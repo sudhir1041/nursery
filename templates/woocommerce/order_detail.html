@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Order Details" }}{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  {% if order %}
+  <div class="card">
+    <div class="card-header">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">Order #{{ order.woo_id }}</h1>
+        <span class="badge status-{{ order.status|lower|default:'unknown' }} text-lg">
+          {{ order.status|default:"N/A"|capfirst }}
+        </span>
+      </div>
+      
+      <div class="flex gap-4 text-sm text-gray border-b pb-4">
+        <div><strong>Created:</strong> {{ order.date_created_woo|date:"M d, Y, P"|default:"N/A" }}</div>
+        <div><strong>Total:</strong> {{ order.currency }} {{ order.total_amount|floatformat:2|default:"0.00" }}</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 p-6">
+      <div class="main-content md:col-span-2">
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Billing Details</h2>
+          <dl class="grid gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Name</dt>
+              <dd class="text-lg">{{ order.billing_first_name|default:"" }} {{ order.billing_last_name|default:"" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Email</dt>
+              <dd class="text-lg">{{ order.billing_email|default:"N/A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Phone</dt>
+              <dd class="text-lg">{{ order.billing_phone|default:"N/A" }}</dd>
+            </div>
+            {% if order.billing_address_1 %}
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Address</dt>
+              <dd class="text-lg">
+                {{ order.billing_address_1|default:"" }}<br>
+                {% if order.billing_address_2 %}{{ order.billing_address_2 }}<br>{% endif %}
+                {{ order.billing_city|default:"" }}{% if order.billing_city and order.billing_state %},{% endif %} {{ order.billing_state|default:"" }} {{ order.billing_postcode|default:"" }}<br>
+                {{ order.billing_country|default:"" }}
+              </dd>
+            </div>
+            {% endif %}
+          </dl>
+        </section>
+
+        {% if order.customer_note %}
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Customer Note</h2>
+          <div class="p-4 bg-gray-50 rounded-lg border">
+            {{ order.customer_note|linebreaksbr }}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if order.raw_data.line_items %}
+        <section class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Line Items</h2>
+          <div class="overflow-hidden rounded-lg border">
+            <table class="table w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Item</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">SKU</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Qty</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-600">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                {% for item in order.raw_data.line_items %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4">
+                    <div class="font-medium">{{ item.name }}</div>
+                    {% if item.meta_data %}
+                    <div class="text-sm text-gray-500 mt-1">
+                      {% for meta in item.meta_data %}
+                      {% if meta.display_key|first != '_' %}
+                      <span>{{ meta.display_key }}: {{ meta.display_value|safe }}</span>{% if not forloop.last %}; {% endif %}
+                      {% endif %}
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4">{{ item.sku|default:'-' }}</td>
+                  <td class="px-6 py-4">{{ item.quantity }}</td>
+                  <td class="px-6 py-4 text-right">{{ order.currency }} {{ item.total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        {% endif %}
+      </div>
+
+      <aside class="md:col-span-1">
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-6">Order Summary</h3>
+          <dl class="grid gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Status</dt>
+              <dd>
+                <span class="badge status-{{ order.status|lower|default:'unknown' }} text-lg">
+                  {{ order.status|default:"N/A"|capfirst }}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Order Total</dt>
+              <dd class="text-xl font-bold">{{ order.currency }} {{ order.total_amount|floatformat:2|default:"0.00" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        {% comment %} Tracking Details section  {% endcomment %}
+        <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-700 mb-5">Order Tracking Link</h3>
+          <dl class="space-y-3">
+             <div>
+               <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Tracking Link</dt>
+               <dd>
+                <a href="https://nurserynisarga.in/admin-track-order/?track_order_id={{ order.woo_id }}" target="_blank">{{ order.woo_id }}</a>
+               </dd>
+             </div>
+            </div>
+          </dl>
+        </section>
+
+
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-6">Timestamps <small class="text-sm font-normal text-gray-500">(UTC)</small></h3>
+          <dl class="grid gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Created</dt>
+              <dd class="font-mono">{{ order.date_created_woo|date:"Y-m-d H:i:s"|default:"N/A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Modified</dt>
+              <dd class="font-mono">{{ order.date_modified_woo|date:"Y-m-d H:i:s"|default:"N/A" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-6">Sync Info</h3>
+          <dl class="grid gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Synced</dt>
+              <dd class="font-mono">{{ order.django_date_created|date:"Y-m-d H:i:s" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">DB Updated</dt>
+              <dd class="font-mono">{{ order.django_date_modified|date:"Y-m-d H:i:s" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <div class="flex flex-col gap-4">
+          <a href="{% url 'order_edit' order.woo_id %}" class="btn btn-primary w-full text-center py-3 rounded-lg hover:opacity-90 transition-opacity">Edit Order</a>
+          <a href="{% url 'woocommerce_index' %}" class="btn btn-secondary w-full text-center py-3 rounded-lg hover:opacity-90 transition-opacity">Back to List</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+  {% else %}
+  <div class="p-8 bg-white rounded-lg shadow-md text-center text-gray-500">
+    <p class="text-xl">Order details could not be loaded.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

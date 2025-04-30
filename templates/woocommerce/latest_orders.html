@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}WooCommerce Section{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav class="woocommrece-main">
+            <ul>
+                <li><a href="">All Orders</a></li>
+                <li><a href="">Add Order</a></li>
+                <li>
+                    <form method="GET" action="">
+                        <input type="date" name="date_filter">
+                        <button type="submit">Filter by Date</button>
+                    </form>
+                </li>
+                <li>
+                    <form method="GET" action="">
+                        <select name="days_filter">
+                            <option value="7">Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                        </select>
+                        <button type="submit">Filter by Days</button>
+                    </form>
+                </li>
+                <li style="margin-left: auto;">
+                    <button onclick="window.location.reload();" class="refresh-btn">🔄 Refresh</button>
+                </li>
+            </ul>
+        </nav>
+        <style>
+            body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+            .container { 
+                max-width: 100%;
+                padding: 0 15px;
+                margin: 0 auto;
+            }
+            @media (min-width: 768px) {
+                .container {
+                    max-width: 1200px;
+                }
+            }
+            .order-list { list-style: none; padding: 0; }
+            .order-item { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+            .order-item strong { display: inline-block; min-width: 80px; }
+            h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;}
+            .error { color: #D8000C; background-color: #FFD2D2; padding: 10px; border: 1px solid #D8000C; border-radius: 4px;}
+            .empty { color: #4F8A10; background-color: #DFF2BF; padding: 10px; border: 1px solid #4F8A10; border-radius: 4px;}
+            
+            /* Responsive table styles */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin: 20px 0;
+                min-width: 700px;
+            }
+            th, td { 
+                padding: 12px; 
+                text-align: left; 
+                border: 1px solid #ddd;
+                white-space: nowrap;
+            }
+            th { background-color: #f5f5f5; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            tr:hover { background-color: #f5f5f5; }
+            
+            .btn { 
+                padding: 8px 16px; 
+                background-color: #4CAF50; 
+                color: white; 
+                border: none; 
+                border-radius: 4px; 
+                cursor: pointer;
+                display: inline-block;
+                margin: 5px 0;
+            }
+            .btn:hover { background-color: #45a049; }
+            
+            .woocommrece-main { 
+                background-color: #f8f9fa; 
+                padding: 1rem; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+                margin-bottom: 2rem;
+                overflow-x: auto;
+            }
+            .woocommrece-main ul { 
+                display: flex; 
+                flex-wrap: wrap;
+                align-items: center; 
+                list-style: none; 
+                margin: 0; 
+                padding: 0;
+                gap: 1rem;
+            }
+            .woocommrece-main li { 
+                margin: 0.5rem 0;
+            }
+            .woocommrece-main a { 
+                text-decoration: none; 
+                color: #333; 
+                font-weight: 500; 
+                padding: 0.5rem; 
+                display: block;
+            }
+            .woocommrece-main a:hover { color: #007bff; }
+            .woocommrece-main form { 
+                display: flex; 
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .woocommrece-main input[type="date"], 
+            .woocommrece-main select { 
+                padding: 0.375rem 0.75rem; 
+                border: 1px solid #ced4da; 
+                border-radius: 0.25rem;
+                width: 100%;
+                max-width: 200px;
+            }
+            .woocommrece-main button { 
+                padding: 0.375rem 0.75rem; 
+                background-color: #007bff; 
+                color: white; 
+                border: none; 
+                border-radius: 0.25rem; 
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .woocommrece-main button:hover { background-color: #0056b3; }
+            .refresh-btn { background-color: #28a745 !important; }
+            .refresh-btn:hover { background-color: #218838 !important; }
+
+            @media (max-width: 768px) {
+                .woocommrece-main ul {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .woocommrece-main li {
+                    width: 100%;
+                    margin-right: 0;
+                }
+                .woocommrece-main form {
+                    flex-direction: column;
+                    width: 100%;
+                }
+                .woocommrece-main input[type="date"],
+                .woocommrece-main select {
+                    max-width: 100%;
+                }
+                .woocommrece-main button {
+                    width: 100%;
+                }
+                li[style*="margin-left: auto"] {
+                    margin-left: 0 !important;
+                }
+            }
+        </style>
+        <h1>WooCommerce Orders</h1>
+        <button class="btn" onclick="addNewOrder()">Add New Order</button>
+
+        {# Sample dummy data for testing #}
+        {% with ''|center:50 as range %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for _ in range %}
+                        <tr>
+                            <td>#{{ forloop.counter|add:1000 }}</td>
+                            <td>{% now "D, M d, Y, P" %}</td>
+                            <td><span class="status-processing">Processing</span></td>
+                            <td>₹999.99</td>
+                            <td>Sudhir Kumar</td>
+                            <td>sudhir@gmail.com</td>
+                            <td><a href="">Update</a></td>
+                            <td><a href="">View details</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endwith %}
+
+        {# Original conditional logic kept for reference #}
+        {% comment %}
+        {% if orders %}
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Customer</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.date_created|date:"D, M d, Y, P" }}</td>
+                            <td><span class="status-{{ order.status }}">{{ order.status|title }}</span></td>
+                            <td>{{ order.total }} {{ order.currency }}</td>
+                            <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
+                            <td>{{ order.billing.email }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% elif orders == None %}
+             <p class="error">Could not load orders due to an error.</p>
+        {% else %}
+            <p class="empty">No recent orders found.</p>
+        {% endif %}
+        {% endcomment %}
+    </div>
+{% endblock %}

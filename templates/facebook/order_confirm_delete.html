@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="container order-delete-confirm"> 
+    <h1>Confirm Delete</h1>
+    <p>Are you sure you want to delete Facebook Order "{{ order.order_id }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'facebook_index'  %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<style>
+    .order-delete-confirm { max-width: 600px; margin: 40px auto; padding: 2rem; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;}
+    .order-delete-confirm h1 { color: #dc3545; margin-bottom: 1.5rem; }
+    .order-delete-confirm p { margin-bottom: 2rem; font-size: 1.1rem; }
+    .btn { padding: 0.7rem 1.5rem; font-size: 1rem; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; border: none; margin: 0 0.5rem;}
+    .btn-danger { background-color: #dc3545; color: white; } .btn-danger:hover { background-color: #c82333; }
+    .btn-secondary { background-color: #6c757d; color: white; } .btn-secondary:hover { background-color: #5a6268; }
+</style>
+{% endblock %}

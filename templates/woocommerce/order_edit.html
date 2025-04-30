@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<style>
+.order-details-edit {
+    /* Form container styles */
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.order-details-edit h1 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.order-details-edit form {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.order-details-edit form p {
+    margin-bottom: 1.5rem;
+}
+
+.order-details-edit label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+.order-details-edit input,
+.order-details-edit select,
+.order-details-edit textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.order-details-edit input:focus,
+.order-details-edit select:focus,
+.order-details-edit textarea:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
+}
+
+.order-details-edit .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.order-details-edit .btn-primary {
+    background-color: #4a90e2;
+    border: none;
+    color: white;
+}
+
+.order-details-edit .btn-primary:hover {
+    background-color: #357abd;
+}
+
+.order-details-edit .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: white;
+    margin-left: 1rem;
+}
+
+.order-details-edit .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.order-details-edit .alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.order-details-edit .alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.order-details-edit .alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.order-details-edit .alert-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+}
+
+.order-details-edit .form-field-error {
+    color: #dc3545;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.order-details-edit a {
+    color: #4a90e2;
+    text-decoration: none;
+}
+
+.order-details-edit a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<h1 class="order-details-edit">{{ page_title }}</h1>
+
+{# Display messages if not using pure AJAX for feedback #}
+<div id="form-messages" class="mb-3 order-details-edit"></div>
+
+{# Add data-url attribute to get the form action URL in JS #}
+<form id="order-edit-form" class="order-details-edit" method="post" action="{% url 'order_edit' order.woo_id %}" data-url="{% url 'order_edit' order.woo_id %}">
+    {% csrf_token %}
+
+    {# Render the form fields #}
+    {{ form.as_p }}
+
+    <div class="form-group">
+        <label for="shipment_status">Shipment Status</label>
+        <select name="shipment_status" id="shipment_status" class="form-control">
+            <option value="pending">Pending</option>
+            <option value="shipped">Shipped</option>
+            <option value="hold">Hold</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary order-details-edit">Save Changes</button>
+    <a href="{% url 'order_detail' order.woo_id %}" class="btn btn-secondary order-details-edit">Cancel</a>
+</form>
+
+{# Link back to detail view #}
+<p class="mt-3 order-details-edit"><a href="{% url 'order_detail' order.woo_id %}" class="order-details-edit">View Order Details</a></p>
+
+{% endblock content %}
+
+{% block extra_js %} {# Add a block for page-specific JS in base.html if needed #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('order-edit-form');
+    const messagesDiv = document.getElementById('form-messages');
+    const formUrl = form.dataset.url; // Get URL from data attribute
+
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Stop traditional form submission
+            messagesDiv.innerHTML = ''; // Clear previous messages
+            // Clear previous field errors (you'd need to implement specific error display logic)
+            document.querySelectorAll('.form-field-error').forEach(el => el.remove());
+
+
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true; // Disable button during submission
+
+            fetch(formUrl, { // Use the URL from data attribute
+                method: 'POST',
+                body: formData,
+                headers: {
+                    // Important: Include CSRF token from the hidden input
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    // Identify the request as AJAX for the Django view
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => {
+                // Check if response is ok (status 200-299) before parsing JSON
+                if (!response.ok) {
+                    // If status is 400, likely validation errors
+                    if (response.status === 400) {
+                        return response.json().then(data => {
+                            // Need to reject promise to enter the catch block for errors
+                            return Promise.reject({ type: 'validation', errors: data.errors });
+                        });
+                    }
+                    // Handle other server errors (like 500)
+                    return Promise.reject({ type: 'server', status: response.status });
+                }
+                // If response is ok, parse JSON for success message
+                 return response.json();
+            })
+            .then(data => {
+                // Handle SUCCESS response (status 200)
+                if (data.status === 'success') {
+                    messagesDiv.innerHTML = `<div class="alert alert-success order-details-edit">${data.message || 'Update successful!'}</div>`;
+                    // Optionally: update fields on the page if needed
+                    // Optionally: disable form fields or redirect after delay
+                    // window.setTimeout(() => {
+                    //     window.location.href = "{% url 'order_detail' order.woo_id %}"; // Redirect back
+                    // }, 1500);
+                } else {
+                    // Handle cases where status 200 but data indicates logical error
+                     messagesDiv.innerHTML = `<div class="alert alert-warning order-details-edit">${data.message || 'An unexpected issue occurred.'}</div>`;
+                }
+            })
+            .catch(errorInfo => {
+                // Handle FAILED responses (validation or server errors)
+                 console.error('Form submission error:', errorInfo);
+                if (errorInfo && errorInfo.type === 'validation') {
+                    // Display validation errors
+                    messagesDiv.innerHTML = `<div class="alert alert-danger order-details-edit">Please correct the errors below.</div>`;
+                    displayFormErrors(errorInfo.errors); // Call function to show field errors
+                } else {
+                     // Display generic server error
+                     messagesDiv.innerHTML = `<div class="alert alert-danger order-details-edit">An error occurred (Status: ${errorInfo.status || 'Network'}). Please try again.</div>`;
+                }
+            })
+            .finally(() => {
+                 submitButton.disabled = false; // Re-enable button
+            });
+        });
+    }
+
+    function displayFormErrors(errors) {
+        // Basic example: Display errors next to fields
+        // Assumes your form fields are wrapped in <p> tags by {{ form.as_p }}
+        // You'll need to adapt this based on your actual form HTML structure
+        for (const fieldName in errors) {
+            const fieldErrors = errors[fieldName]; // Array of error messages
+            const fieldElement = document.querySelector(`[name="${fieldName}"]`);
+
+            if (fieldElement) {
+                // Find the parent element (e.g., the <p> tag) to insert the error message
+                const parentElement = fieldElement.closest('p'); // Adjust selector if needed
+                if (parentElement) {
+                     // Remove old errors for this field first
+                     parentElement.querySelectorAll('.form-field-error').forEach(el => el.remove());
+                     // Create and add the new error message list
+                     const errorList = document.createElement('ul');
+                     errorList.classList.add('form-field-error', 'text-danger', 'list-unstyled', 'small', 'order-details-edit');
+                     fieldErrors.forEach(errorMsg => {
+                         const listItem = document.createElement('li');
+                         listItem.textContent = errorMsg;
+                         errorList.appendChild(listItem);
+                     });
+                     // Insert the error list after the input/select/textarea element
+                     fieldElement.insertAdjacentElement('afterend', errorList);
+                }
+            }
+        }
+    }
+
+});
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nursery Dashboard</title>
+    {% load static %}
+    {# Link to your main CSS if needed, or use inline styles #}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Adjust path if needed #}
+    <style>
+        body { 
+            font-family: sans-serif; 
+            background-color: #f4f7f6; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .login-container { 
+            max-width: 400px; 
+            width: calc(100% - 2rem); /* Subtract padding from width */
+            padding: 2rem 1rem; /* Reduced side padding */
+            background: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            max-height: 90vh;
+            margin: 0 1rem; /* Add side margins */
+        }
+        @media (max-width: 480px) {
+            .login-container {
+                width: calc(100% - 1rem);
+                padding: 1.5rem 0.5rem; /* Further reduced padding for mobile */
+                margin: 0 0.5rem; /* Reduced margins for mobile */
+            }
+        }
+        .login-container h2 { text-align: center; margin-bottom: 1.5rem; color: #2c3e50; }
+        .login-container form p { margin-bottom: 1rem; }
+        .login-container label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #34495e; }
+        .login-container input[type="text"], .login-container input[type="password"] { display: block; width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+        .login-container .errorlist { color: #dc3545; list-style: none; padding: 0; font-size: 0.9rem; margin-top: 5px;}
+        .login-container .error-msg { color: #dc3545; margin-bottom: 1rem; text-align: center; font-weight: 500;}
+        .login-container button { width: 100%; padding: 0.75rem; font-size: 1rem; background-color: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s ease; }
+        .login-container button:hover { background-color: #229954; }
+        .login-container .links { text-align: center; margin-top: 1rem; font-size: 0.9rem; }
+        .login-container .links a { color: #3498db; text-decoration: none; }
+        .login-container .links a:hover { text-decoration: underline; }
+        .logo { width: 120px; margin: 0 auto 1rem; display: block; animation: logoFloat 3s ease-in-out infinite; }
+        @keyframes logoFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="https://nurserynisarga.in/wp-content/uploads/2021/11/cropped-Nursery_Nisarga_Logo_with_R_150x150-px.webp" alt="Nursery Logo" class="logo">
+        <h2>Dashboard Login</h2>
+
+        {% if form.errors and not form.non_field_errors %}
+            <p class="error-msg">Please correct the errors below.</p>
+        {% endif %}
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="error-msg">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% if next %}
+            {% if user.is_authenticated %}
+            <p style="text-align: center; color: #e67e22;">Your account doesn't have access to this page.</p>
+            {% else %}
+            <p style="text-align: center; color: #e67e22;">Please login to see this page.</p>
+            {% endif %}
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            {# Render form using as_p or manually #}
+            <p>
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+            </p>
+            <p>
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {{ form.password.errors }}
+            </p>
+
+            <button type="submit">Login</button>
+            <input type="hidden" name="next" value="{{ next }}">
+        </form>
+
+        <div class="links">
+             <a href="{% url 'password_reset' %}">Forgot password?</a>
+        </div>
+    </div>
+</body>
+</html>

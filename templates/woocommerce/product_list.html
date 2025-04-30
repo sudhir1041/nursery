@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"WooCommerce Products" }}</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+        .container { max-width: 1000px; margin: auto; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 0; list-style: none;}
+        .product-item { border: 1px solid #ddd; padding: 15px; border-radius: 4px; background-color: #fff; text-align: center;}
+        .product-item img { max-width: 100%; height: 150px; object-fit: contain; margin-bottom: 10px; background-color: #eee;}
+        .product-item h2 { font-size: 1.1em; margin: 10px 0 5px 0; }
+        .product-item .price { font-weight: bold; color: #333; margin-bottom: 10px;}
+        .product-item a.view-link { display: inline-block; margin-top: 10px; padding: 5px 10px; background-color: #007bff; color: white; text-decoration: none; border-radius: 3px; font-size: 0.9em;}
+        .product-item a.view-link:hover { background-color: #0056b3; }
+        h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;}
+        .error { color: #D8000C; background-color: #FFD2D2; padding: 10px; border: 1px solid #D8000C; border-radius: 4px;}
+        .empty { color: #4F8A10; background-color: #DFF2BF; padding: 10px; border: 1px solid #4F8A10; border-radius: 4px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ page_title|default:"WooCommerce Products" }}</h1>
+
+        {% if products %}
+            <ul class="product-grid">
+            {% for product in products %}
+                <li class="product-item">
+                    {% if product.images.0 %}
+                        {# Display the first image if available #}
+                        <img src="{{ product.images.0.src }}" alt="{{ product.images.0.alt|default:product.name }}">
+                    {% else %}
+                         {# Placeholder if no image #}
+                         <img src="https://via.placeholder.com/150" alt="No image available">
+                    {% endif %}
+                    <h2>{{ product.name }}</h2>
+                    <div class="price">
+                        {# Display price - Use safe filter cautiously or ensure price is clean #}
+                        {{ product.price_html|safe }}
+                        {# Or just: {{ product.price }} {{ product.currency }} #}
+                    </div>
+                    {# Link to the product on the WooCommerce store #}
+                    {% if product.permalink %}
+                    <a href="{{ product.permalink }}" target="_blank" class="view-link">View Product</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        {% elif products == None %}
+             <p class="error">Could not load products due to an error.</p>
+        {% else %}
+            <p class="empty">No products found matching the criteria.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

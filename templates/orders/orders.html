@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Orders{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 20px;">
+    <img src="https://nurserynisarga.in/wp-content/uploads/2021/11/cropped-Nursery_Nisarga_Logo_with_R_150x150-px.webp" alt="WooCommerce Logo" style="height: 40px;">
+</div>
+
+<button id="toggleNav" class="toggle-nav-btn">Show Menu</button>
+<nav class="woocommrece-main" id="mainNav">
+    <ul>
+        <li><a href="{% url 'orders' %}">All Orders</a></li>
+
+        <li>
+            <form method="GET" action="{% url 'orders' %}" class="search-form">
+                <input type="text" name="search_query" placeholder="Search by Order ID, Name, Email, Phone, City or Pincode..." value="{{ current_search_query|default:'' }}" class="search-input">
+                {% if current_date_filter %}<input type="hidden" name="date_filter" value="{{ current_date_filter }}">{% endif %}
+                {% if current_days_filter %}<input type="hidden" name="days_filter" value="{{ current_days_filter }}">{% endif %}
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </li>
+
+        <li>
+            <form method="GET" action="{% url 'orders' %}">
+                {% if current_search_query %}<input type="hidden" name="search_query" value="{{ current_search_query }}">{% endif %}
+                <input type="date" name="date_filter" value="{{ current_date_filter|default:'' }}">
+                <button type="submit">Filter by Date</button>
+            </form>
+        </li>
+
+        <li>
+            <form method="GET" action="{% url 'orders' %}">
+                {% if current_search_query %}<input type="hidden" name="search_query" value="{{ current_search_query }}">{% endif %}
+                <select name="days_filter">
+                    <option value="" {% if not current_days_filter %}selected{% endif %}>Any Time</option>
+                    <option value="7" {% if current_days_filter == '7' %}selected{% endif %}>Last 7 Days</option>
+                    <option value="30" {% if current_days_filter == '30' %}selected{% endif %}>Last 30 Days</option>
+                </select>
+                <button type="submit">Filter by Days</button>
+            </form>
+        </li>
+
+        <li style="margin-left: auto;">
+            <button onclick="window.location.href='{% url 'orders' %}';" class="refresh-btn">🔄 Refresh / All</button>
+        </li>
+    </ul>
+</nav>
+
+    {% if orders %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Order ID</th>
+                        <th>Date Created</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Customer Name</th>
+                        <th>Phone</th>
+                        <th>Pin code</th>
+                        <th>City</th>
+                        <th>Notes</th>
+                        <th>Tracking</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr {% if order.is_overdue_highlight %} style="background-color:rgb(228, 47, 47);" {% endif %}>
+                            <td>{{ order.platform }}</td>
+                            <td>
+                                <a class="order-details-view" href="{% url 'order_details_view' order.order_id %}"><i class="fas fa-eye"></i>{{ order.order_id }}</a>
+                            </td>
+                            <td>{{ order.date |date:"Y-m-d H:i"|default:"N/A" }}</td>
+                            <td>
+                                <span class="badge status-{{ order.status|lower|default:'unknown' }}">{{ order.status|capfirst }}</span>
+                            </td>
+                            <td>INR {{ order.amount|floatformat:2 }}</td>
+                            <td>{{ order.customer }}</td>
+                            <td>{{ order.phone|default:"N/A" }}</td>
+                            <td>{{ order.pincode|default:"-" }}</td>
+                            <td>{{ order.city|default:"-" }}</td>
+                            <td>{{ order.note|truncatechars:10 }}</td>
+                            <td>
+                                <a href="{{ order.tracking|default:'None' }}" target="_blank">{{ order.tracking|slice:"42:"|default:"None" }}</a>                            </td>
+                            <td>
+                                <a href="{% url 'order_details_view' order.order_id %}" class="btn btn-sm btn-info">👁️ View</a>
+                                <a href="{% url 'all_order_edit' order.order_id %}" class="btn btn-sm btn-secondary">✏️ Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if orders.has_previous %}
+                    <a href="?page=1&search_query={{ current_search_query }}&date_filter={{ current_date_filter }}&days_filter={{ current_days_filter }}">&laquo; first</a>
+                    <a href="?page={{ orders.previous_page_number }}&search_query={{ current_search_query }}&date_filter={{ current_date_filter }}&days_filter={{ current_days_filter }}">previous</a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ orders.number }} of {{ orders.paginator.num_pages }}.
+                </span>
+        
+                {% if orders.has_next %}
+                    <a href="?page={{ orders.next_page_number }}&search_query={{ current_search_query }}&date_filter={{ current_date_filter }}&days_filter={{ current_days_filter }}">next</a>
+                    <a href="?page={{ orders.paginator.num_pages }}&search_query={{ current_search_query }}&date_filter={{ current_date_filter }}&days_filter={{ current_days_filter }}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>   
+        
+    {% else %}
+        <p class="no-orders">No orders found.</p>
+    {% endif %}
+</div>
+<script>
+    document.getElementById('toggleNav').addEventListener('click', function() {
+        const nav = document.getElementById('mainNav');
+        const btn = document.getElementById('toggleNav');
+        nav.classList.toggle('show');
+        btn.textContent = nav.classList.contains('show') ? 'Hide Menu' : 'Show Menu';
+    });
+</script>
+{% endblock %}

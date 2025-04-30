@@ -1,0 +1,195 @@
+{% extends 'whatsapp/whatsapp_base.html' %}
+{% load static %}
+
+{% block title %}WhatsApp Section{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/whatsapp-dashboard.css' %}">
+<style>
+    .card {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    h1 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin: 2rem 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .row {
+        margin-bottom: 2rem;
+    }
+
+    .full-width .chart-container {
+        height: 400px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 250px;
+        }
+        
+        .full-width .chart-container {
+            height: 300px;
+        }
+    }
+</style>
+
+<h1 class="text-center">Welcome WhatsApp</h1>
+
+<div class="row mt-4">
+    <div class="col-12 full-width">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-center">Orders</h5>
+                <div class="chart-container">
+                    <canvas id="ordersChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-center">Chats</h5>
+                <div class="chart-container">
+                    <canvas id="chatsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-center">Templates</h5>
+                <div class="chart-container">
+                    <canvas id="templatesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Bots</h5>
+                        <div class="chart-container">
+                            <canvas id="botsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Marketing</h5>
+                        <div class="chart-container">
+                            <canvas id="marketingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Orders Chart
+    new Chart(document.getElementById('ordersChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Orders',
+                data: [65, 59, 80, 81, 56, 55],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        }
+    });
+
+    // Chats Chart
+    new Chart(document.getElementById('chatsChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Chats',
+                data: [45, 52, 38, 64, 71, 38],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)'
+            }]
+        }
+    });
+
+    // Bots Chart
+    new Chart(document.getElementById('botsChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Inactive'],
+            datasets: [{
+                data: [70, 30],
+                backgroundColor: ['#36A2EB', '#FF6384']
+            }]
+        }
+    });
+
+    // Marketing Chart
+    new Chart(document.getElementById('marketingChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Campaigns', 'Direct', 'Social'],
+            datasets: [{
+                data: [45, 30, 25],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            }]
+        }
+    });
+
+    // Templates Chart
+    new Chart(document.getElementById('templatesChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Active', 'Draft', 'Archived'],
+            datasets: [{
+                label: 'Templates',
+                data: [12, 19, 3],
+                backgroundColor: 'rgba(75, 192, 192, 0.5)'
+            }]
+        }
+    });
+</script>
+
+{% endblock %}

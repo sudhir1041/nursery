@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ project_name }}{% endblock %}
+
+{% block content %}
+
+<style>
+  .card__container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    justify-content: flex-start;
+    padding: 1.25rem;
+    width: 100%;
+  }
+
+  .card {
+    width: calc(33.333% - 1.25rem); /* 3 cards per row with gap */
+    min-width: 18rem; /* Minimum width before wrapping */
+    max-width: 22rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 0.625rem 1.25rem rgba(0,0,0,0.12);
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease;
+  }
+
+  @media (max-width: 1200px) {
+    .card {
+      width: calc(50% - 1.25rem); /* 2 cards per row */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      width: 100%; /* 1 card per row */
+    }
+  }
+
+  .card:hover {
+    transform: translateY(-0.3125rem);
+  }
+
+  .card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card__info {
+    font-size: 0.875rem;
+    color: #444;
+  }
+
+  .card__id {
+    font-weight: 600;
+    margin-right: 0.625rem;
+    color: #2563eb;
+  }
+
+  .card__status {
+    background: #e0f2fe;
+    border-radius: 1.25rem;
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0369a1;
+  }
+
+  .card__content {
+    font-size: 0.875rem;
+    color: #1f2937;
+  }
+
+  .card__title {
+    margin: 0.625rem 0 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .card__contact {
+    margin-bottom: 0.625rem;
+    font-size: 0.8125rem;
+    color: #4b5563;
+  }
+
+  .card__list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.3125rem 0;
+  }
+
+  .card__list-item {
+    margin-bottom: 0.1875rem;
+    color: #3b82f6;
+    font-size: 0.875rem;
+  }
+
+  .card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .button {
+    flex: 1 1 30%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .button--primary {
+    background-color: #3b82f6;
+    color: #ffffff;
+  }
+
+  .button--secondary {
+    background-color: #f97316;
+    color: #ffffff;
+  }
+
+  .button--tertiary {
+    background-color:rgb(19, 133, 24);
+    color:rgb(255, 255, 255);
+  }
+
+  .button:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+
+  .button i {
+    font-size: 0.875rem;
+  }
+
+  .popup-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .popup-content {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 60rem;
+      position: relative;
+      animation: popup 0.3s ease-out;
+    }
+    
+    .popup-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .popup-close:hover {
+      color: #000;
+    }
+    .card__source {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-right: 0.5rem;
+      font-weight: 600;
+    }
+
+    .card__source--shopify {
+      background: #96bf48;
+      color: white;
+    }
+
+    .card__source--wordpress {
+      background: #21759b;
+      color: white;
+    }
+
+    @keyframes popup {
+      from {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .ship-form {
+      padding: 2rem;
+    }
+  
+    .ship-form__row {
+      margin-bottom: 1rem;
+    }
+  
+    .ship-form__label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+  
+    .ship-form__select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 0.25rem;
+    }
+  
+    .ship-form__checkbox {
+      margin-right: 0.5rem;
+    }
+  
+    .ship-form__actions {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+    
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="card__container">
+{% for order in orders %}
+<div class="card" 
+  data-amount="{{ order.amount }}"
+  data-date="{{ order.date }}"
+  data-pincode="{{ order.pincode }}"
+  data-note="{{ order.note }}"
+  data-tracking="{{ order.tracking }}"
+  data-shipment-status="{{ order.shipment_status }}"
+>
+  <div class="card__header">
+    <div class="card__info">
+      <span class="card__source card__source--{{ order.platform|lower }}">{{ order.platform }}</span>
+      <span class="card__id">{{ order.order_id }}</span>
+      <span class="card__location">{{ order.city }}</span>
+    </div>
+    <div class="card__status">{{ order.status }}</div>
+  </div>
+
+  <div class="card__content">
+    <h3 class="card__title">{{ order.customer }}</h3>
+    <p class="card__contact"><strong>Phone:</strong> {{ order.phone }}</p>
+
+    <div class="card__products">
+      <strong>Items:</strong>
+      <ul class="card__list">
+        {% for item in order.items %}
+        <li class="card__list-item">{{ item.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card__actions">
+    <button class="button button--primary"><i class="fas fa-shipping-fast"></i> Ship</button>
+    <button class="button button--secondary"><i class="fas fa-clone"></i> Clone</button>
+    <button class="button button--tertiary"><i class="fas fa-eye"></i> View</button>
+  </div>
+</div>
+{% endfor %}
+</div>
+
+<div class="popup-overlay" id="shipPopup">
+  <div class="popup-content">
+    <button class="popup-close" onclick="closeShipPopup()">&times;</button>
+    <h2>Ship Order</h2>
+    
+    <form class="ship-form" id="shipForm">
+      <div class="ship-form__row">
+        <label class="ship-form__label">Order Details</label>
+        <p id="shipOrderId"></p>
+        <p id="shipCustomer"></p>
+      </div>
+
+      <div class="ship-form__row">
+        <label class="ship-form__label">Items</label>
+        <div id="shipItems"></div>
+      </div>
+
+      <div class="ship-form__row">
+        <label class="ship-form__label">Shipping Status</label>
+        <select class="ship-form__select" id="shipStatus">
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+        </select>
+      </div>
+
+      <div class="ship-form__actions">
+        <button type="button" class="button button--secondary" onclick="closeShipPopup()">Cancel</button>
+        <button type="submit" class="button button--primary">Confirm Shipping</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <div class="popup-overlay" id="cardPopup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="closePopup()">&times;</button>
+      <div class="card__header">
+        <div class="card__info">
+          <span class="card__source" id="popupPlatform"></span>
+          <span class="card__id" id="popupId"></span>
+          <span class="card__location" id="popupLocation"></span>
+        </div>
+        <div class="card__status" id="popupStatus"></div>
+      </div>
+
+      <div class="card__content">
+        <h3 class="card__title" id="popupTitle"></h3>
+        <p class="card__contact" id="popupContact"></p>
+        <p><strong>Amount:</strong> <span id="popupAmount"></span></p>
+        <p><strong>Date:</strong> <span id="popupDate"></span></p>
+        <p><strong>Pincode:</strong> <span id="popupPincode"></span></p>
+        <p><strong>Note:</strong> <span id="popupNote"></span></p>
+        <p><strong>Tracking:</strong> <span id="popupTracking"></span></p>
+        <p><strong>Shipment Status:</strong> <span id="popupShipmentStatus"></span></p>
+
+        <div class="card__products">
+          <strong>Items:</strong>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody id="popupItems">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .items-table th,
+    .items-table td {
+      padding: 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .items-table th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+    }
+  </style>
+
+  <script>
+  function showPopup(cardElement) {
+    const popup = document.getElementById('cardPopup');
+    
+    const order = {
+      platform: cardElement.querySelector('.card__source').textContent,
+      id: cardElement.querySelector('.card__id').textContent,
+      location: cardElement.querySelector('.card__location').textContent,
+      status: cardElement.querySelector('.card__status').textContent,
+      customer: cardElement.querySelector('.card__title').textContent,
+      phone: cardElement.querySelector('.card__contact').textContent,
+      amount: cardElement.dataset.amount || 'N/A',
+      date: cardElement.dataset.date || 'N/A',
+      pincode: cardElement.dataset.pincode || 'N/A',
+      note: cardElement.dataset.note || 'N/A',
+      tracking: cardElement.dataset.tracking || 'N/A',
+      shipmentStatus: cardElement.dataset.shipmentStatus || 'N/A',
+      items: cardElement.querySelectorAll('.card__list-item')
+    };
+
+    document.getElementById('popupPlatform').textContent = order.platform;
+    document.getElementById('popupId').textContent = order.id;
+    document.getElementById('popupLocation').textContent = order.location;
+    document.getElementById('popupStatus').textContent = order.status;
+    document.getElementById('popupTitle').textContent = order.customer;
+    document.getElementById('popupContact').textContent = order.phone;
+    document.getElementById('popupAmount').textContent = order.amount;
+    document.getElementById('popupDate').textContent = order.date;
+    document.getElementById('popupPincode').textContent = order.pincode;
+    document.getElementById('popupNote').textContent = order.note;
+    document.getElementById('popupTracking').textContent = order.tracking;
+    document.getElementById('popupShipmentStatus').textContent = order.shipmentStatus;
+
+    const itemsTable = document.getElementById('popupItems');
+    itemsTable.innerHTML = '';
+    order.items.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      const tdSno = document.createElement('td');
+      const tdName = document.createElement('td');
+      const tdQuantity = document.createElement('td');
+      
+      tdSno.textContent = index + 1;
+      tdName.textContent = item.textContent;
+      tdQuantity.textContent = '1'; // Default quantity, update this based on your data
+      
+      tr.appendChild(tdSno);
+      tr.appendChild(tdName);
+      tr.appendChild(tdQuantity);
+      itemsTable.appendChild(tr);
+    });
+
+    popup.style.display = 'flex';
+  }
+
+  function closePopup() {
+    document.getElementById('cardPopup').style.display = 'none';
+  }
+
+  function showShipPopup(cardElement) {
+    const popup = document.getElementById('shipPopup');
+    
+    const order = {
+      id: cardElement.querySelector('.card__id').textContent,
+      customer: cardElement.querySelector('.card__title').textContent,
+      items: cardElement.querySelectorAll('.card__list-item'),
+      amount: cardElement.dataset.amount,
+      date: cardElement.dataset.date,
+      pincode: cardElement.dataset.pincode,
+      tracking: cardElement.dataset.tracking
+    };
+
+    document.getElementById('shipOrderId').textContent = `Order ID: ${order.id}`;
+    document.getElementById('shipCustomer').textContent = `Customer: ${order.customer}`;
+
+    const itemsContainer = document.getElementById('shipItems');
+    itemsContainer.innerHTML = '';
+    order.items.forEach(item => {
+      const div = document.createElement('div');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'ship-form__checkbox';
+      checkbox.checked = true;
+      
+      const label = document.createElement('label');
+      label.textContent = item.textContent;
+      
+      div.appendChild(checkbox);
+      div.appendChild(label);
+      itemsContainer.appendChild(div);
+    });
+
+    popup.style.display = 'flex';
+  }
+
+  function closeShipPopup() {
+    document.getElementById('shipPopup').style.display = 'none';
+  }
+
+  document.querySelectorAll('.button--tertiary').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      showPopup(card);
+    });
+  });
+
+  document.querySelectorAll('.button--primary').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      showShipPopup(card);
+    });
+  });
+
+  document.getElementById('cardPopup').addEventListener('click', (e) => {
+    if (e.target.className === 'popup-overlay') {
+      closePopup();
+    }
+  });
+
+  document.getElementById('shipForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const status = document.getElementById('shipStatus').value;
+    // Handle form submission
+    closeShipPopup();
+  });
+</script>
+
+
+{% endblock %}

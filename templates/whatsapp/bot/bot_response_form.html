@@ -1,0 +1,46 @@
+
+{% extends "base_whatsapp.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ action }} Bot Response</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.trigger_phrase.id_for_label }}">Trigger Phrase:</label>
+                            {{ form.trigger_phrase }}
+                            {% if form.trigger_phrase.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.trigger_phrase.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.response_text.id_for_label }}">Response Text:</label>
+                            {{ form.response_text }}
+                            {% if form.response_text.errors %}
+                            <div class="alert alert-danger">
+                                {{ form.response_text.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">{{ action }}</button>
+                            <a href="{% url 'whatsapp:bot_response_list' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

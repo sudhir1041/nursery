@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Manage Facebook Order" }}{% endblock %}
+
+{% block content %}
+<div class="container order-form-container">
+    <h1>{{ page_title }}</h1>
+
+    {# Display Django Messages Framework messages #}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {# Display Form Validation Errors #}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+    {% endif %}
+    {# Note: Field-specific errors will appear near the fields with form.as_p #}
+    {# Formset errors are removed as we no longer use formsets #}
+
+    <form method="post" id="order-form">
+        {% csrf_token %}
+
+        {# Main Order Form Fields - Rendered using as_p for simplicity #}
+        {# This assumes fields like total_amount, shipment_amount are in the form #}
+        {# Important: products_json field is excluded here and handled separately #}
+        <fieldset class="order-fieldset">
+            <legend>Order Details</legend>
+            {{ form.media }} {# Include this if using widgets like DateTimeInput #}
+            {% for field in form %}
+                {# Exclude the products_json field from automatic rendering #}
+                {% if field.name != 'products_json' %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.help_text %}<small class="form-help-text">{{ field.help_text }}</small>{% endif %}
+                        {% if field.errors %}<div class="form-field-error">{{ field.errors }}</div>{% endif %}
+                    </p>
+                {% endif %}
+            {% endfor %}
+        </fieldset>
+
+        {# Product Section #}
+        <fieldset class="product-fieldset">
+            <legend>Products</legend>
+            {# Container where dynamic product rows will be added by JS #}
+            <div id="product-list">
+                {# JavaScript will populate this area #}
+            </div>
+            {# Button to add product rows via JS #}
+            <button type="button" id="add-product-form" class="btn btn-sm btn-success mt-2">Add Product Row</button>
+            {# Hidden input field for the products_json data - Populated by JS on submit #}
+            {# Django's form field rendering handles this correctly #}
+            {{ form.products_json }}
+             {% if form.products_json.errors %}<div class="form-field-error">{{ form.products_json.errors }}</div>{% endif %}
+             <small>{{ form.products_json.help_text }}</small>
+        </fieldset>
+
+        {# Submit Buttons #}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ form_mode }} Order</button>
+            {# Link back to detail view if editing, otherwise list view #}
+            <a href="{% url 'facebook_index' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{# Styles - Move to external CSS file (e.g., static/css/form_style.css) for best practice #}
+<style>
+    .order-form-container {
+        max-width: 900px; /* Adjusted width */
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+    .order-form-container h1 { text-align: center; margin-bottom: 1.5rem; color: #333; }
+    .order-fieldset, .product-fieldset {
+        border: 1px solid #dee2e6; /* Lighter border */
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 6px;
+    }
+    .order-fieldset legend, .product-fieldset legend {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        padding: 0 10px;
+        color: #495057;
+    }
+    /* Styles for form rendered with as_p */
+    #order-form p { margin-bottom: 1rem; }
+    #order-form label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+        color: #555;
+        font-weight: 600;
+    }
+     #order-form input[type="text"],
+     #order-form input[type="email"],
+     #order-form input[type="number"],
+     #order-form input[type="datetime-local"],
+     #order-form select,
+     #order-form textarea {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #ced4da; /* Standard border */
+        border-radius: 4px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+     #order-form input:focus,
+     #order-form select:focus,
+     #order-form textarea:focus {
+        outline: none;
+        border-color: #86b7fe; /* Bootstrap focus blue */
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    #order-form textarea { min-height: 80px; }
+    #order-form .form-help-text { font-size: 0.85rem; color: #6c757d; display: block; margin-top: 0.25rem;}
+    #order-form .form-field-error ul, #order-form .form-field-error li { list-style: none; padding: 0; margin: 0; }
+    #order-form .form-field-error { color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem;}
+
+    /* Product Row specific styling */
+     .product-row {
+        display: grid;
+        grid-template-columns: 3fr 1fr 1fr 1fr 1fr auto; /* Adjust columns */
+        gap: 1rem;
+        align-items: end; /* Align bottom edges */
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px dashed #eee;
+     }
+      .product-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+      .product-row label { font-size: 0.8rem; margin-bottom: 0.2rem; color: #666;}
+      .product-row input { padding: 0.5rem; font-size: 0.95rem; }
+      .product-row .line-total { font-size: 0.95rem; padding-bottom: 0.5rem; /* Align with input baseline */ }
+      .product-row .btn-danger { padding: 0.5rem; font-size: 0.8rem; line-height: 1; } /* Smaller remove button */
+
+
+    /* Action Buttons */
+    .form-actions { text-align: right; margin-top: 1.5rem; border-top: 1px solid #eee; padding-top: 1.5rem;}
+    .btn { padding: 0.7rem 1.5rem; font-size: 1rem; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; border: none; }
+    .btn-primary { background-color: #0d6efd; color: white; } .btn-primary:hover { background-color: #0b5ed7; }
+    .btn-secondary { background-color: #6c757d; color: white; margin-left: 0.5rem; } .btn-secondary:hover { background-color: #5a6268; }
+    .btn-success { background-color: #198754; color: white; } .btn-success:hover { background-color: #157347; }
+    .btn-danger { background-color: #dc3545; color: white; } .btn-danger:hover { background-color: #bb2d3b; }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+
+    /* Alert Messages */
+    .alert { padding: 1rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: .25rem; }
+    .alert-success { color: #0f5132; background-color: #d1e7dd; border-color: #badbcc; }
+    .alert-danger { color: #842029; background-color: #f8d7da; border-color: #f5c2c7; }
+    .alert-warning { color: #664d03; background-color: #fff3cd; border-color: #ffecb5; }
+
+    /* Hide the actual input for JSON field if desired, as JS controls it */
+    /* #id_products_json { display: none; } */ /* Already HiddenInput */
+
+</style>
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+    // Function to add a new product input row to the form
+    function addProductRow(name = '', quantity = 1, price = '0.00', potSize = '') {
+        const container = document.getElementById('product-list');
+        const row = document.createElement('div');
+        // Add classes for styling and selection
+        row.classList.add('product-row', 'mb-4', 'pb-4', 'border-b'); // Add spacing/border if needed via CSS
+
+        // Define the HTML structure for a product row
+        row.innerHTML = `
+            <div>
+                <label>Product Name*</label>
+                <input type="text" class="form-control product-input product-name" value="${name}" required>
+            </div>
+            <div>
+                <label>Quantity*</label>
+                <input type="number" min="1" class="form-control product-input product-qty" value="${quantity}" required>
+            </div>
+            <div>
+                <label>Unit Price*</label>
+                <input type="number" step="0.01" min="0" class="form-control product-input product-price" value="${price}" required>
+            </div>
+            <div class="flex flex-col justify-end text-right"> {# Display line total #}
+                 <label>Line Total</label>
+                 <span class="line-total font-semibold pt-2 text-gray-700">0.00</span>
+            </div>
+             <div>
+                <label>Pot Size</label>
+                <input type="text" class="form-control product-input product-pot-size" value="${potSize}">
+            </div>
+            <div class="flex items-end"> {# Button column #}
+                <button type="button" class="btn btn-danger btn-sm remove-product-btn" title="Remove Product">X</button>
+            </div>
+        `;
+        container.appendChild(row);
+
+        // --- Add Event Listeners to new row's inputs/button ---
+        const qtyInput = row.querySelector('.product-qty');
+        const priceInput = row.querySelector('.product-price');
+        const removeButton = row.querySelector('.remove-product-btn');
+
+        // Listener for quantity/price changes to update totals
+        [qtyInput, priceInput].forEach(input => {
+            input.addEventListener('input', function() {
+                 calculateLineTotal(row);
+                 calculateOverallTotals(); // Recalculate overall form totals
+            });
+        });
+
+        // Listener for remove button
+         removeButton.addEventListener('click', function() {
+             row.remove(); // Remove the row element
+             calculateOverallTotals(); // Recalculate after removing
+         });
+
+         // Initial calculation for this new row
+         calculateLineTotal(row);
+         // We need to recalculate overall totals AFTER adding this row too if called manually
+         // calculateOverallTotals(); // Moved initial overall calc to DOMContentLoaded
+    }
+
+    // Function to calculate and update the line total for a single product row
+    function calculateLineTotal(rowElement) {
+        const qtyInput = rowElement.querySelector('.product-qty');
+        const priceInput = rowElement.querySelector('.product-price');
+        const lineTotalSpan = rowElement.querySelector('.line-total');
+
+        if (!qtyInput || !priceInput || !lineTotalSpan) return; // Safety check
+
+        const quantity = parseInt(qtyInput.value, 10) || 0;
+        const price = parseFloat(priceInput.value) || 0.0;
+        const lineTotal = quantity * price;
+
+        lineTotalSpan.textContent = lineTotal.toFixed(2); // Display formatted total
+    }
+
+    // Function to calculate subtotal and update the main Total Amount field
+    function calculateOverallTotals() {
+        const productRows = document.querySelectorAll('#product-list .product-row');
+        let productsSubtotal = 0;
+
+        productRows.forEach(row => {
+            const qtyInput = row.querySelector('.product-qty');
+            const priceInput = row.querySelector('.product-price');
+            const quantity = parseInt(qtyInput ? qtyInput.value : '0', 10) || 0;
+            const price = parseFloat(priceInput ? priceInput.value : '0.00') || 0.0;
+            productsSubtotal += quantity * price;
+        });
+
+        // Get shipment amount using Django's default field ID
+        const shipmentInput = document.getElementById('id_shipment_amount');
+        const shipmentAmount = parseFloat(shipmentInput ? shipmentInput.value : '0.00') || 0.0;
+
+        const grandTotal = productsSubtotal + shipmentAmount;
+
+        // Update the main Total Amount input field's value
+        const totalAmountInput = document.getElementById('id_total_amount');
+        if (totalAmountInput) {
+             totalAmountInput.value = grandTotal.toFixed(2);
+             // Optional: Make it visually readonly if not already via widget
+             // totalAmountInput.readOnly = true;
+        }
+
+        // Optional: Display subtotal separately if needed
+        // const subtotalDisplay = document.getElementById('products-subtotal-display');
+        // if (subtotalDisplay) { subtotalDisplay.textContent = productsSubtotal.toFixed(2); }
+    }
+
+    // Function to gather product data and update the hidden JSON input on form submit
+    function updateProductsJsonInput() {
+        const productRows = document.querySelectorAll('#product-list .product-row');
+        let products = [];
+
+        productRows.forEach(row => {
+             const nameInput = row.querySelector('.product-name');
+             const qtyInput = row.querySelector('.product-qty');
+             const priceInput = row.querySelector('.product-price');
+             const potSizeInput = row.querySelector('.product-pot-size');
+
+             const name = nameInput ? nameInput.value.trim() : '';
+             const quantity = parseInt(qtyInput ? qtyInput.value : '0', 10);
+             const price = parseFloat(priceInput ? priceInput.value : '0.00');
+             const potSize = potSizeInput ? potSizeInput.value.trim() : '';
+
+             // Only add if essential fields have values
+             if (name && quantity > 0 && price >= 0) {
+                 products.push({
+                     product_name: name,
+                     quantity: quantity,
+                     price: price.toFixed(2), // Store price as string with 2 decimals
+                     pot_size: potSize
+                 });
+             }
+        });
+
+        // Target the hidden input field correctly (Django default ID)
+        const productsJsonInput = document.getElementById('id_products_json');
+        if (productsJsonInput) {
+             productsJsonInput.value = JSON.stringify(products);
+             // console.log("Submitting products_json:", productsJsonInput.value); // For debugging
+        } else {
+             console.error("Hidden input #id_products_json not found! Cannot submit products.");
+             return false; // Indicate failure
+        }
+        return true; // Indicate success
+    }
+
+
+    // --- Event Listeners ---
+
+    // Add Product Row Button
+    const addButton = document.getElementById('add-product-form');
+    if (addButton) {
+        addButton.addEventListener('click', function() {
+             addProductRow(); // Add empty row
+             calculateOverallTotals(); // Recalculate totals when empty row added
+        });
+    } else {
+         console.error("Add button #add-product-form not found.");
+    }
+
+    // Form Submission Listener
+    const orderForm = document.getElementById('order-form');
+    if (orderForm) {
+        orderForm.addEventListener('submit', function (e) {
+            // Update the hidden JSON input right before submission
+            const success = updateProductsJsonInput();
+            if (!success) {
+                // Optionally prevent submission if hidden input wasn't found
+                // e.preventDefault();
+                // alert("Error preparing product data. Cannot submit.");
+            }
+            // Allow form submission to proceed normally
+        });
+    } else {
+         console.error("Order form #order-form not found.");
+    }
+
+
+    // DOM Ready Listener (Initial setup)
+    document.addEventListener('DOMContentLoaded', function () {
+        const productsJsonInput = document.getElementById('id_products_json');
+        let initialProductCount = 0;
+
+        // Populate rows from existing JSON data (on edit page load)
+        if (productsJsonInput && productsJsonInput.value) {
+            try {
+                const existingProducts = JSON.parse(productsJsonInput.value);
+                if (existingProducts && Array.isArray(existingProducts) && existingProducts.length > 0) {
+                    existingProducts.forEach(p => {
+                        addProductRow(
+                            p.product_name || '',
+                            p.quantity || 1,
+                            p.price || '0.00',
+                            p.pot_size || ''
+                        );
+                    });
+                    initialProductCount = existingProducts.length;
+                }
+            } catch (e) {
+                 console.error("Error parsing existing products_json on load:", e, productsJsonInput.value);
+                 // Optionally add error message for user
+            }
+        }
+
+        // Add one empty row if no products were loaded (for create page)
+        if (initialProductCount === 0) {
+            addProductRow();
+        }
+
+        // Add listener for Shipment Amount changes
+        const shipmentInput = document.getElementById('id_shipment_amount');
+        if (shipmentInput) {
+             shipmentInput.addEventListener('input', calculateOverallTotals);
+        } else {
+             console.warn("Shipment amount input #id_shipment_amount not found.");
+        }
+
+        // Initial calculation of overall totals after all rows are populated
+        calculateOverallTotals();
+
+        // Make total amount field readonly visually after initial calculation
+        const totalAmountInput = document.getElementById('id_total_amount');
+        if(totalAmountInput) {
+             totalAmountInput.readOnly = true;
+             totalAmountInput.style.backgroundColor = '#e9ecef'; // Visually indicate readonly
+        } else {
+             console.warn("Total amount input #id_total_amount not found.");
+        }
+
+    }); // End DOMContentLoaded
+
+</script>
+{% endblock %}

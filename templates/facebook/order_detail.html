@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Facebook Order Details{% endblock %}
+
+{% block content %}
+<div class="container">
+  {% if order %}
+  <div class="card">
+    <div class="card-header">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">Order #{{ order.order_id }}</h1>
+        <span class="badge status-{{ order.status|lower|default:'unknown' }} text-lg">
+          {{ order.status|default:"N/A"|capfirst }}
+        </span>
+      </div>
+      <div class="flex gap-4 text-sm text-gray border-b pb-4">
+        <div><strong>Created:</strong> {{ order.date_created|date:"M d, Y, P" }}</div>
+        <div><strong>Total:</strong> {{ order.currency }} {{ order.total_amount|floatformat:2|default:"0.00" }}</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 p-6">
+      <div class="main-content md:col-span-2">
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Billing Details</h2>
+          <dl class="grid gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Name</dt>
+              <dd class="text-lg">{{ order.billing_first_name|default:"" }} {{ order.billing_last_name|default:"" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Email</dt>
+              <dd class="text-lg">{{ order.billing_email|default:"N/A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Phone</dt>
+              <dd class="text-lg">{{ order.billing_phone|default:"N/A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Alternate Number</dt>
+              <dd class="text-lg">{{ order.alternet_number|default:"-" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Address</dt>
+              <dd class="text-lg">
+                {{ order.billing_address|default:"-" }}<br>
+                {{ order.billing_city|default:"" }}, {{ order.billing_state|default:"" }} {{ order.billing_postcode|default:"" }}<br>
+                {{ order.billing_country|default:"INDIA" }}
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        {% if order.customer_note %}
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Customer Note</h2>
+          <div class="p-4 bg-gray-50 rounded-lg border">
+            {{ order.customer_note|linebreaksbr }}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if order.products_json %}
+        <section class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Line Items</h2>
+          <div class="overflow-hidden rounded-lg border">
+            <table class="table w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Product</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Pot Size</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Qty</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-600">Price</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                {% for item in order.products_json %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 font-medium">{{ item.product_name }}</td>
+                  <td class="px-6 py-4">{{ item.pot_size|default:"-" }}</td>
+                  <td class="px-6 py-4">{{ item.quantity }}</td>
+                  <td class="px-6 py-4 text-right">{{ order.currency }} {{ item.price|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        {% endif %}
+      </div>
+
+      <aside class="md:col-span-1">
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-6">Order Summary</h3>
+          <dl class="grid gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Status</dt>
+              <dd>
+                <span class="badge status-{{ order.status|lower|default:'unknown' }} text-lg">
+                  {{ order.status|default:"N/A"|capfirst }}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Order Total</dt>
+              <dd class="text-xl font-bold">{{ order.currency }} {{ order.total_amount|floatformat:2|default:"0.00" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Received Amount</dt>
+              <dd class="text-lg">{{ order.currency }} {{ order.received_amount|floatformat:2|default:"0.00" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Shipment Amount</dt>
+              <dd class="text-lg">{{ order.currency }} {{ order.shipment_amount|floatformat:2|default:"0.00" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Credit Amount</dt>
+              <dd class="text-lg">{{ order.currency }} {{ order.credit_amount|floatformat:2|default:"0.00" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Payment Mode</dt>
+              <dd class="text-lg">{{ order.mode_of_payment|default:"-" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-700 mb-5">Order Tracking Link</h3>
+          <dl class="space-y-3">
+             <div>
+               <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Tracking Info</dt>
+               <dd class="text-sm text-gray-800">
+                 {{ order.tracking_info|default:"-" }}
+               </dd>
+             </div>
+          </dl>
+        </section>
+
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-6">Timestamps <small class="text-sm font-normal text-gray-500">(UTC)</small></h3>
+          <dl class="grid gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Created</dt>
+              <dd class="font-mono">{{ order.date_created|date:"Y-m-d H:i:s" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Modified</dt>
+              <dd class="font-mono">{{ order.date_modified|date:"Y-m-d H:i:s" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <div class="flex flex-col gap-4">
+          <a href="{% url 'order_edit' order.order_id %}" class="btn btn-primary w-full text-center py-3 rounded-lg hover:opacity-90 transition-opacity">Edit Order</a>
+          <a href="{% url 'facebook_index' %}" class="btn btn-secondary w-full text-center py-3 rounded-lg hover:opacity-90 transition-opacity">Back to List</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+  {% else %}
+  <div class="p-8 bg-white rounded-lg shadow-md text-center text-gray-500">
+    <p class="text-xl">Order details could not be loaded.</p>
+  </div>
+  {% endif %}
+</div>
+<style>/* Card Layout */
+
+    /* Section Titles */
+    .card h2, .card h3 {
+      color: #1f2937;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Table Styling */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    
+    .table th,
+    .table td {
+      padding: 1rem;
+      text-align: left;
+      vertical-align: middle;
+    }
+    
+    .table thead {
+      background-color: #f9fafb;
+      font-weight: 600;
+      color: #6b7280;
+    }
+    
+    .table tbody tr {
+      border-bottom: 1px solid #e5e7eb;
+      transition: background-color 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+      background-color: #f3f4f6;
+    }
+    
+    /* Badge Styles */
+    .badge {
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+      text-transform: capitalize;
+    }
+    
+    .status-processing {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-completed {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-pending {
+      background-color: #e0f2fe;
+      color: #1e40af;
+    }
+    
+    .status-cancelled {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* Order Summary Section */
+    aside .bg-white {
+      border: 1px solid #e5e7eb;
+    }
+    
+    aside dl dt {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    
+    aside dl dd {
+      font-size: 1rem;
+      color: #111827;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+      background-color: #2563eb;
+      color: #fff;
+    }
+    
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+    
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #111827;
+      border: 1px solid #d1d5db;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+    }
+    
+    /* Typography + Misc */
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 2rem;
+    }
+    
+    dt {
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+    
+    dd {
+      margin: 0;
+    }
+    
+    .font-mono {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+</style>    
+{% endblock %}

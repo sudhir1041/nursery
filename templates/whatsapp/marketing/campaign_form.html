@@ -1,0 +1,48 @@
+{# whatsapp_app/templates/whatsapp_app/marketing/campaign_form.html #}
+{% extends "whatsapp/base_whatsapp.html" %}
+{# Load crispy forms tags if you installed and configured django-crispy-forms #}
+{% load crispy_forms_tags %}
+
+{% block whatsapp_content %} {# Override the whatsapp_content block #}
+
+{# --- Breadcrumbs --- #}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'whatsapp_app:campaign_list' %}">Marketing Campaigns</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Create New Campaign</li>
+  </ol>
+</nav>
+
+<h3 class="mb-3">Create New Marketing Campaign</h3>
+<hr class="mb-4">
+
+{# --- Campaign Creation Form --- #}
+<div class="card shadow-sm">
+    <div class="card-header bg-light fw-bold">
+        Campaign Details
+    </div>
+    <div class="card-body">
+        <p class="card-text text-muted">First, give your campaign a name and select the approved WhatsApp template you want to use.</p>
+        {# Use novalidate to disable browser validation and rely on Django's server-side validation #}
+        <form method="post" novalidate>
+            {% csrf_token %} {# Include CSRF token for security #}
+
+            {# --- Render form using crispy-forms for nice Bootstrap layout --- #}
+            {# This assumes you have crispy-forms and crispy-bootstrap5 installed and configured #}
+            {% crispy form %}
+
+            {# --- Submit and Cancel Buttons --- #}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-plus-circle me-1"></i> Create Campaign
+                </button>
+                <a href="{% url 'whatsapp_app:campaign_list' %}" class="btn btn-secondary ms-2">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div> {# End card-body #}
+</div> {# End card #}
+
+{% endblock whatsapp_content %}
+

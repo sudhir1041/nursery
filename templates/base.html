@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Nursery Dashboard{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+  <!-- Mobile menu toggle -->
+  <button class="menu-toggle" onclick="toggleMenu()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="mobile-header">
+    <h1>Nursery Nisarga</h1>
+  </div>
+  <button class="toggle-btn" onclick="toggleSidebar()">
+    <i class="fas fa-chevron-left" id="toggleIcon"></i>
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  
+     <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <h2><i class="fas fa-leaf"></i> Nursery</h2>
+    <ul>
+        <li><a href="{% url 'dashboard' %}" class="">
+            <i class="fas fa-home"></i>Dashboard
+        </a></li>
+        <li><a href="{% url 'orders' %}">
+            <i class="fas fa-shopping-cart"></i>All Orders
+        </a></li>
+        <li><a href="{% url 'woocommerce_index' %}">
+            <i class="fab fa-wordpress"></i>WooCommerce
+        </a></li>
+        <li><a href="{% url 'shopify_index' %}">
+            <i class="fab fa-shopify"></i>Shopify
+        </a></li>
+        <li><a href="{% url 'facebook_index' %}">
+            <i class="fab fa-facebook"></i>Facebook
+        </a></li>
+        <li><a href="{% url 'whatsapp_app:whatsapp_index' %}">
+            <i class="fab fa-whatsapp"></i>WhatsApp
+        </a></li>      
+        <li><a href="{% url 'shipment_index' %}">
+            <i class="fas fa-truck"></i>Shipments
+        </a></li>
+        {% if request.user.is_staff %}
+        <li style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+            <a href="{% url 'admin:index' %}">
+                <i class="fas fa-cog"></i>Admin
+            </a>
+        </li>
+        <li style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
+          <a href="">
+              <i class="fas fa-cog"></i>Settings
+          </a>
+        </li>
+        {% endif %}        
+        <li style="margin-top: auto; border-top: 1px solid #ddd; padding-top: 10px;">
+            <form method="post" action="{% url 'logout' %}" style="display: inline; margin-left: 20px;">
+                {% csrf_token %}
+                <button type="submit" class="logout-button" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; padding: 0;">
+                    <i class="fas fa-sign-out-alt"></i>  Logout
+                </button>
+            </form>
+        </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content" id="mainContent">
+    {% block content %}
+    <p>This is the default content area. Select an item from the menu.</p>
+    {% endblock %}
+  </main>
+
+  <script>
+    // Mobile menu toggle
+    function toggleMenu() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    // Desktop sidebar toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const mainContent = document.getElementById("mainContent");
+      const toggleIcon = document.getElementById("toggleIcon");
+
+      sidebar.classList.toggle("hide-sidebar");
+      mainContent.classList.toggle("full-width");
+
+      if (sidebar.classList.contains("hide-sidebar")) {
+        toggleIcon.classList.remove("fa-chevron-left");
+        toggleIcon.classList.add("fa-angles-right");
+      } else {
+        toggleIcon.classList.remove("fa-angles-right"); 
+        toggleIcon.classList.add("fa-chevron-left");
+      }
+    }
+
+    // Add active class to clicked menu item
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuItems = document.querySelectorAll('.sidebar ul li a');
+      
+      // Set initial active state based on current URL
+      const currentPath = window.location.pathname;
+      menuItems.forEach(item => {
+        if (item.getAttribute('href') === currentPath) {
+          item.classList.add('active');
+        }
+      });
+      
+      menuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          // Remove active class from all menu items
+          menuItems.forEach(item => item.classList.remove('active'));
+          
+          // Add active class to clicked item
+          this.classList.add('active');
+        });
+      });
+    });
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+

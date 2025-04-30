@@ -1,0 +1,31 @@
+{# whatsapp_app/templates/whatsapp_app/partials/status_badge.html #}
+{# Reusable template part for displaying status badges consistently #}
+{# Expects 'status' variable (string). #}
+{# Optional: 'scheduled_time' (datetime object) for SCHEDULED status tooltip. #}
+{# Optional: 'large_badge' (boolean) to apply slightly larger font size. #}
+
+{% comment %} --- Determine badge class and text based on status --- {% endcomment %}
+{% if status == 'DRAFT' %} {% with badge_class="bg-secondary" text="Draft" %}
+{% elif status == 'SCHEDULED' %} {% with badge_class="bg-info text-dark" text="Scheduled" %}
+{% elif status == 'SENDING' %} {% with badge_class="bg-warning text-dark" text="Sending" %}
+{% elif status == 'COMPLETED' %} {% with badge_class="bg-success" text="Completed" %}
+{% elif status == 'FAILED' %} {% with badge_class="bg-danger" text="Failed" %}
+{% elif status == 'CANCELLED' %} {% with badge_class="bg-light text-dark border" text="Cancelled" %}
+{% elif status == 'PENDING' %} {% with badge_class="bg-light text-dark border" text="Pending" %}
+{% elif status == 'SENT' %} {% with badge_class="bg-secondary" text="Sent" %}
+{% elif status == 'DELIVERED' %} {% with badge_class="bg-info text-dark" text="Delivered" %}
+{% elif status == 'READ' %} {% with badge_class="bg-success" text="Read" %}
+{% else %} {% with badge_class="bg-dark" text=status|default:"Unknown" %} {# Fallback #}
+{% endif %}
+
+{# --- Render the badge --- #}
+{% with size_class=large_badge|yesno:"fs-6," %} {# Apply larger font size if large_badge is True #}
+<span class="badge rounded-pill {{ badge_class }} {{ size_class }}"
+      {# Add a tooltip, especially useful for scheduled status #}
+      title="{{ text }}{% if status == 'SCHEDULED' and scheduled_time %} (Scheduled for {{ scheduled_time|date:'Y-m-d H:i' }}){% endif %}">
+    {{ text|default:status|default:"Unknown" }}
+</span>
+{% endwith %} {# End size_class with block #}
+
+{% endwith %} {# End status check with block #}
+

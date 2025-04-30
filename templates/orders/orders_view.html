@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  {% if order %}
+  <div class="card">
+    <div class="card-header">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">Order #{{ order.order_id }}</h1>
+        <span class="badge status-{{ order.status|lower|default:'unknown' }} text-lg">
+          {{ order.status|default:"N/A"|capfirst }}
+        </span>
+      </div>
+      
+      <div class="flex gap-4 text-sm text-gray border-b pb-4">
+        <div><strong>Created:</strong> {{ order.date|date:"M d, Y, P"|default:"N/A" }}</div>
+        <div><strong>Total:</strong> {{ order.amount|floatformat:2|default:"0.00" }}</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 p-6">
+      <div class="main-content md:col-span-2">
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Billing Details</h2>
+          <dl class="grid gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Name</dt>
+              <dd class="text-lg">{{ order.customer }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Phone</dt>
+              <dd class="text-lg">{{ order.phone|default:"N/A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">City</dt>
+              <dd class="text-lg">{{ order.city|default:"N/A" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Pincode</dt>
+              <dd class="text-lg">{{ order.pincode|default:"N/A" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        {% if order.note %}
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Customer Note</h2>
+          <div class="p-4 bg-gray-50 rounded-lg border">
+            {{ order.note|linebreaksbr }}
+          </div>
+        </section>
+        {% endif %}
+
+        {% if order.products %}
+        <section class="bg-white rounded-lg shadow-sm p-6">
+          <h2 class="text-xl font-semibold mb-6">Line Items</h2>
+          <div class="overflow-hidden rounded-lg border">
+            <table class="table w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Item</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">SKU</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600">Qty</th>
+                  <th class="px-6 py-3 text-right text-sm font-semibold text-gray-600">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                {% for item in order.products %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4">
+                    <div class="font-medium">{{ item.name }}</div>
+                  </td>
+                  <td class="px-6 py-4">{{ item.sku|default:'-' }}</td>
+                  <td class="px-6 py-4">{{ item.quantity }}</td>
+                  <td class="px-6 py-4 text-right">{{ item.total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        {% endif %}
+      </div>
+
+      <aside class="md:col-span-1">
+        <section class="mb-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-6">Order Summary</h3>
+          <dl class="grid gap-4">
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Status</dt>
+              <dd>
+                <span class="badge status-{{ order.status|lower|default:'unknown' }} text-lg">
+                  {{ order.status|default:"N/A"|capfirst }}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Platform</dt>
+              <dd class="text-lg">{{ order.platform }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Order Total</dt>
+              <dd class="text-xl font-bold">{{ order.amount|floatformat:2|default:"0.00" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-700 mb-5">Tracking Details</h3>
+          <dl class="space-y-3">
+            <div>
+              <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Tracking Number</dt>
+              <dd>
+                {% if order.tracking %}
+                <a href="{{ order.tracking }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">{{ order.tracking }}</a>
+                {% else %}
+                  N/A
+                {% endif %}
+              </dd>            
+            </div>
+          </dl>
+        </section>
+
+        <div class="flex flex-col gap-4 mt-8">
+          <a href="{% url 'all_order_edit' order.order_id %}" class="btn btn-primary w-full text-center py-3 rounded-lg hover:opacity-90 transition-opacity">Edit Order</a>
+          <a href="{% url 'orders' %}" class="btn btn-secondary w-full text-center py-3 rounded-lg hover:opacity-90 transition-opacity">Back to List</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+  {% else %}
+  <div class="p-8 bg-white rounded-lg shadow-md text-center text-gray-500">
+    <p class="text-xl">Order details could not be loaded.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

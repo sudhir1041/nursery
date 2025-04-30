@@ -1,0 +1,61 @@
+{# whatsapp_app/templates/whatsapp_app/marketing/template_list.html #}
+{% extends "whatsapp/base_whatsapp.html" %}
+
+{% block whatsapp_content %} {# Override the whatsapp_content block #}
+
+{# --- Page Header --- #}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">WhatsApp Message Templates</h3>
+    {# Sync Button Form #}
+     <form method="post" action="{% url 'whatsapp_app:sync_templates' %}" class="d-inline">
+         {% csrf_token %}
+         <button type="submit" class="btn btn-secondary" title="Fetch latest approved templates from Meta">
+             <i class="bi bi-arrow-clockwise me-1"></i> Sync Templates from Meta
+         </button>
+     </form>
+</div>
+<hr class="mb-4">
+<p class="text-muted">
+    This page lists the message templates associated with your WhatsApp Business Account that have been approved by Meta for use.
+    Templates are fetched periodically or when you click the 'Sync' button. Ensure your API settings are correct for syncing.
+</p>
+
+{# --- Template Accordion --- #}
+{% if templates %}
+<div class="accordion shadow-sm" id="templateAccordion">
+    {% for template in templates %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading{{ template.pk }}">
+            {# Accordion Button Header #}
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ template.pk }}" aria-expanded="false" aria-controls="collapse{{ template.pk }}">
+                {# Template Name, Language, Category #}
+                <span class="fw-bold me-2">{{ template.name }}</span>
+                <span class="text-muted me-3">({{ template.language }})</span>
+                <span class="badge bg-primary">{{ template.category }}</span>
+            </button>
+        </h2>
+        {# Accordion Collapsible Body #}
+        <div id="collapse{{ template.pk }}" class="accordion-collapse collapse" aria-labelledby="heading{{ template.pk }}" data-bs-parent="#templateAccordion">
+            <div class="accordion-body">
+                <h6 class="mb-2">Template Components:</h6>
+                {# Display the JSON structure of components #}
+                {# Use json_script filter for safe embedding into a <script> tag if needed by JS #}
+                {# Or display preformatted for readability #}
+                <pre class="bg-light p-3 rounded border" style="font-size: 0.9em; white-space: pre-wrap; word-break: break-all;">{{ template.components }}</pre>
+                <hr>
+                <small class="text-muted">Last Synced: {{ template.last_synced|date:"Y-m-d H:i T" }}</small>
+            </div>
+        </div>
+    </div> {# End accordion-item #}
+    {% endfor %}
+</div> {# End accordion #}
+{% else %}
+{# Message shown if no templates are synced yet #}
+<div class="alert alert-info" role="alert">
+  <i class="bi bi-info-circle me-1"></i> No approved templates found in the local database.
+  Click the 'Sync Templates from Meta' button above to fetch them. Make sure your WhatsApp API settings are correctly configured.
+</div>
+{% endif %}
+
+{% endblock whatsapp_content %}
+

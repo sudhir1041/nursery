@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project_name }}{% endblock %}
+
+{% block content %}
+<div class="logo-container">
+    <img src="https://nurserynisarga.in/wp-content/uploads/2021/11/cropped-Nursery_Nisarga_Logo_with_R_150x150-px.webp" alt="Nursery Nisarga Logo" class="company-logo">
+</div>
+
+<h1>Welcome to the Nursery Nisarga</h1>
+
+<div class="dashboard-widgets">
+    <!-- Orders Widget -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>Orders</h3>
+        </div>
+        <div class="widget-content">
+            <div class="order-stats">
+                <p>Total Orders: <span>{{ total_orders }}</span></p>
+                <p>Total Pending: <span>{{ total_pending_orders }}</span></p>
+                <p>Total Shipped: <span>{{ total_shipment_status_orders }}</span></p>
+                <p>Total Not Shipped: <span>{{ total_not_shipped }}</span></p>
+            </div>
+            <canvas id="ordersChart"></canvas>
+        </div>
+    </div>
+
+    <!-- WooCommerce Widget -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>WooCommerce</h3>
+            <span class="connection-status">{{ woo_status }}</span>
+        </div>
+        <div class="widget-content">
+            <p>Total Orders: <span>{{ woo_orders }}</span></p>
+            <p>Pending: <span>{{ woo_pending_orders }}</span></p>
+            <p>Shipped: <span>{{ woo_shipped_orders }}</span></p>
+            <p>Not Shipped: <span>{{ woo_not_shipped }}</span></p>
+            <canvas id="wooChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Shopify Widget -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>Shopify</h3>
+            <span class="connection-status">{{ shopify_status }}</span>
+        </div>
+        <div class="widget-content">
+            <p>Total Orders: <span>{{ shopify_orders }}</span></p>
+            <p>Pending: <span>{{ shopify_pending_orders }}</span></p>
+            <p>Shipped: <span>{{ shopify_shipped_orders }}</span></p>
+            <p>Not Shipped: <span>{{ shopify_not_shipped_orders }}</span></p>
+            <canvas id="shopifyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Facebook Shop Widget -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>Facebook Shop</h3>
+        </div>
+        <div class="widget-content">
+            <p>Total Orders: <span>{{ fb_orders }}</span></p>
+            <p>Pending: <span>{{ fb_pending_orders }}</span></p>
+            <p>Shipped: <span>{{ fb_shipped_orders }}</span></p>
+            <p>Not Shipped: <span>{{ fb_not_shipped }}</span></p>
+            <canvas id="fbChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Social Media Widget -->
+    <div class="widget-card">
+        <div class="widget-header">
+            <h3>Social Media</h3>
+        </div>
+        <div class="widget-content">
+            <div class="social-links">
+                <a href="#" class="facebook-link">Facebook Shop</a>
+                <a href="#" class="whatsapp-link">WhatsApp Business</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .logo-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .company-logo {
+        max-width: 200px;
+        height: auto;
+    }
+
+    canvas {
+        width: 100%;
+        max-height: 200px;
+        margin-top: 15px;
+    }
+
+    .widget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Orders Chart
+        const ordersCtx = document.getElementById('ordersChart');
+        if (ordersCtx) {
+            new Chart(ordersCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Total Orders', 'Total Pending', 'Total Shipped','Total Not Shipped'],
+                    datasets: [{
+                        data: [{{ total_orders }}, {{ total_pending_orders }}, {{ total_shipment_status_orders }},{{ total_not_shipped }}],
+                        backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // WooCommerce Chart
+        const wooCtx = document.getElementById('wooChart');
+        if (wooCtx) {
+            new Chart(wooCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
+                    datasets: [{
+                        data: [{{ woo_orders }}, {{ woo_pending_orders }}, {{ woo_shipped_orders }},{{ woo_not_shipped }}],
+                        backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Shopify Chart
+        const shopifyCtx = document.getElementById('shopifyChart');
+        if (shopifyCtx) {
+            new Chart(shopifyCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
+                    datasets: [{
+                        data: [{{ shopify_orders }}, {{ shopify_pending_orders }}, {{ shopify_shipped_orders }},{{ shopify_not_shipped_orders }}],
+                        backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Facebook Shop Chart
+        const fbCtx = document.getElementById('fbChart');
+        if (fbCtx) {
+            new Chart(fbCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
+                    datasets: [{
+                        data: [{{ fb_orders }}, {{ fb_pending_orders }}, {{ fb_shipped_orders }},{{ fb_not_shipped }}],
+                        backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,118 @@
+{# whatsapp_app/templates/whatsapp_app/settings_form.html #}
+{% extends "whatsapp/base_whatsapp.html" %}
+{# Load crispy forms tags if you installed and configured django-crispy-forms #}
+{% load crispy_forms_tags %}
+
+{% block whatsapp_content %} {# Override the whatsapp_content block #}
+<h3 class="mb-3">WhatsApp API Settings</h3>
+<hr class="mb-4">
+
+{# --- Important Warning --- #}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <div class="d-flex align-items-center">
+      <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+      <div>
+          <strong>Important:</strong> Changes here directly affect connectivity with the WhatsApp Cloud API. Ensure all credentials and IDs are correct.
+          <br>If you change the <strong>Webhook URL</strong> or <strong>Webhook Verify Token</strong>, you <strong>MUST</strong> update these values in the
+          <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer" class="alert-link">Meta Developer Portal</a>
+          under your WhatsApp App's configuration settings for the webhook to function correctly.
+      </div>
+  </div>
+   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+{# --- Settings Form --- #}
+{# Use novalidate to disable browser validation and rely on Django's server-side validation #}
+<form method="post" novalidate>
+    {% csrf_token %} {# Include CSRF token for security #}
+
+    {# --- Render form using crispy-forms for nice Bootstrap layout --- #}
+    {# This assumes you have crispy-forms and crispy-bootstrap5 installed and configured #}
+    {% crispy form %}
+
+    {# --- Submit Button --- #}
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-save me-1"></i> Save Settings
+        </button>
+    </div>
+</form>
+
+{# --- Display Webhook URL and Token for Easy Copying --- #}
+{% if settings %} {# Check if settings object exists #}
+<div class="row mt-5 g-3">
+    {# Display Webhook URL #}
+    {% if settings.webhook_url and full_webhook_url %}
+    <div class="col-md-6">
+        <div class="p-3 border rounded bg-light h-100">
+            <label for="webhookUrlInput" class="form-label fw-bold">Your Configured Webhook URL:</label>
+            <div class="input-group">
+                <input type="text" class="form-control form-control-sm" value="{{ full_webhook_url }}" readonly id="webhookUrlInput" aria-describedby="copyWebhookHelp">
+                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="copyToClipboard('webhookUrlInput', this)">
+                    <i class="bi bi-clipboard"></i> Copy
+                </button>
+            </div>
+            <div id="copyWebhookHelp" class="form-text mt-1">Use this URL when configuring the webhook in the Meta Developer Portal.</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Display Verify Token #}
+    {% if settings.webhook_verify_token %}
+    <div class="col-md-6">
+        <div class="p-3 border rounded bg-light h-100">
+             <label for="verifyTokenInput" class="form-label fw-bold">Your Webhook Verify Token:</label>
+             <div class="input-group">
+                 <input type="text" class="form-control form-control-sm" value="{{ settings.webhook_verify_token }}" readonly id="verifyTokenInput" aria-describedby="copyTokenHelp">
+                 <button class="btn btn-sm btn-outline-secondary" type="button" onclick="copyToClipboard('verifyTokenInput', this)">
+                     <i class="bi bi-clipboard"></i> Copy
+                 </button>
+             </div>
+             <div id="copyTokenHelp" class="form-text mt-1">Use this token when configuring the webhook in the Meta Developer Portal.</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %} {# End check for settings object #}
+
+{% endblock whatsapp_content %}
+
+{% block extra_js %} {# Add JavaScript specific to this page #}
+{{ block.super }} {# Include JS from base templates #}
+<script>
+// Simple function to copy text from an input field to the clipboard
+function copyToClipboard(elementId, buttonElement) {
+  const input = document.getElementById(elementId);
+  if (input && navigator.clipboard) {
+    navigator.clipboard.writeText(input.value).then(() => {
+      // Provide visual feedback on the button
+      const originalText = buttonElement.innerHTML;
+      buttonElement.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+      buttonElement.classList.add('btn-success');
+      buttonElement.classList.remove('btn-outline-secondary');
+      setTimeout(() => {
+        buttonElement.innerHTML = originalText;
+        buttonElement.classList.remove('btn-success');
+        buttonElement.classList.add('btn-outline-secondary');
+      }, 2000); // Reset after 2 seconds
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+      alert('Failed to copy URL/Token.'); // Fallback alert
+    });
+  } else if (input) {
+      // Fallback for older browsers (less reliable)
+      input.select();
+      try {
+          document.execCommand('copy');
+          alert(input.value + ' copied (using fallback method).');
+      } catch (err) {
+           alert('Failed to copy using fallback method.');
+      }
+      window.getSelection().removeAllRanges(); // Deselect
+  } else {
+       alert('Could not find the element to copy.');
+  }
+}
+</script>
+{% endblock extra_js %}
+
