@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils import timezone
 
 # Import your model and utility function
-from models import WooCommerceOrder # <--- Adjust 'yourapp' if needed
+from woocommerce_app.models import WooCommerceOrder # <--- Adjust 'yourapp' if needed
 from utils import fetch_orders_from_woo # <--- Adjust 'yourapp' if needed
 
 logger = logging.getLogger(__name__)
