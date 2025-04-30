@@ -54,10 +54,9 @@ class ShopifyOrder(models.Model):
     # Timestamps from Shopify (Note: Shopify uses ISO 8601 format)
     created_at_shopify = models.DateTimeField(blank=True, null=True)
     updated_at_shopify = models.DateTimeField(blank=True, null=True)
-    losed_at_shopify = models.DateTimeField(blank=True, null=True)
+    closed_at_shopify = models.DateTimeField(blank=True, null=True)
     #Add other timestamps if needed (processed_at, closed_at)
     #processed_at_shopify = models.DateTimeField(blank=True, null=True)
-    losed_at_shopify = models.DateTimeField(blank=True, null=True)
 
     # Store the full raw data for reference or if fields are missed
     raw_data = models.JSONField(blank=True, null=True, help_text="Raw JSON data from API or webhook")
