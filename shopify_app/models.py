@@ -54,6 +54,7 @@ class ShopifyOrder(models.Model):
     # Timestamps from Shopify (Note: Shopify uses ISO 8601 format)
     created_at_shopify = models.DateTimeField(blank=True, null=True)
     updated_at_shopify = models.DateTimeField(blank=True, null=True)
+    losed_at_shopify = models.DateTimeField(blank=True, null=True)
     #Add other timestamps if needed (processed_at, closed_at)
     #processed_at_shopify = models.DateTimeField(blank=True, null=True)
     losed_at_shopify = models.DateTimeField(blank=True, null=True)
