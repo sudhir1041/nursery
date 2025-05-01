@@ -976,64 +976,30 @@ def bot_response_create(request):
 def bot_response_update(request, pk):
     """Updates an existing bot response."""
     bot_response = get_object_or_404(BotResponse, pk=pk)
-    
     if request.method == 'POST':
         form = BotResponseForm(request.POST, instance=bot_response)
         if form.is_valid():
             try:
                 bot_response = form.save()
                 messages.success(request, f"Bot response for trigger '{bot_response.trigger_phrase}' updated successfully.")
-                return redirect('whatsapp:bot_response_list')
+                return redirect('whatsapp_app:bot_list')
             except Exception as e:
                 logger.error(f"Error updating bot response {pk}: {e}")
                 messages.error(request, "An error occurred while updating the bot response.")
         else:
-            messages.error(request, "Please correct the errors in the form.")
+            messages.error(request, "Please correct the errors highlighted below.") # More specific
     else:
         form = BotResponseForm(instance=bot_response)
-    
-    context = {
-        'form': form,
-        'bot_response': bot_response,
-        'action': 'Update'
-    }
+
+    context = {'form': form, 'bot_response': bot_response, 'action': 'Update'}
     return render(request, 'whatsapp/bot/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
-def autoreply_settings_view(request):
-    """Manages auto-reply settings."""
-    try:
-        settings = AutoReply.objects.first()
-    except AutoReply.DoesNotExist:
-        settings = None
-        
-    if request.method == 'POST':
-        form = AutoReplySettingsForm(request.POST, instance=settings)
-        if form.is_valid():
-            try:
-                settings = form.save()
-                messages.success(request, "Auto-reply settings updated successfully.")
-                return redirect('whatsapp:autoreply_settings')
-            except Exception as e:
-                logger.error(f"Error saving auto-reply settings: {e}")
-                messages.error(request, "An error occurred while saving auto-reply settings.")
-        else:
-            messages.error(request, "Please correct the errors in the form.")
-    else:
-        form = AutoReplySettingsForm(instance=settings)
-    
-    context = {
-        'form': form,
-        'settings': settings
-    }
-    return render(request, 'whatsapp/bot/autoreply_settings.html', context)
-@user_passes_test(is_staff_user)
-@require_POST # Ensures this view only accepts POST requests
+@require_POST
 def bot_response_delete(request, pk):
     """Deletes a specific bot response."""
     bot_response = get_object_or_404(BotResponse, pk=pk)
-    trigger_phrase = bot_response.trigger_phrase # Get phrase before deleting
-
+    trigger_phrase = bot_response.trigger_phrase
     try:
         bot_response.delete()
         messages.success(request, f"Bot response for trigger '{trigger_phrase}' deleted successfully.")
@@ -1041,7 +1007,36 @@ def bot_response_delete(request, pk):
     except Exception as e:
         logger.error(f"Error deleting bot response {pk}: {e}")
         messages.error(request, "An error occurred while deleting the bot response.")
-
-    # Redirect back to the list view in either case (success or error)
-     # Correct redirect URL name assumed
     return redirect('whatsapp_app:bot_list')
+
+
+# --- Auto-Reply View ---
+
+@user_passes_test(is_staff_user)
+def autoreply_settings_view(request):
+    """Manages auto-reply settings."""
+    settings, created = AutoReply.objects.get_or_create(pk=1) # Assuming pk=1 for singleton
+    if request.method == 'POST':
+        form = AutoReplySettingsForm(request.POST, instance=settings)
+        if form.is_valid():
+            try:
+                settings = form.save()
+                messages.success(request, "Auto-reply settings updated successfully.")
+                return redirect('whatsapp_app:autoreply_settings')
+            except Exception as e:
+                logger.exception(f"Error saving auto-reply settings: {e}")
+                messages.error(request, "An error occurred while saving auto-reply settings.")
+                # Re-render the form even on save exception
+        else:
+            # Form is invalid, add a more specific error message
+            # The template should display form.errors next to fields
+            messages.error(request, "Please correct the errors highlighted below.")
+            # No redirect here, re-render the form with errors below
+    else: # GET request
+        form = AutoReplySettingsForm(instance=settings)
+
+    context = {
+        'form': form, # Pass the potentially invalid form back to the template
+        'settings': settings
+    }
+    return render(request, 'whatsapp/bot/autoreply_settings.html', context)
