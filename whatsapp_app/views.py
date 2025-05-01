@@ -14,6 +14,8 @@ import json
 import csv
 import io
 import logging
+from django.urls import reverse
+
 import uuid # For webhook token generation if needed
 
 # Models from this app
@@ -104,66 +106,86 @@ def dashboard(request):
 @user_passes_test(is_staff_user)
 def whatsapp_settings_view(request):
     """Manages WhatsApp Cloud API settings."""
-    settings_name = "NurseryProjectDefault"
-    settings, created = WhatsAppSettings.objects.get_or_create(
+    settings_name = "NurseryProjectDefault" # Define a default name or get from config
+    # Use get_or_create with the specific name
+    settings_instance, created = WhatsAppSettings.objects.get_or_create(
         account_name=settings_name,
         defaults={
+            # Generate a new verify token only if creating the record
             'webhook_verify_token': str(uuid.uuid4())
         }
     )
 
     if request.method == 'POST':
-        form = WhatsAppSettingsForm(request.POST, instance=settings)
+        form = WhatsAppSettingsForm(request.POST, instance=settings_instance)
         if form.is_valid():
             try:
                 # Save form without committing to get settings object
+                # This isn't strictly necessary if not modifying before final save,
+                # but kept here based on user's code structure.
                 settings = form.save(commit=False)
-                
-                # Optional validation logic
+
+                # Optional validation logic (ensure validate_api_credentials exists if uncommented)
                 # if validate_api_credentials(settings):
                 #     settings.last_validated = timezone.now()
                 # else:
                 #     settings.last_validated = None
                 #     messages.warning(request, "Could not validate credentials with WhatsApp API.")
-                
+
                 # Save settings with any additional fields
                 settings.save()
-                
-                # Save many-to-many relationships if any
-                form.save_m2m()
-                
+
+                # Save many-to-many relationships if any (usually not needed for settings)
+                # form.save_m2m() # Uncomment if your settings form has M2M fields
+
                 messages.success(request, 'WhatsApp settings updated successfully.')
-                
+
                 # Remind user about webhook updates if URL/token changed
                 if form.has_changed() and any(field in form.changed_data for field in ['webhook_url', 'webhook_verify_token']):
                     messages.info(request, "Remember to update the Webhook URL and Verify Token in the Meta Developer Portal for your WhatsApp App.")
-                
-                return redirect('whatsapp:settings')
-                
+
+                # *** CORRECTED NAMESPACE IN REDIRECT ***
+                # Ensure 'settings' is the correct URL name in whatsapp_app/urls.py
+                return redirect('whatsapp_app:settings')
+
             except Exception as e:
-                logger.error(f"Error saving WhatsApp settings: {e}")
+                logger.exception(f"Error saving WhatsApp settings: {e}") # Use logger.exception
                 messages.error(request, f"Failed to save settings: {e}")
-                
+
         else:
+            # Improved error message display for invalid form
+            error_list = []
             for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
+                 # Use field label if available, otherwise fallback to field name
+                field_label = form.fields.get(field).label if form.fields.get(field) else field.replace('_', ' ').title()
+                error_list.append(f"{field_label}: {'; '.join(errors)}")
+            messages.error(request, f"Please correct the errors: {'. '.join(error_list)}")
+            # No redirect here, re-render the form with errors below
     else:
-        form = WhatsAppSettingsForm(instance=settings)
+        form = WhatsAppSettingsForm(instance=settings_instance)
 
-    context = {'form': form, 'settings': settings}
-    
-    try:
-        webhook_path = settings.webhook_url or form.initial.get('webhook_url')
-        if webhook_path:
-            if not webhook_path.startswith('http'):
-                webhook_path = request.build_absolute_uri('/whatsapp/webhook/')
-            context['full_webhook_url'] = webhook_path
-    except Exception as e:
-        logger.warning(f"Could not build full webhook URL for display: {e}")
-        context['full_webhook_url'] = None
+    # Build the full webhook URL to display in the template
+    full_webhook_url = None
+    # Check settings_instance again as it might be None if get_or_create fails (unlikely but safe)
+    if settings_instance:
+        try:
+            # Prefer using reverse with the correct namespace for the webhook handler view
+            # Ensure 'webhook_handler' is the name of your webhook view in urls.py
+            webhook_path = reverse('whatsapp_app:webhook_handler')
+            full_webhook_url = request.build_absolute_uri(webhook_path)
+        except Exception as e:
+            logger.warning(f"Could not reverse URL for 'whatsapp_app:webhook_handler'. Check urls.py. Error: {e}")
+            # Fallback or leave as None if reverse fails
 
-    return render(request, 'whatsapp/settings_form.html', context)
+    context = {
+        'form': form,
+        'settings': settings_instance,
+        'full_webhook_url': full_webhook_url
+    }
+    # Ensure this template path is correct
+    return render(request, 'whatsapp_app/settings_form.html', context)
+
+
 
 
 # --- Webhook Handler ---
