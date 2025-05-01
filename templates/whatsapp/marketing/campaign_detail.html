@@ -1,5 +1,5 @@
 {# whatsapp_app/templates/whatsapp_app/marketing/campaign_detail.html #}
-{% extends "whatsapp_app/base_whatsapp.html" %} {# Corrected path assuming base is in app #}
+{% extends "whatsapp/base_whatsapp.html" %} {# Corrected path assuming base is in app #}
 {% load static %}
 
 {% block whatsapp_content %}
@@ -10,7 +10,7 @@
         <div class="detail-title-status">
             <h3 class="page-title">{{ campaign.name }}</h3>
             {# Use the status badge partial #}
-            {% include "whatsapp_app/partials/custom_status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
+            {% include "whatsapp/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
         </div>
         <div class="detail-actions">
             {# --- Action Buttons based on Status --- #}
