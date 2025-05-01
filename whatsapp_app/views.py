@@ -183,7 +183,7 @@ def whatsapp_settings_view(request):
         'full_webhook_url': full_webhook_url
     }
     # Ensure this template path is correct
-    return render(request, 'whatsapp_app/settings_form.html', context)
+    return render(request, 'whatsapp/settings_form.html', context)
 
 
 
