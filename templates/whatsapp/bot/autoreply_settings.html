@@ -1,4 +1,4 @@
-{# whatsapp_app/templates/whatsapp_app/bot_response_form.html #}
+{# whatsapp_app/templates/whatsapp_app/autoreply_settings.html #}
 {% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
 {% load static %}
 
@@ -6,13 +6,15 @@
 <div class="whatsapp-form-container"> {# Custom container for the form area #}
     <div class="form-card"> {# Custom card-like container #}
         <div class="form-card-header">
-            {# The 'action' variable comes from the view context ('Create' or 'Update') #}
-            <h3>{{ action }} Bot Response</h3>
+            <h3>Auto-Reply Settings</h3>
         </div>
         <div class="form-card-body">
-             {# Display general messages (like form errors) #}
+            <p class="form-description">Configure the automatic message sent when staff are unavailable. Availability is determined by your operational hours settings (if configured).</p>
+            <hr class="divider mb-4">
+
+            {# Display general messages (like success on save) #}
             {% if messages %}
-            <div class="whatsapp-messages-container mb-4">
+            <div class="whatsapp-messages-container mb-4"> {# Use existing message container #}
                 {% for message in messages %}
                 <div class="message-item message-{{ message.tags|default:'info' }}">
                     {{ message }}
@@ -25,42 +27,25 @@
             <form method="post" class="whatsapp-form"> {# Use existing custom form class #}
                 {% csrf_token %}
 
-                 {# Render non-field errors if any #}
+                {# Render non-field errors if any #}
                 {% if form.non_field_errors %}
                     <div class="message-item message-error form-field-error">
                          {{ form.non_field_errors }}
                     </div>
                 {% endif %}
 
-                {# Trigger Phrase Field #}
+                {# Message Text Field #}
                 <div class="form-group">
-                    <label for="{{ form.trigger_phrase.id_for_label }}" class="form-label">{{ form.trigger_phrase.label }}:</label>
-                    {# Apply form-input class via widget or CSS selector #}
-                    {{ form.trigger_phrase }}
-                    {% if form.trigger_phrase.help_text %}
-                        <small class="form-help-text">{{ form.trigger_phrase.help_text|safe }}</small>
-                    {% endif %}
-                    {% if form.trigger_phrase.errors %}
-                        {# Use custom message-item for errors #}
-                        <div class="message-item message-error form-field-error">
-                            {{ form.trigger_phrase.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                {# Response Text Field #}
-                <div class="form-group">
-                    <label for="{{ form.response_text.id_for_label }}" class="form-label">{{ form.response_text.label }}:</label>
+                    <label for="{{ form.message_text.id_for_label }}" class="form-label">{{ form.message_text.label }}:</label>
                      {# Apply form-input class via widget or CSS selector #}
-                     {# Textarea might need specific styling #}
-                    {{ form.response_text }}
-                     {% if form.response_text.help_text %}
-                        <small class="form-help-text">{{ form.response_text.help_text|safe }}</small>
+                    {{ form.message_text }}
+                     {% if form.message_text.help_text %}
+                        <small class="form-help-text">{{ form.message_text.help_text|safe }}</small>
                     {% endif %}
-                    {% if form.response_text.errors %}
+                    {% if form.message_text.errors %}
                          {# Use custom message-item for errors #}
                         <div class="message-item message-error form-field-error">
-                            {{ form.response_text.errors }}
+                            {{ form.message_text.errors }}
                         </div>
                     {% endif %}
                 </div>
@@ -90,14 +75,13 @@
                 <div class="form-actions">
                      {# Use custom button classes #}
                     <button type="submit" class="custom-button button-primary">
-                         <i class="fas fa-save"></i> {{ action }} Response
+                         <i class="fas fa-save"></i> Save Settings
                     </button>
-                    {# Ensure whatsapp_app:bot_list is the correct URL name #}
-                    <a href="{% url 'whatsapp_app:bot_list' %}" class="custom-button button-secondary">Cancel</a>
+                    {# Optional: Add a cancel button if needed, linking back to dashboard or relevant page #}
+                    {# <a href="{% url 'whatsapp_app:whatsapp_index' %}" class="custom-button button-secondary">Cancel</a> #}
                 </div>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
-

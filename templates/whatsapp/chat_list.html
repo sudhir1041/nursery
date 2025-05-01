@@ -1,109 +1,106 @@
 {# whatsapp_app/templates/whatsapp_app/chat_list.html #}
-{% extends "whatsapp/base_whatsapp.html" %}
+{% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% load static %}
 
 {% block whatsapp_content %} {# Override the whatsapp_content block #}
-<h3 class="mb-3">Chats</h3>
-<hr class="mb-4">
+<div class="whatsapp-chat-list-container"> {# Custom container #}
+    <h3 class="page-title">Chats</h3> {# Custom title class #}
+    <hr class="divider">
 
-{# --- Search Bar --- #}
-<div class="row mb-4">
-    <div class="col-md-8 col-lg-6">
-        <form method="get" action="{% url 'whatsapp_app:chat_list' %}">
-            <div class="input-group shadow-sm">
-                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" name="q" class="form-control" placeholder="Search by Contact Name or WhatsApp Number..." value="{{ search_query|default:'' }}" aria-label="Search Chats">
-                <button class="btn btn-outline-secondary" type="submit">Search</button>
-                 {% if search_query %}
-                    {# Add a clear search button if a query exists #}
-                    <a href="{% url 'whatsapp_app:chat_list' %}" class="btn btn-outline-danger" title="Clear Search">&times;</a>
+    {# --- Search Bar --- #}
+    <div class="search-bar-container">
+        <form method="get" action="{% url 'whatsapp_app:chat_list' %}" class="search-form">
+            <div class="search-input-wrapper"> {# Custom wrapper #}
+                <i class="fas fa-search search-icon"></i> {# Font Awesome icon #}
+                <input type="text" name="q" class="search-input" placeholder="Search by Contact Name or WhatsApp Number..." value="{{ search_query|default:'' }}" aria-label="Search Chats">
+                <button class="custom-button button-secondary" type="submit">Search</button> {# Custom button #}
+                {% if search_query %}
+                    {# Custom clear button #}
+                    <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-danger button-clear" title="Clear Search">&times;</a>
                 {% endif %}
             </div>
         </form>
     </div>
-</div>
 
-{# --- List of Chats --- #}
-<div class="list-group shadow-sm">
-    {% for contact in contacts %}
-    {# Link each item to the chat detail view for that contact #}
-    <a href="{% url 'whatsapp_app:chat_detail' contact.wa_id %}"
-       class="list-group-item list-group-item-action p-3 {% if forloop.counter|divisibleby:2 %}list-group-item-light{% endif %}"> {# Alternate row colors slightly #}
-        <div class="d-flex w-100 justify-content-between">
-            {# Display contact name or fallback to WA ID #}
-            <h5 class="mb-1 fw-bold">{{ contact.name|default:contact.wa_id }}</h5>
-            {# Display time since last message #}
-            <small class="text-muted">
-                {% if contact.last_message_time %}
-                    {{ contact.last_message_time|timesince }} ago
-                {% endif %}
-            </small>
-        </div>
-        {# Display last message preview #}
-        {# Note: Accessing messages.last here can be inefficient on large datasets. #}
-        {# Consider optimizing by storing last message snippet on Contact model. #}
-        {% with last_message=contact.messages.last %}
-            <p class="mb-1 text-muted text-truncate">
-                {% if last_message %}
-                    {% if last_message.direction == 'OUT' %}
-                        <i class="bi bi-arrow-up-right-square me-1" title="Outgoing"></i>
-                    {% else %}
-                         <i class="bi bi-arrow-down-left-square me-1" title="Incoming"></i>
+    {# --- List of Chats --- #}
+    <div class="chat-list"> {# Custom list container #}
+        {% for contact in contacts %}
+        {# Link each item to the chat detail view for that contact #}
+        <a href="{% url 'whatsapp_app:chat_detail' contact.wa_id %}" class="chat-list-item"> {# Custom list item class #}
+            <div class="chat-item-header">
+                {# Display contact name or fallback to WA ID #}
+                <h5 class="chat-contact-name">{{ contact.name|default:contact.wa_id }}</h5>
+                {# Display time since last message #}
+                <small class="chat-last-time">
+                    {% if contact.last_message_time %}
+                        {{ contact.last_message_time|timesince }} ago
                     {% endif %}
-                    {{ last_message.text_content|default:"(Media/Template)"|striptags|truncatechars:80 }}
-                {% else %}
-                    (No messages yet)
-                {% endif %}
-            </p>
-        {% endwith %}
-        {# Display WA ID subtly #}
-        <small class="text-muted">{{ contact.wa_id }}</small>
+                </small>
+            </div>
+            {# Display last message preview #}
+            {# Note: Accessing messages.last here can be inefficient on large datasets. #}
+            {# Consider optimizing by storing last message snippet on Contact model. #}
+            {% with last_message=contact.messages.last %}
+                <p class="chat-last-message">
+                    {% if last_message %}
+                        {% if last_message.direction == 'OUT' %}
+                            <i class="fas fa-arrow-up chat-direction-icon" title="Outgoing"></i>
+                        {% else %}
+                            <i class="fas fa-arrow-down chat-direction-icon" title="Incoming"></i>
+                        {% endif %}
+                        {{ last_message.text_content|default:"(Media/Template)"|striptags|truncatechars:80 }}
+                    {% else %}
+                        <span class="no-messages-text">(No messages yet)</span>
+                    {% endif %}
+                </p>
+            {% endwith %}
+            {# Display WA ID subtly #}
+            <small class="chat-wa-id">{{ contact.wa_id }}</small>
 
-        {# Optional: Add unread message count badge if implemented #}
-        {# Example:
-        {% if contact.unread_count > 0 %}
-            <span class="badge bg-primary rounded-pill float-end ms-2">{{ contact.unread_count }}</span>
-        {% endif %}
-        #}
-    </a>
-    {% empty %}
-    {# Display message if no contacts found #}
-    <div class="list-group-item p-4 text-center">
-        {% if search_query %}
-            <p class="text-muted mb-0">No contacts found matching your search criteria '{{ search_query }}'.</p>
-        {% else %}
-            <p class="text-muted mb-0">No active chats found. Incoming messages from new contacts will appear here.</p>
-        {% endif %}
+            {# Optional: Add unread message count badge if implemented #}
+            {# Example:
+            {% if contact.unread_count > 0 %}
+                <span class="unread-badge">{{ contact.unread_count }}</span> {# Custom badge class #}
+            {% endif %}
+            #}
+        </a>
+        {% empty %}
+        {# Display message if no contacts found #}
+        <div class="chat-list-empty"> {# Custom class for empty state #}
+            {% if search_query %}
+                <p>No contacts found matching your search criteria '{{ search_query }}'.</p>
+            {% else %}
+                <p>No active chats found. Incoming messages from new contacts will appear here.</p>
+            {% endif %}
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
 
-{# --- Pagination --- #}
-{# Add pagination controls here if you implement pagination in the view #}
-{# Example using Django's built-in pagination:
-{% if page_obj.has_other_pages %} {# Assuming context variable is page_obj #}
-  <nav aria-label="Chat list navigation" class="mt-4">
-    <ul class="pagination justify-content-center">
-      {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}">&laquo; First</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a></li>
-      {% else %}
-         <li class="page-item disabled"><span class="page-link">&laquo; First</span></li>
-         <li class="page-item disabled"><span class="page-link">Previous</span></li>
-      {% endif %}
+    {# --- Pagination --- #}
+    {# Example using custom pagination styling #}
+    {% if page_obj.has_other_pages %} {# Assuming context variable is page_obj #}
+      <nav aria-label="Chat list navigation" class="pagination-container">
+        <ul class="pagination-custom"> {# Custom pagination class #}
+          {% if page_obj.has_previous %}
+            <li class="page-item-custom"><a class="page-link-custom" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}">&laquo; First</a></li>
+            <li class="page-item-custom"><a class="page-link-custom" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a></li>
+          {% else %}
+            <li class="page-item-custom disabled"><span class="page-link-custom">&laquo; First</span></li>
+            <li class="page-item-custom disabled"><span class="page-link-custom">Previous</span></li>
+          {% endif %}
 
-      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+          <li class="page-item-custom disabled"><span class="page-link-custom current-page">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
 
-      {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a></li>
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}">Last &raquo;</a></li>
-      {% else %}
-         <li class="page-item disabled"><span class="page-link">Next</span></li>
-         <li class="page-item disabled"><span class="page-link">Last &raquo;</span></li>
-      {% endif %}
-    </ul>
-  </nav>
-{% endif %}
-#}
+          {% if page_obj.has_next %}
+            <li class="page-item-custom"><a class="page-link-custom" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a></li>
+            <li class="page-item-custom"><a class="page-link-custom" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}">Last &raquo;</a></li>
+          {% else %}
+            <li class="page-item-custom disabled"><span class="page-link-custom">Next</span></li>
+            <li class="page-item-custom disabled"><span class="page-link-custom">Last &raquo;</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
 
+</div> {# End whatsapp-chat-list-container #}
 {% endblock whatsapp_content %}
-

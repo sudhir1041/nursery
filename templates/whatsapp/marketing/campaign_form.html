@@ -1,48 +1,81 @@
 {# whatsapp_app/templates/whatsapp_app/marketing/campaign_form.html #}
-{% extends "whatsapp/base_whatsapp.html" %}
-{# Load crispy forms tags if you installed and configured django-crispy-forms #}
-{% load crispy_forms_tags %}
+{% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% load static %}
 
-{% block whatsapp_content %} {# Override the whatsapp_content block #}
+{% block whatsapp_content %}
+<div class="whatsapp-form-container"> {# Custom container for the form area #}
+    <div class="form-card"> {# Custom card-like container #}
+        <div class="form-card-header">
+            <h3>Create New Marketing Campaign</h3>
+        </div>
+        <div class="form-card-body">
+            <p class="form-description">Start by giving your campaign a name and selecting the approved message template you want to use.</p>
+            <hr class="divider mb-4">
 
-{# --- Breadcrumbs --- #}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'whatsapp_app:campaign_list' %}">Marketing Campaigns</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Create New Campaign</li>
-  </ol>
-</nav>
-
-<h3 class="mb-3">Create New Marketing Campaign</h3>
-<hr class="mb-4">
-
-{# --- Campaign Creation Form --- #}
-<div class="card shadow-sm">
-    <div class="card-header bg-light fw-bold">
-        Campaign Details
-    </div>
-    <div class="card-body">
-        <p class="card-text text-muted">First, give your campaign a name and select the approved WhatsApp template you want to use.</p>
-        {# Use novalidate to disable browser validation and rely on Django's server-side validation #}
-        <form method="post" novalidate>
-            {% csrf_token %} {# Include CSRF token for security #}
-
-            {# --- Render form using crispy-forms for nice Bootstrap layout --- #}
-            {# This assumes you have crispy-forms and crispy-bootstrap5 installed and configured #}
-            {% crispy form %}
-
-            {# --- Submit and Cancel Buttons --- #}
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary px-4">
-                    <i class="bi bi-plus-circle me-1"></i> Create Campaign
-                </button>
-                <a href="{% url 'whatsapp_app:campaign_list' %}" class="btn btn-secondary ms-2">
-                    Cancel
-                </a>
+             {# Display general messages (like form errors) #}
+            {% if messages %}
+            <div class="whatsapp-messages-container mb-4">
+                {% for message in messages %}
+                <div class="message-item message-{{ message.tags|default:'info' }}">
+                    {{ message }}
+                    <button type="button" class="message-close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+                </div>
+                {% endfor %}
             </div>
-        </form>
-    </div> {# End card-body #}
-</div> {# End card #}
+            {% endif %}
 
-{% endblock whatsapp_content %}
+            <form method="post" class="whatsapp-form"> {# Use existing custom form class #}
+                {% csrf_token %}
 
+                 {# Render non-field errors if any #}
+                {% if form.non_field_errors %}
+                    <div class="message-item message-error form-field-error">
+                         {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {# Campaign Name Field #}
+                <div class="form-group">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}:</label>
+                    {# Apply form-input class via widget #}
+                    {{ form.name }}
+                    {% if form.name.help_text %}
+                        <small class="form-help-text">{{ form.name.help_text|safe }}</small>
+                    {% endif %}
+                    {% if form.name.errors %}
+                        <div class="message-item message-error form-field-error">
+                            {{ form.name.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Template Selection Field #}
+                <div class="form-group">
+                    <label for="{{ form.template.id_for_label }}" class="form-label">{{ form.template.label }}:</label>
+                     {# Apply form-select class via widget #}
+                    {{ form.template }}
+                     {% if form.template.help_text %}
+                        <small class="form-help-text">{{ form.template.help_text|safe }}</small>
+                    {% endif %}
+                    {% if form.template.errors %}
+                        <div class="message-item message-error form-field-error">
+                            {{ form.template.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Action Buttons #}
+                <div class="form-actions">
+                     {# Use custom button classes #}
+                    <button type="submit" class="custom-button button-primary">
+                         <i class="fas fa-arrow-right"></i> Create & Continue
+                    </button>
+                     {# Link back to campaign list #}
+                     {# Ensure URL name matches urls.py #}
+                    <a href="{% url 'whatsapp_app:campaign_list' %}" class="custom-button button-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

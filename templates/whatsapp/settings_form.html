@@ -1,118 +1,220 @@
 {# whatsapp_app/templates/whatsapp_app/settings_form.html #}
-{% extends "whatsapp/base_whatsapp.html" %}
-{# Load crispy forms tags if you installed and configured django-crispy-forms #}
-{% load crispy_forms_tags %}
+{% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% load static %}
 
-{% block whatsapp_content %} {# Override the whatsapp_content block #}
-<h3 class="mb-3">WhatsApp API Settings</h3>
-<hr class="mb-4">
+{% block whatsapp_content %}
+<div class="whatsapp-settings-container"> {# Custom container class #}
+    <h3 class="settings-title">WhatsApp API Settings</h3>
+    <hr class="divider">
 
-{# --- Important Warning --- #}
-<div class="alert alert-warning alert-dismissible fade show" role="alert">
-  <div class="d-flex align-items-center">
-      <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-      <div>
-          <strong>Important:</strong> Changes here directly affect connectivity with the WhatsApp Cloud API. Ensure all credentials and IDs are correct.
-          <br>If you change the <strong>Webhook URL</strong> or <strong>Webhook Verify Token</strong>, you <strong>MUST</strong> update these values in the
-          <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer" class="alert-link">Meta Developer Portal</a>
-          under your WhatsApp App's configuration settings for the webhook to function correctly.
-      </div>
-  </div>
-   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-
-{# --- Settings Form --- #}
-{# Use novalidate to disable browser validation and rely on Django's server-side validation #}
-<form method="post" novalidate>
-    {% csrf_token %} {# Include CSRF token for security #}
-
-    {# --- Render form using crispy-forms for nice Bootstrap layout --- #}
-    {# This assumes you have crispy-forms and crispy-bootstrap5 installed and configured #}
-    {% crispy form %}
-
-    {# --- Submit Button --- #}
-    <div class="mt-4">
-        <button type="submit" class="btn btn-primary px-4">
-            <i class="bi bi-save me-1"></i> Save Settings
-        </button>
+    {# Display Django Messages (Using custom message styles) #}
+    {% if messages %}
+    <div class="whatsapp-messages-container"> {# Use existing container #}
+        {% for message in messages %}
+        <div class="message-item message-{{ message.tags|default:'info' }}">
+            {{ message }}
+            <button type="button" class="message-close-btn" onclick="this.parentElement.style.display='none'">&times;</button> {# Custom close button JS #}
+        </div>
+        {% endfor %}
     </div>
-</form>
+    {% endif %}
 
-{# --- Display Webhook URL and Token for Easy Copying --- #}
-{% if settings %} {# Check if settings object exists #}
-<div class="row mt-5 g-3">
-    {# Display Webhook URL #}
-    {% if settings.webhook_url and full_webhook_url %}
-    <div class="col-md-6">
-        <div class="p-3 border rounded bg-light h-100">
-            <label for="webhookUrlInput" class="form-label fw-bold">Your Configured Webhook URL:</label>
-            <div class="input-group">
-                <input type="text" class="form-control form-control-sm" value="{{ full_webhook_url }}" readonly id="webhookUrlInput" aria-describedby="copyWebhookHelp">
-                <button class="btn btn-sm btn-outline-secondary" type="button" onclick="copyToClipboard('webhookUrlInput', this)">
-                    <i class="bi bi-clipboard"></i> Copy
-                </button>
+    {# Warning Card (Using custom card styles) #}
+    <div class="settings-card warning-card"> {# Custom card classes #}
+        <div class="warning-content">
+            <i class="fas fa-exclamation-triangle warning-icon"></i> {# Font Awesome icon #}
+            <div class="warning-text">
+                <strong>Important:</strong>
+                <p>
+                    Changes here directly affect connectivity with the WhatsApp Cloud API. Ensure all credentials and IDs are correct.
+                    <br>Update webhook settings in the
+                    <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer" class="settings-link">Meta Developer Portal</a>
+                    if the Webhook URL or Verify Token are changed here (though Verify Token is usually auto-generated and read-only).
+                </p>
             </div>
-            <div id="copyWebhookHelp" class="form-text mt-1">Use this URL when configuring the webhook in the Meta Developer Portal.</div>
         </div>
     </div>
-    {% endif %}
 
-    {# Display Verify Token #}
-    {% if settings.webhook_verify_token %}
-    <div class="col-md-6">
-        <div class="p-3 border rounded bg-light h-100">
-             <label for="verifyTokenInput" class="form-label fw-bold">Your Webhook Verify Token:</label>
-             <div class="input-group">
-                 <input type="text" class="form-control form-control-sm" value="{{ settings.webhook_verify_token }}" readonly id="verifyTokenInput" aria-describedby="copyTokenHelp">
-                 <button class="btn btn-sm btn-outline-secondary" type="button" onclick="copyToClipboard('verifyTokenInput', this)">
-                     <i class="bi bi-clipboard"></i> Copy
-                 </button>
-             </div>
-             <div id="copyTokenHelp" class="form-text mt-1">Use this token when configuring the webhook in the Meta Developer Portal.</div>
+    {# Settings Form (Using custom form styles) #}
+    <form method="post" novalidate class="whatsapp-form"> {# Custom form class #}
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-group"> {# Custom form group class #}
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+
+            {# Apply custom classes based on widget type #}
+            {% if field.widget_type == 'checkbox' %}
+                <div class="form-checkbox-wrapper">
+                     {# Add custom class via widget attrs in forms.py OR rely on input[type=checkbox] selector #}
+                    {{ field }}
+                    <label for="{{ field.id_for_label }}" class="form-checkbox-label">
+                        {% if field.help_text %}
+                            <span class="form-help-text">{{ field.help_text|safe }}</span>
+                        {% endif %}
+                    </label>
+                </div>
+            {% elif field.widget_type == 'password' %}
+                 {# Add custom class via widget attrs in forms.py OR rely on input[type=password] selector #}
+                 {{ field }}
+                 {% if field.help_text %}
+                     <small class="form-help-text">{{ field.help_text|safe }}</small>
+                 {% endif %}
+            {% else %}
+                 {# Add custom class via widget attrs in forms.py OR rely on input[type=text/url/etc] selector #}
+                 {{ field }}
+                 {% if field.help_text %}
+                     <small class="form-help-text">{{ field.help_text|safe }}</small>
+                 {% endif %}
+            {% endif %}
+
+            {% if field.errors %}
+            <div class="form-error-feedback"> {# Custom error class #}
+                {{ field.errors }}
+            </div>
+            {% endif %}
         </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            {# Use custom button styles #}
+            <button type="submit" class="custom-button button-primary button-lg"> {# Custom button classes #}
+                <i class="fas fa-save"></i> {# Font Awesome icon #}
+                Save Settings
+            </button>
+        </div>
+    </form>
+
+    {# Webhook Details Section (Using custom layout/card styles) #}
+    {% if settings %}
+    <div class="webhook-details-section">
+        <h4 class="section-title">Webhook Configuration</h4>
+        <div class="webhook-grid"> {# Custom grid for webhook cards #}
+
+            {% if settings.webhook_url and full_webhook_url %}
+            <div class="settings-card webhook-card"> {# Custom card class #}
+                 <div class="card-content">
+                    <h6>Webhook URL</h6>
+                    <p class="small-description">Use this URL in the Meta Developer Portal.</p>
+                    <div class="copy-field"> {# Custom copy field structure #}
+                        <input type="text" class="form-input" value="{{ full_webhook_url }}" readonly id="webhookUrlInput" aria-label="Webhook URL">
+                        <button class="custom-button copy-btn" type="button" onclick="copyToClipboard('webhookUrlInput', this)" title="Copy URL">
+                             <i class="fas fa-copy"></i> {# Font Awesome icon #}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if settings.webhook_verify_token %}
+             <div class="settings-card webhook-card"> {# Custom card class #}
+                 <div class="card-content">
+                    <h6>Verify Token</h6>
+                    <p class="small-description">Use this token in the Meta Developer Portal.</p>
+                    <div class="copy-field"> {# Custom copy field structure #}
+                        <input type="text" class="form-input" value="{{ settings.webhook_verify_token }}" readonly id="verifyTokenInput" aria-label="Verify Token">
+                        <button class="custom-button copy-btn" type="button" onclick="copyToClipboard('verifyTokenInput', this)" title="Copy Token">
+                             <i class="fas fa-copy"></i> {# Font Awesome icon #}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div> {# End webhook-grid #}
     </div>
     {% endif %}
-</div>
-{% endif %} {# End check for settings object #}
+</div> {# End whatsapp-settings-container #}
+{% endblock %}
 
-{% endblock whatsapp_content %}
 
-{% block extra_js %} {# Add JavaScript specific to this page #}
-{{ block.super }} {# Include JS from base templates #}
-<script>
-// Simple function to copy text from an input field to the clipboard
-function copyToClipboard(elementId, buttonElement) {
-  const input = document.getElementById(elementId);
-  if (input && navigator.clipboard) {
-    navigator.clipboard.writeText(input.value).then(() => {
-      // Provide visual feedback on the button
-      const originalText = buttonElement.innerHTML;
-      buttonElement.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
-      buttonElement.classList.add('btn-success');
-      buttonElement.classList.remove('btn-outline-secondary');
-      setTimeout(() => {
-        buttonElement.innerHTML = originalText;
-        buttonElement.classList.remove('btn-success');
-        buttonElement.classList.add('btn-outline-secondary');
-      }, 2000); // Reset after 2 seconds
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-      alert('Failed to copy URL/Token.'); // Fallback alert
-    });
-  } else if (input) {
-      // Fallback for older browsers (less reliable)
-      input.select();
-      try {
-          document.execCommand('copy');
-          alert(input.value + ' copied (using fallback method).');
-      } catch (err) {
-           alert('Failed to copy using fallback method.');
-      }
-      window.getSelection().removeAllRanges(); // Deselect
-  } else {
-       alert('Could not find the element to copy.');
-  }
-}
-</script>
-{% endblock extra_js %}
+{% block extra_scripts %} {# Use the block name from your base.html #}
+    {{ block.super }} {# Include JS from base.html #}
 
+    {# copyToClipboard function specific to this page #}
+    <script>
+    /**
+     * Copies the value of a specified input field to the clipboard.
+     * Provides visual feedback on the button using custom classes.
+     * NOTE: navigator.clipboard.writeText() requires HTTPS or localhost.
+     * @param {string} inputId - The ID of the input element to copy from.
+     * @param {HTMLElement} btn - The button element that was clicked.
+     */
+    async function copyToClipboard(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) {
+            console.error('Copy Error: Input element not found with ID:', inputId);
+            btn.setAttribute('title', 'Error: Input not found');
+            return;
+        }
+
+        const icon = btn.querySelector('i.fas'); // Target Font Awesome icon
+        const originalIconClass = icon ? icon.className : 'fas fa-copy'; // Store original classes
+
+        // Define custom feedback classes (adjust if needed)
+        const successClass = 'button-success'; // Example: Define .button-success in CSS
+        const errorClass = 'button-error'; // Example: Define .button-error in CSS
+        const originalBtnClasses = btn.className; // Store original button classes
+
+        // --- Try Modern Clipboard API (Preferred) ---
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(input.value);
+                console.log('Copied to clipboard using navigator.clipboard:', input.value);
+
+                // Provide visual feedback: Success
+                if (icon) icon.className = 'fas fa-check'; // Change icon
+                btn.className = `custom-button copy-btn ${successClass}`; // Apply success class
+                btn.setAttribute('title', 'Copied!');
+
+                // Reset after a delay
+                setTimeout(() => {
+                    if (icon) icon.className = originalIconClass; // Restore original icon
+                    btn.className = originalBtnClasses; // Restore original classes
+                    btn.setAttribute('title', 'Copy');
+                }, 2000);
+                return;
+
+            } catch (err) {
+                console.error('Failed to copy using navigator.clipboard:', err);
+            }
+        } else {
+             console.warn('navigator.clipboard API not available or context is not secure. Attempting fallback.');
+        }
+
+        // --- Fallback to Legacy document.execCommand ---
+        try {
+            input.select();
+            document.execCommand('copy');
+            console.log('Copied to clipboard using document.execCommand (fallback).');
+            input.setSelectionRange(0, 0);
+            window.getSelection()?.removeAllRanges();
+
+            // Provide visual feedback: Success
+            if (icon) icon.className = 'fas fa-check';
+            btn.className = `custom-button copy-btn ${successClass}`;
+            btn.setAttribute('title', 'Copied!');
+
+            setTimeout(() => {
+                if (icon) icon.className = originalIconClass;
+                btn.className = originalBtnClasses;
+                btn.setAttribute('title', 'Copy');
+            }, 2000);
+
+        } catch (fallbackErr) {
+            console.error('Fallback copy using document.execCommand failed:', fallbackErr);
+
+            // Provide visual feedback: Failure
+            if (icon) icon.className = 'fas fa-exclamation-triangle'; // Error icon
+            btn.className = `custom-button copy-btn ${errorClass}`; // Apply error class
+            btn.setAttribute('title', 'Copy failed');
+
+            setTimeout(() => {
+                if (icon) icon.className = originalIconClass;
+                btn.className = originalBtnClasses;
+                btn.setAttribute('title', 'Copy');
+            }, 3000);
+        }
+    }
+    </script>
+{% endblock extra_scripts %}

@@ -16,7 +16,7 @@ urlpatterns = [
 
     # --- Webhook ---
     # URL: /whatsapp/webhook/ (Needs to match the URL given to Meta)
-    path('webhook/', views.whatsapp_webhook, name='webhook'),
+    path('webhook/receive-kVusV/', views.whatsapp_webhook, name='webhook'),
 
     # --- Chat Interface ---
     # URL: /whatsapp/chats/
@@ -48,8 +48,9 @@ urlpatterns = [
 
     # --- Bot/Auto-Reply Management (Optional - Add if using dedicated views) ---
     path('bots/', views.bot_response_list, name='bot_list'),
-    path('bots/new/', views.bot_response_create, name='bot_create'),
-    path('bots/<int:pk>/edit/', views.bot_response_update, name='bot_update'),
+    path('bots/new/', views.bot_response_create, name='bot_response_create'),
+    path('bots/<int:pk>/edit/', views.bot_response_update, name='bot_response_edit'),
+    path('bots/<int:pk>/delete/', views.bot_response_delete, name='bot_response_delete'),
     path('autoreply/', views.autoreply_settings_view, name='autoreply_settings'),
 ]
 

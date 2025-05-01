@@ -130,7 +130,7 @@ animation: blink 1s infinite;
                             <td>{{ order.shipping_address_json.phone|default:"N/A" }}</td>
                             <td>{{ order.shipping_address_json.zip|default:"N/A" }}</td>
                             <td>{{ order.shipping_address_json.city|default:"N/A" }}</td>
-                            <td>{{ order.raw_data.note|default:"N/A" }}</td>
+                            <td>{{ order.internal_notes|default:"N/A" }}</td>
                             <td>
                                 {% with fulfillments=order.raw_data.fulfillments %}
                                     {% if fulfillments %}

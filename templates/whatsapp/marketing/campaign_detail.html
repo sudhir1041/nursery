@@ -1,230 +1,118 @@
 {# whatsapp_app/templates/whatsapp_app/marketing/campaign_detail.html #}
-{% extends "whatsapp/base_whatsapp.html" %}
-{# Load crispy forms tags if used for the upload form #}
-{% load crispy_forms_tags %}
+{% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% load static %}
 
-{% block whatsapp_content %} {# Override the whatsapp_content block #}
+{% block whatsapp_content %}
+<div class="whatsapp-detail-container"> {# Custom container for detail pages #}
 
-{# --- Breadcrumbs --- #}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'whatsapp_app:campaign_list' %}">Marketing Campaigns</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ campaign.name }}</li>
-  </ol>
-</nav>
-
-{# --- Campaign Header --- #}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Campaign: {{ campaign.name }}</h3>
-    {# Display overall status prominently #}
-    <div>
-        {% include "whatsapp_app/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time large_badge=True %}
+    {# Header Section #}
+    <div class="detail-header">
+        <div class="detail-title-status">
+            <h3 class="page-title">{{ campaign.name }}</h3>
+             {# Use the status badge partial #}
+            {% include "whatsapp_app/partials/custom_status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
+        </div>
+        <div class="detail-actions">
+            {# Placeholder for primary actions like Schedule/Send/Pause based on status #}
+            {% if campaign.status == 'DRAFT' %}
+                 <a href="#" class="custom-button button-success"><i class="fas fa-calendar-alt"></i> Schedule</a>
+                 <a href="#" class="custom-button button-primary"><i class="fas fa-paper-plane"></i> Send Now</a>
+            {% elif campaign.status == 'SCHEDULED' %}
+                 <a href="#" class="custom-button button-warning"><i class="fas fa-pause-circle"></i> Pause</a>
+                 <a href="#" class="custom-button button-secondary"><i class="fas fa-edit"></i> Edit Schedule</a>
+            {% elif campaign.status == 'SENDING' %}
+                 <a href="#" class="custom-button button-warning"><i class="fas fa-pause-circle"></i> Pause</a>
+            {% elif campaign.status == 'PAUSED' %}
+                 <a href="#" class="custom-button button-success"><i class="fas fa-play-circle"></i> Resume</a>
+            {% endif %}
+             {# Add other actions like Edit, Delete later #}
+             {# <a href="{% url 'whatsapp_app:campaign_edit' campaign.pk %}" class="custom-button button-outline-secondary button-sm"><i class="fas fa-edit"></i> Edit</a> #}
+        </div>
     </div>
-</div>
-<hr class="mb-4">
+     <p class="page-description">Manage contacts, scheduling, and view performance for this campaign.</p>
+    <hr class="divider">
 
-{# --- Campaign Details & Stats Row --- #}
-<div class="row mb-4 g-4"> {# Use g-4 for gutters #}
-    {# Campaign Info Card #}
-    <div class="col-lg-6">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-light fw-bold">
-                <i class="bi bi-info-circle me-1"></i> Campaign Details
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0"> {# Use definition list for details #}
-                    <dt class="col-sm-4">Template:</dt>
-                    <dd class="col-sm-8">{{ campaign.template.name }} ({{ campaign.template.language }})</dd>
+    {# Display general messages #}
+    {% if messages %}
+    <div class="whatsapp-messages-container mb-4">
+        {% for message in messages %}
+        <div class="message-item message-{{ message.tags|default:'info' }}">
+            {{ message }}
+            <button type="button" class="message-close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-                    <dt class="col-sm-4">Status:</dt>
-                    <dd class="col-sm-8">{% include "whatsapp_app/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}</dd>
+    {# --- Campaign Details Section --- #}
+    <div class="detail-section">
+        <h4 class="section-title">Campaign Setup</h4>
+        <dl class="definition-list"> {# Use definition list for details #}
+            <dt>Template Used:</dt>
+            <dd>
+                {% if campaign.template %}
+                    {{ campaign.template.name }} ({{ campaign.template.category }})
+                    {# Optional: Link to template preview #}
+                    {# <a href="{% url 'whatsapp_app:template_detail' campaign.template.pk %}" class="action-link-sm"><i class="fas fa-eye"></i> Preview</a> #}
+                {% else %}
+                    <span class="text-muted">N/A</span>
+                {% endif %}
+            </dd>
 
-                    <dt class="col-sm-4">Scheduled For:</dt>
-                    <dd class="col-sm-8">{{ campaign.scheduled_time|date:"Y-m-d H:i T"|default:"Not Scheduled" }}</dd>
+            <dt>Created On:</dt>
+            <dd>{{ campaign.created_at|date:"F j, Y, P" }}</dd>
 
-                    <dt class="col-sm-4">Started At:</dt>
-                    <dd class="col-sm-8">{{ campaign.started_at|date:"Y-m-d H:i T"|default:"Not Started" }}</dd>
+            <dt>Last Updated:</dt>
+            <dd>{{ campaign.updated_at|date:"F j, Y, P" }}</dd>
 
-                    <dt class="col-sm-4">Completed At:</dt>
-                    <dd class="col-sm-8">{{ campaign.completed_at|date:"Y-m-d H:i T"|default:"Not Completed" }}</dd>
+            <dt>Scheduled Time:</dt>
+            <dd>{{ campaign.scheduled_time|date:"F j, Y, P"|default:"Not Scheduled" }}</dd>
 
-                    <dt class="col-sm-4">Created At:</dt>
-                    <dd class="col-sm-8">{{ campaign.created_at|date:"Y-m-d H:i T" }}</dd>
+            <dt>Started Sending:</dt>
+            <dd>{{ campaign.started_at|date:"F j, Y, P"|default:"Not Started" }}</dd>
 
-                    {# Add created_by if tracked in model #}
-                    {# <dt class="col-sm-4">Created By:</dt>
-                       <dd class="col-sm-8">{{ campaign.created_by.username|default:"System" }}</dd> #}
-                </dl>
-            </div>
+            <dt>Finished Sending:</dt>
+            <dd>{{ campaign.finished_at|date:"F j, Y, P"|default:"Not Finished" }}</dd>
+
+        </dl>
+    </div>
+
+    {# --- Placeholder Sections for Future Functionality --- #}
+
+    {# Contacts Section #}
+    <div class="detail-section">
+         <div class="section-header">
+            <h4 class="section-title">Recipients</h4>
+             {# Add button only if in draft/paused state? #}
+            {% if campaign.status == 'DRAFT' or campaign.status == 'PAUSED' %}
+                <a href="#" class="custom-button button-outline-secondary button-sm">
+                    <i class="fas fa-users"></i> Manage Recipients
+                </a>
+            {% endif %}
+         </div>
+        <div class="placeholder-content">
+            <p class="text-muted">Recipient management (uploading CSV, selecting lists) will be available here.</p>
+            {# Example: <p>Total Recipients: {{ contacts_count|default:0 }}</p> #}
         </div>
     </div>
 
-    {# Recipient Stats Card #}
-    <div class="col-lg-6">
-         <div class="card shadow-sm h-100">
-            <div class="card-header bg-light fw-bold">
-                 <i class="bi bi-people me-1"></i> Recipient Summary
-            </div>
-            <div class="card-body">
-                 <p class="fs-5"><strong>Total Recipients:</strong> {{ stats.total|default:"0" }}</p>
-                 {% if stats.total > 0 %}
-                 <ul class="list-group list-group-flush">
-                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                         Pending <span class="badge bg-light text-dark border rounded-pill">{{ stats.pending|default:"0" }}</span>
-                     </li>
-                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                         Sent <span class="badge bg-secondary rounded-pill">{{ stats.sent|default:"0" }} ({{ stats.sent_pct|default:0 }}%)</span>
-                     </li>
-                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                         Delivered <span class="badge bg-info text-dark rounded-pill">{{ stats.delivered|default:"0" }} ({{ stats.delivered_pct|default:0 }}%)</span>
-                     </li>
-                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                         Read <span class="badge bg-success rounded-pill">{{ stats.read|default:"0" }} ({{ stats.read_pct|default:0 }}%)</span>
-                     </li>
-                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                         Failed <span class="badge bg-danger rounded-pill">{{ stats.failed|default:"0" }} ({{ stats.failed_pct|default:0 }}%)</span>
-                     </li>
-                 </ul>
-                 {# Optional: Add progress bars for visualization #}
-                 {% else %}
-                 <p class="text-muted">No recipients have been added to this campaign yet.</p>
-                 {% endif %}
-            </div>
+     {# Performance Section #}
+    <div class="detail-section">
+         <div class="section-header">
+            <h4 class="section-title">Performance</h4>
+             {# Add button only if campaign has run #}
+             {% if campaign.status != 'DRAFT' and campaign.status != 'SCHEDULED' %}
+                <a href="#" class="custom-button button-outline-secondary button-sm">
+                    <i class="fas fa-chart-bar"></i> View Full Report
+                </a>
+            {% endif %}
+         </div>
+        <div class="placeholder-content">
+             <p class="text-muted">Campaign statistics (Sent, Delivered, Read, Failed) will be displayed here once the campaign runs.</p>
+             {# Example: <p>Sent: {{ sent_count|default:0 }} | Delivered: ... | Read: ... </p> #}
         </div>
     </div>
-</div>
 
 
-{# --- Action Forms (Conditional based on campaign status) --- #}
-{# Only show actions if Celery is enabled #}
-{% if celery_enabled %}
-    {# Actions for DRAFT campaigns #}
-    {% if campaign.status == 'DRAFT' %}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-light fw-bold">
-            <i class="bi bi-pencil-square me-1"></i> Next Steps
-        </div>
-        <div class="card-body">
-            {# 1. Upload Contacts Form #}
-            <h5 class="card-title">1. Upload Contacts</h5>
-            <p class="card-text text-muted small">Upload a CSV file containing recipient WhatsApp IDs and any required template variables.</p>
-            <form method="post" action="{% url 'whatsapp_app:campaign_upload_contacts' campaign.pk %}" enctype="multipart/form-data" class="mb-4">
-                 {% csrf_token %}
-                 {# Use crispy forms for nice layout #}
-                 {% crispy upload_form %}
-                 {# Or render manually: {{ upload_form.contact_file }} #}
-                 <button type="submit" class="btn btn-secondary">
-                     <i class="bi bi-upload me-1"></i> Upload CSV
-                 </button>
-            </form>
-            <hr>
-
-            {# 2. Schedule or Send Form #}
-            <h5 class="card-title">2. Schedule or Send</h5>
-            <p class="card-text text-muted small">Once contacts are uploaded, you can schedule the campaign for a future time or start sending it immediately.</p>
-             <form method="post" action="{% url 'whatsapp_app:campaign_schedule' campaign.pk %}" class="row g-3 align-items-end">
-                 {% csrf_token %}
-                 <div class="col-md-5 col-lg-4">
-                     <label for="id_scheduled_time" class="form-label">Schedule for (Optional):</label>
-                     {# Use datetime-local input type #}
-                     <input type="datetime-local" name="scheduled_time" class="form-control form-control-sm" id="id_scheduled_time" aria-describedby="scheduleHelp">
-                     <div id="scheduleHelp" class="form-text">Leave blank to send immediately. Use your local time.</div>
-                 </div>
-                 <div class="col-auto">
-                     {# Disable button if no recipients exist #}
-                     <button type="submit" class="btn btn-success" {% if stats.total == 0 %}disabled title="Upload contacts before sending"{% endif %}>
-                         <i class="bi bi-send me-1"></i> Schedule / Send Now
-                     </button>
-                 </div>
-             </form>
-        </div>
-    </div>
-    {% endif %} {# End DRAFT actions #}
-
-    {# Actions for SCHEDULED campaigns #}
-    {% if campaign.status == 'SCHEDULED' %}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-light fw-bold">
-            <i class="bi bi-clock-history me-1"></i> Scheduled Campaign Actions
-        </div>
-        <div class="card-body">
-             <p>This campaign is scheduled to start sending on <strong>{{ campaign.scheduled_time|date:"F j, Y, P T" }}</strong>.</p>
-             {# Cancel Button Form #}
-             <form method="post" action="{% url 'whatsapp_app:campaign_cancel' campaign.pk %}" onsubmit="return confirm('Are you sure you want to cancel this scheduled campaign? This cannot be undone.');">
-                 {% csrf_token %}
-                 <button type="submit" class="btn btn-danger">
-                     <i class="bi bi-x-octagon me-1"></i> Cancel Scheduled Campaign
-                 </button>
-             </form>
-        </div>
-    </div>
-    {% endif %} {# End SCHEDULED actions #}
-{% else %} {# Show message if Celery is disabled #}
-    <div class="alert alert-warning" role="alert">
-        <i class="bi bi-exclamation-circle me-1"></i> Background task processing (Celery) is not enabled. Campaign scheduling and sending actions are unavailable.
-    </div>
-{% endif %}
-
-
-{# --- Recipient List Table --- #}
-<h4 class="mt-4">Recipients</h4>
-<hr class="mb-3">
-{% if recipients %}
-<div class="card shadow-sm">
-    <div class="card-header bg-light">
-         <i class="bi bi-person-lines-fill me-1"></i> Recipient Details ({{ stats.total|default:"0" }})
-    </div>
-    <div class="table-responsive">
-        <table class="table table-sm table-striped table-hover mb-0">
-            <thead>
-                <tr>
-                    <th scope="col">Contact WA ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Variables Sent</th>
-                    <th scope="col">Message ID (WAMID)</th>
-                    <th scope="col">Sent Time</th>
-                    <th scope="col">Error Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for recipient in recipients %}
-                <tr>
-                    {# Contact WA ID #}
-                    <td>{{ recipient.contact.wa_id }}</td>
-                    {# Contact Name #}
-                    <td>{{ recipient.contact.name|default:'-' }}</td>
-                    {# Status Badge #}
-                    <td>
-                        {% include "whatsapp_app/partials/status_badge.html" with status=recipient.status %}
-                    </td>
-                    {# Template Variables (display formatted JSON) #}
-                    <td>
-                        {% if recipient.template_variables %}
-                        {# Use json_script filter for safe embedding, access with JS if needed, or just display preformatted #}
-                        {# {{ recipient.template_variables|json_script:"vars-"|safe }} #}
-                        <pre class="mb-0" style="font-size: 0.8em; white-space: pre-wrap; word-break: break-all;">{{ recipient.template_variables }}</pre>
-                        {% else %} - {% endif %}
-                    </td>
-                    {# Message ID #}
-                    <td class="text-muted" style="font-size: 0.8em; word-break: break-all;">{{ recipient.message_id|default:'-' }}</td>
-                    {# Sent Time #}
-                    <td>{{ recipient.sent_time|date:"Y-m-d H:i"|default:'-' }}</td>
-                    {# Error Message #}
-                    <td class="text-danger" style="font-size: 0.8em;">{{ recipient.error_message|default:'' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div> {# End table-responsive #}
-</div> {# End card #}
-{% else %}
-<div class="alert alert-secondary" role="alert">
-  No recipients have been added to this campaign yet. Upload a CSV file using the form above (if the campaign is in Draft status).
-</div>
-{% endif %}
-
-{# Add pagination for recipients if implemented #}
-
-{% endblock whatsapp_content %}
-
+</div> {# End whatsapp-detail-container #}
+{% endblock %}

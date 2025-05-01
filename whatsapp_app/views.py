@@ -24,7 +24,7 @@ from .models import (
 # Forms from this app
 from .forms import (
     WhatsAppSettingsForm, ManualMessageForm, MarketingCampaignForm,
-    ContactUploadForm , BotResponseForm,AutoReplyForm# Add BotResponseForm, AutoReplyForm if using dedicated views
+    ContactUploadForm , BotResponseForm,AutoReplySettingsForm# Add BotResponseForm, AutoReplyForm if using dedicated views
 )
 # Utilities from this app
 from .utils import (
@@ -104,13 +104,11 @@ def dashboard(request):
 @user_passes_test(is_staff_user)
 def whatsapp_settings_view(request):
     """Manages WhatsApp Cloud API settings."""
-    # Use get_or_create to handle the initial setup case. Assumes a single settings object named 'NurseryProjectDefault'.
-    # Adjust the filter if you allow multiple named settings.
     settings_name = "NurseryProjectDefault"
     settings, created = WhatsAppSettings.objects.get_or_create(
         account_name=settings_name,
-        defaults={ # Sensible defaults if creating for the first time
-            'webhook_verify_token': str(uuid.uuid4()) # Generate a default token as string
+        defaults={
+            'webhook_verify_token': str(uuid.uuid4())
         }
     )
 
@@ -118,42 +116,53 @@ def whatsapp_settings_view(request):
         form = WhatsAppSettingsForm(request.POST, instance=settings)
         if form.is_valid():
             try:
-                settings = form.save()
-                # Optional: Add validation logic here - try a simple API call?
-                # e.g., try fetching business profile info using the new token/ID
+                # Save form without committing to get settings object
+                settings = form.save(commit=False)
+                
+                # Optional validation logic
                 # if validate_api_credentials(settings):
-                #      settings.last_validated = timezone.now()
+                #     settings.last_validated = timezone.now()
                 # else:
-                #      settings.last_validated = None
-                #      messages.warning(request, "Could not validate credentials with WhatsApp API.")
+                #     settings.last_validated = None
+                #     messages.warning(request, "Could not validate credentials with WhatsApp API.")
+                
+                # Save settings with any additional fields
                 settings.save()
+                
+                # Save many-to-many relationships if any
+                form.save_m2m()
+                
                 messages.success(request, 'WhatsApp settings updated successfully.')
-                # Important: Remind user to update webhook URL in Meta Developer Portal if changed
-                messages.info(request, "If you changed the Webhook URL or Verify Token, remember to update them in the Meta Developer Portal for your WhatsApp App.")
-                return redirect('whatsapp:settings') # Use app namespace
+                
+                # Remind user about webhook updates if URL/token changed
+                if form.has_changed() and any(field in form.changed_data for field in ['webhook_url', 'webhook_verify_token']):
+                    messages.info(request, "Remember to update the Webhook URL and Verify Token in the Meta Developer Portal for your WhatsApp App.")
+                
+                return redirect('whatsapp:settings')
+                
             except Exception as e:
                 logger.error(f"Error saving WhatsApp settings: {e}")
                 messages.error(request, f"Failed to save settings: {e}")
+                
         else:
-             messages.error(request, 'Please correct the errors in the form.')
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = WhatsAppSettingsForm(instance=settings)
 
     context = {'form': form, 'settings': settings}
-    # Attempt to build the full webhook URL for display
-    full_webhook_url = None
+    
     try:
-        # Use saved value first
         webhook_path = settings.webhook_url or form.initial.get('webhook_url')
         if webhook_path:
-            # Ensure it starts with '/' if it's a relative path
             if not webhook_path.startswith('http'):
-                 webhook_path = request.build_absolute_uri(f'/whatsapp/webhook/') # Construct based on known path
-            full_webhook_url = webhook_path
+                webhook_path = request.build_absolute_uri('/whatsapp/webhook/')
+            context['full_webhook_url'] = webhook_path
     except Exception as e:
         logger.warning(f"Could not build full webhook URL for display: {e}")
+        context['full_webhook_url'] = None
 
-    context['full_webhook_url'] = full_webhook_url
     return render(request, 'whatsapp/settings_form.html', context)
 
 
@@ -457,14 +466,18 @@ def campaign_list(request):
     # Optimize by selecting related template name
     campaigns = MarketingCampaign.objects.select_related('template').order_by('-created_at')
     context = {'campaigns': campaigns}
+    # Corrected template path assumption
     return render(request, 'whatsapp/marketing/campaign_list.html', context)
 
+
+# --- Campaign Detail View ---
 @user_passes_test(is_staff_user)
 def campaign_detail(request, pk):
     """Shows details and recipients of a specific campaign."""
     # Fetch campaign with related template
     campaign = get_object_or_404(MarketingCampaign.objects.select_related('template'), pk=pk)
     # Fetch recipients with related contact info
+    # Ensure CampaignContact model and its relation to Contact are correctly defined
     recipients = CampaignContact.objects.filter(campaign=campaign).select_related('contact').order_by('contact__wa_id')
 
     # Calculate summary stats efficiently using aggregation
@@ -477,17 +490,27 @@ def campaign_detail(request, pk):
         failed=Count('id', filter=Q(status='FAILED')),
     )
     # Calculate percentages safely
+    stats['sent_pct'] = 0
+    stats['delivered_pct'] = 0
+    stats['read_pct'] = 0
+    stats['failed_pct'] = 0
     if stats['total'] > 0:
         # Calculate total processed (non-pending) for percentage base if preferred
         processed_total = stats['total'] - stats['pending']
         base = processed_total if processed_total > 0 else 1 # Avoid division by zero
 
+        # Calculate based on total recipients initiated
         stats['sent_pct'] = round((stats['sent'] + stats['delivered'] + stats['read'] + stats['failed']) / stats['total'] * 100, 1)
-        stats['delivered_pct'] = round((stats['delivered'] + stats['read']) / base * 100, 1) if base > 1 else 0
-        stats['read_pct'] = round(stats['read'] / base * 100, 1) if base > 1 else 0
-        stats['failed_pct'] = round(stats['failed'] / base * 100, 1) if base > 1 else 0
+
+        # Calculate based on processed recipients (optional, might be more meaningful for delivery/read)
+        if base > 0: # Check if any were processed
+            stats['delivered_pct'] = round((stats['delivered'] + stats['read']) / base * 100, 1)
+            stats['read_pct'] = round(stats['read'] / base * 100, 1)
+            stats['failed_pct'] = round(stats['failed'] / base * 100, 1)
+
 
     # Only show upload form if campaign is in Draft status
+    # Ensure ContactUploadForm is defined in forms.py
     upload_form = ContactUploadForm() if campaign.status == 'DRAFT' else None
 
     context = {
@@ -497,7 +520,8 @@ def campaign_detail(request, pk):
         'upload_form': upload_form,
         'celery_enabled': CELERY_ENABLED, # Inform template if Celery is available
     }
-    return render(request, 'whatsapp_app/marketing/campaign_detail.html', context)
+    # Assuming template path
+    return render(request, 'whatsapp/marketing/campaign_detail.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_create(request):
@@ -521,7 +545,7 @@ def campaign_create(request):
         form = MarketingCampaignForm()
 
     context = {'form': form}
-    return render(request, 'whatsapp_app/marketing/campaign_form.html', context)
+    return render(request, 'whatsapp/marketing/campaign_form.html', context)
 
 
 @user_passes_test(is_staff_user)
@@ -873,9 +897,12 @@ def bot_response_list(request):
     """Lists all configured bot responses."""
     bot_responses = BotResponse.objects.order_by('trigger_phrase')
     context = {'bot_responses': bot_responses}
-    return render(request, 'whatsapp/bot/bot_response_list.html', context)
+    # This should render the LIST template, not the FORM template
+    # return render(request, 'whatsapp/bot/bot_response_form.html', context) # Incorrect
+    return render(request, 'whatsapp/bot/bot_list.html', context)
 
 @user_passes_test(is_staff_user) 
+@user_passes_test(is_staff_user)
 def bot_response_create(request):
     """Creates a new bot response."""
     if request.method == 'POST':
@@ -884,7 +911,8 @@ def bot_response_create(request):
             try:
                 bot_response = form.save()
                 messages.success(request, f"Bot response for trigger '{bot_response.trigger_phrase}' created successfully.")
-                return redirect('whatsapp:bot_response_list')
+                 # Correct redirect URL name assumed
+                return redirect('whatsapp_app:bot_list')
             except Exception as e:
                 logger.error(f"Error creating bot response: {e}")
                 messages.error(request, "An error occurred while creating the bot response.")
@@ -892,8 +920,9 @@ def bot_response_create(request):
             messages.error(request, "Please correct the errors in the form.")
     else:
         form = BotResponseForm()
-    
+
     context = {'form': form, 'action': 'Create'}
+     # Correct template path assumed
     return render(request, 'whatsapp/bot/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
@@ -951,3 +980,21 @@ def autoreply_settings_view(request):
         'settings': settings
     }
     return render(request, 'whatsapp/bot/autoreply_settings.html', context)
+@user_passes_test(is_staff_user)
+@require_POST # Ensures this view only accepts POST requests
+def bot_response_delete(request, pk):
+    """Deletes a specific bot response."""
+    bot_response = get_object_or_404(BotResponse, pk=pk)
+    trigger_phrase = bot_response.trigger_phrase # Get phrase before deleting
+
+    try:
+        bot_response.delete()
+        messages.success(request, f"Bot response for trigger '{trigger_phrase}' deleted successfully.")
+        logger.info(f"Bot response {pk} ('{trigger_phrase}') deleted by user {request.user.username}")
+    except Exception as e:
+        logger.error(f"Error deleting bot response {pk}: {e}")
+        messages.error(request, "An error occurred while deleting the bot response.")
+
+    # Redirect back to the list view in either case (success or error)
+     # Correct redirect URL name assumed
+    return redirect('whatsapp_app:bot_list')

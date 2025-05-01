@@ -71,21 +71,28 @@ class ManualMessageForm(forms.Form):
 
 # --- Marketing Campaign Form ---
 class MarketingCampaignForm(forms.ModelForm):
-    """Form for creating or editing a marketing campaign."""
-    # Fetch only approved templates relevant for marketing/utility
+    """Form for creating or editing a marketing campaign using custom CSS classes."""
+    # Fetch only templates relevant for marketing/utility
     template = forms.ModelChoiceField(
-        queryset=MarketingTemplate.objects.filter(category__in=['MARKETING', 'UTILITY']), # Adjust categories as needed
-        widget=forms.Select(attrs={'class': 'form-select'}), # Use form-select for Bootstrap 5 styling
+        # CORRECTED: Removed the non-existent 'status' filter
+        queryset=MarketingTemplate.objects.filter(category__in=['MARKETING', 'UTILITY']),
+        # Use custom 'form-select' class (needs styling in CSS)
+        widget=forms.Select(attrs={'class': 'form-select'}),
         empty_label="-- Select an Approved Template --",
         required=True,
         help_text="Choose the pre-approved WhatsApp template for this campaign."
+        # Note: If you need to filter by approval status,
+        # you'll need to ensure your MarketingTemplate model HAS a status field
+        # (e.g., status = models.CharField(max_length=20, choices=TEMPLATE_STATUS_CHOICES, default='PENDING'))
+        # and then you could add status='APPROVED' back to the filter.
     )
 
     class Meta:
         model = MarketingCampaign
         fields = ['name', 'template'] # Only allow setting name and template initially
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Spring Plant Sale Promotion'}),
+             # Use custom 'form-input' class
+            'name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g., Spring Plant Sale Promotion'}),
         }
         labels = {
             'name': 'Campaign Name',
@@ -93,6 +100,18 @@ class MarketingCampaignForm(forms.ModelForm):
         help_texts = {
             'name': 'Give this campaign a descriptive internal name.',
         }
+
+    # Optional: Add validation if needed
+    # def clean_name(self):
+    #     name = self.cleaned_data.get('name')
+    #     if not name or len(name) < 3:
+    #          raise forms.ValidationError("Campaign name must be at least 3 characters long.")
+    #     # Check for uniqueness if required
+    #     # if MarketingCampaign.objects.filter(name=name).exists():
+    #     #     raise forms.ValidationError("A campaign with this name already exists.")
+    #     return name
+
+
 
 # --- Contact Upload Form (for Marketing Campaigns) ---
 class ContactUploadForm(forms.Form):
@@ -119,14 +138,17 @@ class ContactUploadForm(forms.Form):
 
 # --- Bot Response Form (Optional, if using dedicated views instead of Admin) ---
 class BotResponseForm(forms.ModelForm):
-    """Form for creating/editing chatbot responses."""
+    """Form for creating/editing chatbot responses using custom CSS classes."""
     class Meta:
         model = BotResponse
         fields = ['trigger_phrase', 'response_text', 'is_active']
         widgets = {
-            'trigger_phrase': forms.TextInput(attrs={'class': 'form-control'}),
-            'response_text': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            # Use custom 'form-input' class
+            'trigger_phrase': forms.TextInput(attrs={'class': 'form-input'}),
+            # Use custom 'form-input' class for textarea
+            'response_text': forms.Textarea(attrs={'rows': 4, 'class': 'form-input'}),
+            # Use custom 'form-checkbox-input' class
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox-input'}),
         }
         help_texts = {
             'trigger_phrase': 'The exact phrase (case-insensitive) the user must type to trigger this response.',
@@ -134,15 +156,26 @@ class BotResponseForm(forms.ModelForm):
             'is_active': 'Enable this response.',
         }
 
+    # Optional: Add custom validation if needed
+    # def clean_trigger_phrase(self):
+    #     data = self.cleaned_data['trigger_phrase']
+    #     # Example validation: ensure it's not empty after stripping whitespace
+    #     if not data.strip():
+    #         raise forms.ValidationError("Trigger phrase cannot be empty.")
+    #     return data
+
+
 # --- Auto-Reply Settings Form (Optional, if using dedicated views instead of Admin) ---
-class AutoReplyForm(forms.ModelForm):
-    """Form for managing the out-of-office auto-reply message."""
+class AutoReplySettingsForm(forms.ModelForm):
+    """Form for managing the out-of-office auto-reply message using custom CSS classes."""
     class Meta:
-        model = AutoReply
+        model = AutoReply # Ensure this model exists and is imported
         fields = ['message_text', 'is_active']
         widgets = {
-            'message_text': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+             # Use custom 'form-input' class for textarea
+            'message_text': forms.Textarea(attrs={'rows': 4, 'class': 'form-input'}),
+             # Use custom 'form-checkbox-input' class
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox-input'}),
         }
         help_texts = {
             'message_text': 'The message sent when staff are unavailable (availability logic defined elsewhere).',
@@ -152,6 +185,6 @@ class AutoReplyForm(forms.ModelForm):
     # Override save method or use signals if implementing singleton pattern
     # def save(self, commit=True):
     #     # Ensure only one instance exists
-    #     self.instance.pk = 1 # Assuming singleton with pk=1
-    #     return super().save(commit=commit)
+    #     # self.instance.pk = 1 # Assuming singleton with pk=1
+    #     # return super().save(commit=commit)
 

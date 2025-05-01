@@ -1,0 +1,83 @@
+{# whatsapp_app/templates/whatsapp_app/bot_list.html #}
+{% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% load static %}
+
+{% block whatsapp_content %}
+<div class="whatsapp-list-container"> {# Custom container for list pages #}
+    <div class="list-header">
+        <h3 class="page-title">Bot Responses</h3>
+        {# Button to add a new response #}
+        {# Ensure this URL name matches your urls.py #}
+        <a href="{% url 'whatsapp_app:bot_response_create' %}" class="custom-button button-primary">
+             <i class="fas fa-plus"></i> Add New Response
+        </a>
+    </div>
+    <p class="page-description">Manage automated responses triggered by specific customer phrases.</p>
+    <hr class="divider">
+
+    {# Display general messages (like success on delete) #}
+    {% if messages %}
+    <div class="whatsapp-messages-container mb-4"> {# Use existing message container #}
+        {% for message in messages %}
+        <div class="message-item message-{{ message.tags|default:'info' }}">
+            {{ message }}
+            <button type="button" class="message-close-btn" onclick="this.parentElement.style.display='none'">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# --- List/Table of Bot Responses --- #}
+    {% if bot_responses %} {# Use the context variable name from the view #}
+    <div class="table-container"> {# Use existing table container style #}
+        <table class="custom-table"> {# Use existing table style #}
+            <thead>
+                <tr>
+                    <th>Trigger Phrase</th>
+                    <th>Response Text (Preview)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for response in bot_responses %} {# Loop through the context variable #}
+                <tr>
+                    <td data-label="Trigger Phrase"><code>{{ response.trigger_phrase }}</code></td>
+                    <td data-label="Response Preview">{{ response.response_text|truncatewords:15 }}</td>
+                    <td data-label="Status">
+                        {% if response.is_active %}
+                            <span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span>
+                        {% else %}
+                             <span class="status-badge status-inactive"><i class="fas fa-times-circle"></i> Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Actions" class="action-buttons"> {# Class for styling buttons #}
+                        {# Edit Button - Ensure URL name matches urls.py #}
+                        <a href="{% url 'whatsapp_app:bot_response_edit' response.pk %}" class="custom-button button-outline-secondary button-sm" title="Edit">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {# Delete Button - Ensure URL name matches urls.py #}
+                        <form method="post" action="{% url 'whatsapp_app:bot_response_delete' response.pk %}" style="display: inline-block; margin-left: 5px;" onsubmit="return confirm('Are you sure you want to delete the response for trigger: \'{{ response.trigger_phrase|escapejs }}\'?');">
+                             {% csrf_token %}
+                            <button type="submit" class="custom-button button-danger button-sm" title="Delete">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="message-item message-info"> {# Use existing message style #}
+        No bot responses have been created yet.
+        {# Ensure URL name matches urls.py #}
+        <a href="{% url 'whatsapp_app:bot_response_create' %}" class="message-link">Add the first one?</a>
+    </div>
+    {% endif %}
+
+    {# Optional: Add Pagination if needed for many responses #}
+
+</div> {# End whatsapp-list-container #}
+{% endblock %}

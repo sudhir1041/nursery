@@ -1,109 +1,176 @@
-{# whatsapp_app/templates/whatsapp_app/base_whatsapp.html #}
-{# This template extends your main project's base template. #}
-{# *** IMPORTANT: Replace 'base.html' with the actual path to your main project's base template *** #}
+{# whatsapp_app/templates/whatsapp/base_whatsapp.html #}
 {% extends "base.html" %}
-{% load static %} {# Load static tag library #}
+{% load static %}
 
-{% block title %}WhatsApp - {{ block.super }}{% endblock title %} {# Append to the existing title #}
+{% block title %}WhatsApp - {{ block.super }}{% endblock title %}
 
 {# --- ADD CSS/FONTS SPECIFIC TO WHATSAPP SECTION --- #}
-{% block extra_head %} {# Use a block often available in base templates for head additions #}
-    {{ block.super }} {# Include anything from the parent block #}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+{% block extra_head %}
+    {{ block.super }} {# Include CSS/links from base.html #}
+    {# Google Material Icons (Potentially needed by child templates like settings) #}
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    {# Link to your custom CSS for WhatsApp section styling #}
     <link rel="stylesheet" href="{% static 'whatsapp_app/css/whatsapp_style.css' %}">
-
-    {# Example: Link to Bootstrap Icons if not already in base.html #}
-    {# <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"> #}
 {% endblock extra_head %}
 
 
-{% block content %} {# Override the main content block from your base template #}
-<div class="container-fluid mt-3 mb-5"> {# Use container-fluid for full width, adjust as needed #}
+{% block content %} {# This replaces the content block in base.html #}
+<div class="whatsapp-section-container"> {# Use a container class for specific styling #}
 
-    {# --- WhatsApp Section Header & Navigation --- #}
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+    {# --- WhatsApp Section Header --- #}
+    <div class="whatsapp-header">
         <h2 class="h4">WhatsApp Integration</h2>
-        {# Optional: Add breadcrumbs here if your base template supports it #}
+        {# Optional: Add breadcrumbs here if needed #}
     </div>
 
-    {# Sub-navigation specific to the WhatsApp section #}
-    <ul class="nav nav-pills mb-4">
-        <li class="nav-item">
-            {# Check if the current URL name matches the dashboard URL #}
-            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
-               href="{% url 'whatsapp_app:whatsapp_index' %}">
-               <i class="bi bi-speedometer2 me-1"></i> Dashboard {# Example using Bootstrap Icons #}
-            </a>
-        </li>
-        <li class="nav-item">
-             {# Check if the current URL name is related to chats #}
-            <a class="nav-link {% if request.resolver_match.url_name == 'chat_list' or request.resolver_match.url_name == 'chat_detail' %}active{% endif %}"
-               href="{% url 'whatsapp_app:chat_list' %}">
-               <i class="bi bi-chat-dots me-1"></i> Chats
-            </a>
-        </li>
-        <li class="nav-item dropdown">
-             {# Check if the current view name contains 'marketing' #}
-             <a class="nav-link dropdown-toggle {% if 'marketing' in request.resolver_match.view_name|stringformat:"s" %}active{% endif %}"
-                data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="bi bi-megaphone me-1"></i> Marketing
-             </a>
-             <ul class="dropdown-menu">
-               <li><a class="dropdown-item" href="{% url 'whatsapp_app:campaign_list' %}">Campaigns</a></li>
-               <li><a class="dropdown-item" href="{% url 'whatsapp_app:template_list' %}">Templates</a></li>
-             </ul>
-        </li>
-         <li class="nav-item">
-             {# Check if the current URL name matches the settings URL #}
-            <a class="nav-link {% if request.resolver_match.url_name == 'settings' %}active{% endif %}"
-               href="{% url 'whatsapp_app:settings' %}">
-               <i class="bi bi-gear me-1"></i> Settings
-            </a>
-        </li>
-        {# Add links for Bots/AutoReply management views if you create them #}
-        {# Example:
-        <li class="nav-item">
-            <a class="nav-link {% if 'bot_' in request.resolver_match.url_name %}active{% endif %}"
-               href="{% url 'whatsapp_app:bot_list' %}">
-               <i class="bi bi-robot me-1"></i> Bots
-            </a>
-        </li>
-         <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'autoreply_settings' %}active{% endif %}"
-               href="{% url 'whatsapp_app:autoreply_settings' %}">
-               <i class="bi bi-reply me-1"></i> Auto-Reply
-            </a>
-        </li>
-        #}
-    </ul>
+    {# --- WhatsApp Sub-Navigation (Styled via whatsapp_style.css) --- #}
+    {% url 'whatsapp_app:whatsapp_index' as whatsapp_index_url %}
+    {% url 'whatsapp_app:chat_list' as chat_list_url %}
+    {% url 'whatsapp_app:campaign_list' as campaign_list_url %}
+    {% url 'whatsapp_app:template_list' as template_list_url %}
+    {% url 'whatsapp_app:settings' as settings_url %}
+    {% url 'whatsapp_app:bot_list' as bot_list_url %}
+    {% url 'whatsapp_app:autoreply_settings' as autoreply_settings_url %}
 
-    {# --- Display Django Messages --- #}
+    <nav class="whatsapp-subnav">
+        <ul>
+            {# Dashboard Link #}
+            <li>
+                <a href="{{ whatsapp_index_url }}" class="subnav-link {% if request.resolver_match.app_name == 'whatsapp_app' and request.resolver_match.url_name == 'whatsapp_index' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt fa-fw me-1"></i> Dashboard {# Using Font Awesome like base.html #}
+                </a>
+            </li>
+
+            {# Chats Link #}
+            <li>
+                <a href="{{ chat_list_url }}" class="subnav-link {% if request.resolver_match.app_name == 'whatsapp_app' and request.resolver_match.url_name|slice:':5' == 'chat_' %}active{% endif %}">
+                    <i class="fas fa-comments fa-fw me-1"></i> Chats
+                </a>
+            </li>
+
+            {# Marketing Dropdown #}
+            {% with marketing_urls='campaign_list template_list' %}
+            <li class="whatsapp-dropdown"> {# Custom dropdown class #}
+                <a href="#" class="subnav-link whatsapp-dropdown-toggle {% if request.resolver_match.app_name == 'whatsapp_app' and request.resolver_match.url_name in marketing_urls %}active{% endif %}" onclick="toggleWhatsAppDropdown(event, 'marketing-dropdown')">
+                    <i class="fas fa-bullhorn fa-fw me-1"></i> Marketing <i class="fas fa-caret-down dropdown-caret"></i>
+                </a>
+                <ul class="whatsapp-dropdown-menu" id="marketing-dropdown">
+                    <li><a class="whatsapp-dropdown-item {% if request.resolver_match.url_name == 'campaign_list' %}active{% endif %}" href="{{ campaign_list_url }}">Campaigns</a></li>
+                    <li><a class="whatsapp-dropdown-item {% if request.resolver_match.url_name == 'template_list' %}active{% endif %}" href="{{ template_list_url }}">Templates</a></li>
+                    {# Add other marketing links here #}
+                </ul>
+            </li>
+            {% endwith %}
+
+            {# Bots Link #}
+            <li>
+                <a href="{{ bot_list_url }}" class="subnav-link {% if request.resolver_match.app_name == 'whatsapp_app' and request.resolver_match.url_name|slice:':4' == 'bot_' %}active{% endif %}">
+                    <i class="fas fa-robot fa-fw me-1"></i> Bots
+                </a>
+            </li>
+
+            {# Auto-Reply Link #}
+            <li>
+                <a href="{{ autoreply_settings_url }}" class="subnav-link {% if request.resolver_match.app_name == 'whatsapp_app' and request.resolver_match.url_name == 'autoreply_settings' %}active{% endif %}">
+                    <i class="fas fa-reply fa-fw me-1"></i> Auto-Reply
+                </a>
+            </li>
+
+             {# Settings Link #}
+            <li>
+                <a href="{{ settings_url }}" class="subnav-link {% if request.resolver_match.app_name == 'whatsapp_app' and request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <i class="fas fa-cog fa-fw me-1"></i> Settings
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    {# --- Display Django Messages (Styled via whatsapp_style.css) --- #}
     {% if messages %}
+    <div class="whatsapp-messages-container">
         {% for message in messages %}
-            {# Use Bootstrap alert classes based on message tags (e.g., success, error, warning, info) #}
-            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {# Custom message item classes based on tags #}
+            <div class="message-item message-{{ message.tags|default:'info' }}">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="message-close-btn" onclick="this.parentElement.style.display='none'">&times;</button> {# Simple close button #}
             </div>
         {% endfor %}
+    </div>
     {% endif %}
 
     {# --- Main Content Area for Specific WhatsApp Pages --- #}
-    {# Child templates will override this block #}
-    {% block whatsapp_content %}
-        <p>Welcome to the WhatsApp Integration section.</p>
-    {% endblock whatsapp_content %}
+    <div class="whatsapp-page-content">
+        {% block whatsapp_content %}
+            {# Default content if no child template overrides this block #}
+            <div class="default-card"> {# Use a custom card style if needed #}
+                <p>Welcome to the WhatsApp Integration section. Select an option from the navigation above.</p>
+            </div>
+        {% endblock whatsapp_content %}
+    </div>
 
-</div> {# End container #}
+</div> {# End whatsapp-section-container #}
 {% endblock content %}
 
-{% block extra_js %} {# Allow child templates to add specific JavaScript #}
-    {{ block.super }} {# Include JS from the base template #}
-    {# Add any JavaScript needed across all WhatsApp pages here #}
-{% endblock extra_js %}
 
-{# extra_css block removed as CSS is now linked in extra_head #}
+{% block extra_scripts %} {# Use the block name from your base.html #}
+    {{ block.super }} {# Include JS from base.html #}
 
+    {# Custom JavaScript for WhatsApp Section (e.g., dropdown) #}
+    <script>
+        /**
+         * Toggles the visibility of a custom dropdown menu.
+         * Closes other open dropdowns in this section.
+         * @param {Event} event - The click event.
+         * @param {string} dropdownId - The ID of the dropdown menu UL element.
+         */
+        function toggleWhatsAppDropdown(event, dropdownId) {
+            event.preventDefault(); // Prevent default link behavior
+            event.stopPropagation(); // Prevent event bubbling up
+
+            const targetDropdown = document.getElementById(dropdownId);
+            if (!targetDropdown) return;
+
+            // Close all other dropdowns first
+            const allDropdowns = document.querySelectorAll('.whatsapp-dropdown-menu');
+            allDropdowns.forEach(menu => {
+                if (menu.id !== dropdownId) {
+                    menu.style.display = 'none';
+                    // Optional: remove active class from toggle
+                     menu.previousElementSibling?.classList.remove('open');
+                }
+            });
+
+            // Toggle the target dropdown
+            const isVisible = targetDropdown.style.display === 'block';
+            targetDropdown.style.display = isVisible ? 'none' : 'block';
+             // Optional: add/remove class on toggle link for styling
+            event.currentTarget.classList.toggle('open', !isVisible);
+        }
+
+        // Close dropdowns if clicking outside
+        document.addEventListener('click', function(event) {
+            const openDropdowns = document.querySelectorAll('.whatsapp-dropdown-menu');
+            let clickedInsideDropdown = false;
+            openDropdowns.forEach(menu => {
+                 if (menu.contains(event.target) || menu.previousElementSibling?.contains(event.target)) {
+                     clickedInsideDropdown = true;
+                 }
+            });
+
+            if (!clickedInsideDropdown) {
+                openDropdowns.forEach(menu => {
+                    menu.style.display = 'none';
+                    menu.previousElementSibling?.classList.remove('open');
+                });
+            }
+        });
+
+        // Add any other JS needed for the WhatsApp section here
+        // e.g., the copyToClipboard function from settings_form.html if needed,
+        // potentially adapted to use custom classes instead of btn-success/btn-danger.
+
+    </script>
+
+    {# Example: Include a WhatsApp specific JS file #}
+    {# <script src="{% static 'whatsapp_app/js/whatsapp_scripts.js' %}"></script> #}
+{% endblock extra_scripts %}
