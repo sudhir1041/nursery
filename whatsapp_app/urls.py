@@ -38,7 +38,7 @@ urlpatterns = [
     # URL: /whatsapp/marketing/campaigns/<campaign_id>/upload/ (POST)
     path('marketing/campaigns/<int:pk>/upload/', views.upload_contacts_for_campaign, name='campaign_upload_contacts'),
     # URL: /whatsapp/marketing/campaigns/<campaign_id>/schedule/ (POST)
-    path('marketing/campaigns/<int:pk>/schedule/', views.schedule_campaign, name='campaign_schedule'),
+    path('marketing/campaigns/<int:pk>/schedule/', views.schedule_campaign, name='schedule_campaign'),
     # URL: /whatsapp/marketing/campaigns/<campaign_id>/cancel/ (POST)
     path('marketing/campaigns/<int:pk>/cancel/', views.cancel_campaign, name='campaign_cancel'),
 
