@@ -6,41 +6,39 @@
 {% comment %} --- Determine badge class, icon, and text based on status --- {% endcomment %}
 {% with status_lower=status|lower|default:"unknown" %} {# Convert status to lowercase once #}
     {% if status_lower == 'draft' %}
-        {% with badge_class="status-draft" icon_class="fas fa-pencil-alt" text="Draft" %}
+        {% with badge_class="status-draft" icon_class="fas fa-pencil-alt" text="Draft" %}{% endwith %}
     {% elif status_lower == 'pending' %}
-        {% with badge_class="status-pending" icon_class="fas fa-clock" text="Pending" %}
+        {% with badge_class="status-pending" icon_class="fas fa-clock" text="Pending" %}{% endwith %}
     {% elif status_lower == 'scheduled' %}
-        {% with badge_class="status-scheduled" icon_class="fas fa-calendar-alt" text="Scheduled" %}
+        {% with badge_class="status-scheduled" icon_class="fas fa-calendar-alt" text="Scheduled" %}{% endwith %}
     {% elif status_lower == 'sending' or status_lower == 'processing' %}
-        {% with badge_class="status-sending" icon_class="fas fa-paper-plane" text="Sending" %}
+        {% with badge_class="status-sending" icon_class="fas fa-paper-plane" text="Sending" %}{% endwith %}
     {% elif status_lower == 'completed' or status_lower == 'sent' %}
-        {% with badge_class="status-completed" icon_class="fas fa-check-double" text="Sent" %}
+        {% with badge_class="status-completed" icon_class="fas fa-check-double" text="Sent" %}{% endwith %}
     {% elif status_lower == 'delivered' %}
-        {% with badge_class="status-delivered" icon_class="fas fa-check-double" text="Delivered" %}
+        {% with badge_class="status-delivered" icon_class="fas fa-check-double" text="Delivered" %}{% endwith %} {# Needs status-delivered class in CSS if distinct style needed #}
     {% elif status_lower == 'read' %}
-        {% with badge_class="status-read" icon_class="fas fa-eye" text="Read" %}
+        {% with badge_class="status-read" icon_class="fas fa-eye" text="Read" %}{% endwith %} {# Needs status-read class in CSS if distinct style needed #}
     {% elif status_lower == 'failed' or status_lower == 'error' %}
-        {% with badge_class="status-failed" icon_class="fas fa-exclamation-circle" text="Failed" %}
+        {% with badge_class="status-failed" icon_class="fas fa-exclamation-circle" text="Failed" %}{% endwith %}
     {% elif status_lower == 'cancelled' %}
-        {% with badge_class="status-cancelled" icon_class="fas fa-ban" text="Cancelled" %}
+        {% with badge_class="status-cancelled" icon_class="fas fa-ban" text="Cancelled" %}{% endwith %} {# Needs status-cancelled class in CSS #}
     {% elif status_lower == 'paused' %}
-        {% with badge_class="status-paused" icon_class="fas fa-pause-circle" text="Paused" %}
+        {% with badge_class="status-paused" icon_class="fas fa-pause-circle" text="Paused" %}{% endwith %}
     {% elif status_lower == 'active' %} {# For Bot/AutoReply status #}
-        {% with badge_class="status-active" icon_class="fas fa-check-circle" text="Active" %}
+        {% with badge_class="status-active" icon_class="fas fa-check-circle" text="Active" %}{% endwith %}
     {% elif status_lower == 'inactive' %} {# For Bot/AutoReply status #}
-        {% with badge_class="status-inactive" icon_class="fas fa-times-circle" text="Inactive" %}
+        {% with badge_class="status-inactive" icon_class="fas fa-times-circle" text="Inactive" %}{% endwith %}
     {% else %} {# Fallback #}
-        {% with badge_class="status-unknown" icon_class="fas fa-question-circle" text=status|default:"Unknown" %}
+        {% with badge_class="status-unknown" icon_class="fas fa-question-circle" text=status|default:"Unknown" %}{% endwith %}
     {% endif %}
 
-    {# --- Render the badge using the variables set above --- #}
+    {# --- Render the badge using the variables set above (THIS SPAN IS NOW OUTSIDE THE IF/ELIF/ELSE) --- #}
     <span class="status-badge {{ badge_class }}"
           {# Add a tooltip, especially useful for scheduled status #}
           title="{{ text }}{% if status_lower == 'scheduled' and scheduled_time %} (Scheduled for {{ scheduled_time|date:'Y-m-d H:i' }}){% endif %}">
         {% if icon_class %}<i class="{{ icon_class }}"></i>{% endif %} {# Display icon #}
         {{ text|default:status|default:"Unknown" }}
     </span>
-
-    {% endwith %} {# Close the corresponding with block #}
 
 {% endwith %} {# Close the outer with block for status_lower #}
