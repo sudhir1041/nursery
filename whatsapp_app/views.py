@@ -438,7 +438,7 @@ def bot_response_list(request):
     """ Lists all configured bot responses. """
     bot_responses = BotResponse.objects.order_by('trigger_phrase')
     context = {'bot_responses': bot_responses}
-    return render(request, 'whatsapp_app/bot_list.html', context)
+    return render(request, 'whatsapp/bot/bot_list.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_create(request):
