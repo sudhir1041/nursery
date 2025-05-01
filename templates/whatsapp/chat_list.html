@@ -1,5 +1,5 @@
 {# whatsapp_app/templates/whatsapp_app/chat_list.html #}
-{% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% extends "whatsapp_app/base_whatsapp.html" %} {# Corrected path assuming base is in app #}
 {% load static %}
 
 {% block whatsapp_content %} {# Override the whatsapp_content block #}
@@ -24,21 +24,24 @@
 
     {# --- List of Chats --- #}
     <div class="chat-list"> {# Custom list container #}
-        {% for contact in contacts %}
+        {% for contact in contacts %} {# Loop through contacts from view context #}
         {# Link each item to the chat detail view for that contact #}
         <a href="{% url 'whatsapp_app:chat_detail' contact.wa_id %}" class="chat-list-item"> {# Custom list item class #}
             <div class="chat-item-header">
                 {# Display contact name or fallback to WA ID #}
                 <h5 class="chat-contact-name">{{ contact.name|default:contact.wa_id }}</h5>
-                {# Display time since last message #}
+                {# Display time since last message (uses annotation from view) #}
                 <small class="chat-last-time">
                     {% if contact.last_message_time %}
                         {{ contact.last_message_time|timesince }} ago
+                    {% else %}
+                        {# Should not happen due to view filter, but good fallback #}
+                        Never
                     {% endif %}
                 </small>
             </div>
             {# Display last message preview #}
-            {# Note: Accessing messages.last here can be inefficient on large datasets. #}
+            {# WARNING: Accessing messages.last here can be inefficient on large datasets. #}
             {# Consider optimizing by storing last message snippet on Contact model. #}
             {% with last_message=contact.messages.last %}
                 <p class="chat-last-message">
@@ -48,6 +51,7 @@
                         {% else %}
                             <i class="fas fa-arrow-down chat-direction-icon" title="Incoming"></i>
                         {% endif %}
+                        {# Display text or indicate media/template #}
                         {{ last_message.text_content|default:"(Media/Template)"|striptags|truncatechars:80 }}
                     {% else %}
                         <span class="no-messages-text">(No messages yet)</span>
@@ -77,8 +81,9 @@
     </div>
 
     {# --- Pagination --- #}
-    {# Example using custom pagination styling #}
-    {% if page_obj.has_other_pages %} {# Assuming context variable is page_obj #}
+    {# Include pagination controls if using pagination in the view #}
+    {# Make sure your view passes 'page_obj' to the context if using pagination #}
+    {% if page_obj.has_other_pages %}
       <nav aria-label="Chat list navigation" class="pagination-container">
         <ul class="pagination-custom"> {# Custom pagination class #}
           {% if page_obj.has_previous %}
