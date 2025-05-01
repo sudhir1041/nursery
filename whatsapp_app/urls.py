@@ -41,10 +41,13 @@ urlpatterns = [
     path('marketing/campaigns/<int:pk>/schedule/', views.schedule_campaign, name='campaign_schedule'),
     # URL: /whatsapp/marketing/campaigns/<campaign_id>/cancel/ (POST)
     path('marketing/campaigns/<int:pk>/cancel/', views.cancel_campaign, name='campaign_cancel'),
+
+    path('marketing/campaigns/<int:pk>/delete/', views.campaign_delete, name='campaign_delete'),
     # URL: /whatsapp/marketing/templates/
     path('marketing/templates/', views.template_list, name='template_list'),
     # URL: /whatsapp/marketing/templates/sync/ (POST)
     path('marketing/templates/sync/', views.sync_whatsapp_templates, name='sync_templates'),
+    
 
     # --- Bot/Auto-Reply Management (Optional - Add if using dedicated views) ---
     path('bots/', views.bot_response_list, name='bot_list'),

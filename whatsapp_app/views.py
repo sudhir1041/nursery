@@ -823,6 +823,31 @@ def cancel_campaign(request, pk):
 
     return redirect('whatsapp_app:campaign_detail', pk=campaign.pk)
 
+@user_passes_test(is_staff_user)
+@require_POST # Ensures this view only accepts POST requests
+def campaign_delete(request, pk):
+    """Deletes a specific marketing campaign."""
+    campaign = get_object_or_404(MarketingCampaign, pk=pk)
+    campaign_name = campaign.name # Get name before deleting
+
+    # Optional: Add checks here to prevent deletion of active/sent campaigns if needed
+    # if campaign.status not in ['DRAFT', 'FAILED', 'CANCELLED']:
+    #     messages.error(request, f"Cannot delete campaign '{campaign_name}' because it is currently {campaign.status.lower()}.")
+    #     return redirect('whatsapp_app:campaign_list')
+
+    try:
+        campaign.delete()
+        # Note: Consider what should happen to associated CampaignContact records.
+        # By default, they might cascade delete if ForeignKey has on_delete=models.CASCADE.
+        # If you want to keep contacts but remove them from the campaign, handle that logic here.
+        messages.success(request, f"Campaign '{campaign_name}' deleted successfully.")
+        logger.info(f"Marketing campaign {pk} ('{campaign_name}') deleted by user {request.user.username}")
+    except Exception as e:
+        logger.exception(f"Error deleting marketing campaign {pk}: {e}") # Use logger.exception
+        messages.error(request, "An error occurred while deleting the campaign.")
+
+    # Redirect back to the list view in either case (success or error)
+    return redirect('whatsapp_app:campaign_list')
 
 @user_passes_test(is_staff_user)
 def template_list(request):
