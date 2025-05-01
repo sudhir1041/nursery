@@ -47,7 +47,7 @@
                     <td data-label="Template">{{ campaign.template.name|default:"N/A" }}</td>
                     <td data-label="Status">
                          {# Use the status badge partial #}
-                         {% include "whatsapp_app/partials/custom_status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
+                         {% include "whatsapp/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
                     </td>
                     <td data-label="Created">{{ campaign.created_at|date:"Y-m-d H:i" }}</td>
                     <td data-label="Scheduled/Sent">
