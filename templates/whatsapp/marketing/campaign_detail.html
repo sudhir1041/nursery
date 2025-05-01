@@ -10,7 +10,7 @@
         <div class="detail-title-status">
             <h3 class="page-title">{{ campaign.name }}</h3>
              {# Use the status badge partial #}
-            {% include "whatsapp/partials/custom_status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
+            {% include "whatsapp/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
         </div>
         <div class="detail-actions">
             {# Placeholder for primary actions like Schedule/Send/Pause based on status #}
