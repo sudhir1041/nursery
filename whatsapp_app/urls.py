@@ -16,7 +16,7 @@ urlpatterns = [
 
     # --- Webhook ---
     # URL: /whatsapp/webhook/ (Needs to match the URL given to Meta)
-    path('webhook/receive-kVusV/', views.whatsapp_webhook, name='webhook'),
+    path('webhook/receive-kVusV/', views.webhook_handler, name='webhook'),
 
     # --- Chat Interface ---
     # URL: /whatsapp/chats/

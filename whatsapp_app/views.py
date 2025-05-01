@@ -1,5 +1,6 @@
 # views.py (within your whatsapp_app)
 
+# --- Django Imports ---
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, Http404
 from django.views.decorators.csrf import csrf_exempt
@@ -11,13 +12,18 @@ from django.db.models import Count, Q, Max
 from django.contrib.auth.decorators import login_required, user_passes_test # Or custom permission decorators
 from django.contrib import messages # Use Django's messaging framework
 from django.conf import settings as django_settings # For project level settings if needed
+from django.urls import reverse
+
+# --- Standard Library Imports ---
 import json
 import csv
 import io
 import logging
-from django.urls import reverse
-import uuid # Import uuid
+import uuid # For webhook token generation if needed
+import hmac # For signature verification
+import hashlib # For signature verification
 
+# --- App Imports ---
 # Models from this app
 from .models import (
     Contact, ChatMessage, WhatsAppSettings, BotResponse, AutoReply,
@@ -28,54 +34,68 @@ from .forms import (
     WhatsAppSettingsForm, ManualMessageForm, MarketingCampaignForm,
     ContactUploadForm , BotResponseForm, AutoReplySettingsForm # Ensure ManualMessageForm is defined
 )
-# Utilities from this app
+# Utilities from this app (Assume these exist and handle API/parsing logic)
 from .utils import (
     send_whatsapp_message, parse_incoming_whatsapp_message,
-    fetch_whatsapp_templates_from_api, get_active_whatsapp_settings
-    # Add verify_whatsapp_signature if implementing webhook security
+    fetch_whatsapp_templates_from_api, get_active_whatsapp_settings,
+    verify_whatsapp_signature # Add this utility if implementing signature verification
 )
-# Celery tasks (assuming they are defined in tasks.py)
+
+# --- Celery (Optional Background Tasks) ---
 try:
     from .tasks import send_bulk_campaign_messages_task
+    # from .tasks import process_uploaded_contacts_task # If using background CSV processing
     CELERY_ENABLED = True
 except ImportError:
     CELERY_ENABLED = False
+    # Define dummy task functions if Celery is not installed/enabled
     def send_bulk_campaign_messages_task(*args, **kwargs):
         logger.error("Celery not configured. Cannot run background tasks.")
         raise NotImplementedError("Celery is not enabled or tasks are not defined.")
 
+# --- Logger Setup ---
 logger = logging.getLogger(__name__)
 
 # --- Helper: Check if user is admin/staff ---
 def is_staff_user(user):
     """ Checks if the user is authenticated and has staff privileges. """
     # Implement your actual permission logic here
-    # This is a basic example, adjust as needed for your user roles/permissions model
     return user.is_authenticated and user.is_staff
 
-# --- Dashboard ---
+# ==============================================================================
+# Dashboard View
+# ==============================================================================
 @user_passes_test(is_staff_user)
 def dashboard(request):
     """ Displays overview statistics related to WhatsApp integration. """
     today = timezone.now().date()
     stats = {}
     try:
+        # Basic Counts
         stats['total_contacts'] = Contact.objects.count()
         stats['active_chats_count'] = Contact.objects.filter(messages__isnull=False).distinct().count()
+
+        # Message Stats for Today
         messages_today_qs = ChatMessage.objects.filter(timestamp__date=today)
         stats['messages_today'] = messages_today_qs.count()
         stats['incoming_today'] = messages_today_qs.filter(direction='IN').count()
         stats['outgoing_today'] = messages_today_qs.filter(direction='OUT').count()
+
+        # Outgoing Delivery Stats (Consider performance implications)
         outgoing_messages = ChatMessage.objects.filter(direction='OUT')
         total_outgoing = outgoing_messages.count()
         delivered_count = outgoing_messages.filter(status__in=['DELIVERED', 'READ']).count()
         failed_count = outgoing_messages.filter(status='FAILED').count()
         stats['success_rate'] = (delivered_count / total_outgoing * 100) if total_outgoing > 0 else 0
         stats['failed_count'] = failed_count
+
+        # Recent Campaigns
         stats['recent_campaigns'] = MarketingCampaign.objects.select_related('template').order_by('-created_at')[:5]
+
     except Exception as e:
-        logger.error(f"Error fetching dashboard stats: {e}")
+        logger.exception(f"Error fetching dashboard stats: {e}") # Log full traceback
         messages.error(request, "Could not load all dashboard statistics.")
+        # Provide default values
         stats.setdefault('total_contacts', 0)
         stats.setdefault('active_chats_count', 0)
         stats.setdefault('messages_today', 0)
@@ -84,16 +104,17 @@ def dashboard(request):
         stats.setdefault('success_rate', 0)
         stats.setdefault('failed_count', 0)
         stats.setdefault('recent_campaigns', [])
+
     context = stats
-    # Corrected template path
-    return render(request, 'whatsapp/dashboard.html', context)
+    return render(request, 'whatsapp_app/dashboard.html', context)
 
-
-# --- Settings ---
+# ==============================================================================
+# Settings View
+# ==============================================================================
 @user_passes_test(is_staff_user)
 def whatsapp_settings_view(request):
-    """ Manages WhatsApp Cloud API settings. """
-    settings_name = "NurseryProjectDefault" # Define a default name or get from config
+    """ Manages WhatsApp Cloud API connection settings. """
+    settings_name = "NurseryProjectDefault"
     settings_instance, created = WhatsAppSettings.objects.get_or_create(
         account_name=settings_name,
         defaults={'webhook_verify_token': str(uuid.uuid4())}
@@ -118,7 +139,6 @@ def whatsapp_settings_view(request):
     full_webhook_url = None
     if settings_instance:
         try:
-            # Ensure 'webhook_handler' URL name exists in whatsapp_app/urls.py
             webhook_path = reverse('whatsapp_app:webhook_handler')
             full_webhook_url = request.build_absolute_uri(webhook_path)
         except Exception as e:
@@ -129,68 +149,95 @@ def whatsapp_settings_view(request):
         'settings': settings_instance,
         'full_webhook_url': full_webhook_url
     }
-    # Corrected template path
-    return render(request, 'whatsapp/settings_form.html', context)
+    return render(request, 'whatsapp_app/settings_form.html', context)
 
 
-# --- Webhook Handler ---
-@csrf_exempt
-def whatsapp_webhook(request):
+# ==============================================================================
+# Webhook Handler
+# ==============================================================================
+@csrf_exempt # WhatsApp doesn't send CSRF tokens
+def webhook_handler(request):
     """ Handles incoming notifications (messages, status updates) from WhatsApp. """
-    # 1. Verify Signature (Recommended for Production)
-    # Implement signature verification using WA_APP_SECRET from settings
+
+    # 1. Verify Signature (Highly Recommended for Production)
+    # Ensure you have WHATSAPP_APP_SECRET in your Django settings
+    app_secret = getattr(django_settings, 'WHATSAPP_APP_SECRET', None)
+    if app_secret:
+        signature = request.headers.get('X-Hub-Signature-256')
+        if not signature or not verify_whatsapp_signature(request.body, signature, app_secret):
+            logger.warning("Invalid webhook signature received.")
+            return HttpResponseForbidden("Invalid signature.")
+    else:
+        # Only log this warning if not in DEBUG mode, maybe?
+        if not django_settings.DEBUG:
+             logger.warning("WHATSAPP_APP_SECRET not configured. Skipping webhook signature verification (INSECURE).")
 
     # 2. Handle Verification Request (GET)
     if request.method == 'GET':
         verify_token_param = request.GET.get('hub.verify_token')
         challenge = request.GET.get('hub.challenge')
-        try:
-            settings = get_active_whatsapp_settings()
-            expected_token = settings.webhook_verify_token
-            if verify_token_param == expected_token and challenge:
-                logger.info(f"Webhook verification successful for token: {expected_token}")
-                return HttpResponse(challenge, status=200)
-            else:
-                logger.warning(f"Webhook verification failed. Received token: '{verify_token_param}', Expected: '{expected_token}'")
-                return HttpResponseForbidden("Verification token mismatch.")
-        except WhatsAppSettings.DoesNotExist:
-            logger.error("Webhook verification failed: WhatsAppSettings not found.")
-            return HttpResponseForbidden("Configuration error: Settings not found.")
-        except ValueError as e:
-             logger.error(f"Webhook verification failed: Configuration error - {e}")
-             return HttpResponseForbidden(f"Configuration error: {e}")
-        except Exception as e:
-            logger.error(f"Error during webhook GET verification: {e}")
-            return HttpResponseForbidden("Internal server error during verification.")
+        mode = request.GET.get('hub.mode')
+
+        if mode == 'subscribe' and verify_token_param and challenge:
+            try:
+                settings = get_active_whatsapp_settings()
+                expected_token = settings.webhook_verify_token
+                if verify_token_param == expected_token:
+                    logger.info(f"Webhook verification successful. Responding with challenge: {challenge}")
+                    return HttpResponse(challenge, status=200)
+                else:
+                    logger.warning(f"Webhook verification failed. Received token: '{verify_token_param}', Expected: '{expected_token}'")
+                    return HttpResponseForbidden("Verification token mismatch.")
+            except WhatsAppSettings.DoesNotExist:
+                logger.error("Webhook verification failed: WhatsAppSettings not found.")
+                return HttpResponseForbidden("Configuration error: Settings not found.")
+            except ValueError as e: # Catches config errors from get_active_whatsapp_settings
+                 logger.error(f"Webhook verification failed: Configuration error - {e}")
+                 return HttpResponseForbidden(f"Configuration error: {e}")
+            except Exception as e:
+                logger.exception(f"Error during webhook GET verification: {e}")
+                return HttpResponseForbidden("Internal server error during verification.")
+        else:
+             logger.warning(f"Invalid GET verification request parameters received: Mode='{mode}', Token Provided='{bool(verify_token_param)}', Challenge Provided='{bool(challenge)}'")
+             return HttpResponseBadRequest("Invalid verification request.")
+
 
     # 3. Handle Incoming Notifications (POST)
     if request.method == 'POST':
         try:
             payload = json.loads(request.body)
-            # Process the payload (store message, update status, etc.)
+            logger.info(f"Received webhook payload: {json.dumps(payload, indent=2)}") # Log full payload in DEBUG?
+
+            # Process the payload using the utility function
+            # This function should handle saving ChatMessage, updating status, etc.
             processed_data = parse_incoming_whatsapp_message(payload)
 
-            # Trigger Bot/Auto-Reply Logic if an incoming message was processed
+            # Trigger Bot/Auto-Reply Logic ONLY if an incoming message was successfully processed
             if processed_data and processed_data.get('type') == 'incoming_message':
                 message_obj = processed_data.get('message_object')
-                if message_obj:
+                if message_obj and isinstance(message_obj, ChatMessage): # Check if it's a valid ChatMessage object
                     handle_bot_or_autoreply(message_obj) # Call helper
+                else:
+                    logger.warning("parse_incoming_whatsapp_message indicated incoming message but did not return a valid message_object.")
 
-            # Acknowledge receipt to WhatsApp IMMEDIATELY
+            # Acknowledge receipt to WhatsApp IMMEDIATELY (required)
             return HttpResponse(status=200)
+
         except json.JSONDecodeError:
             logger.error("Invalid JSON received in webhook POST request.")
             return HttpResponseBadRequest("Invalid JSON.")
         except Exception as e:
             logger.exception(f"Error processing webhook POST payload: {e}")
-            # Still return 200 OK to WhatsApp to prevent retries
+            # Still return 200 OK to WhatsApp to prevent Meta from resending repeatedly.
             return HttpResponse(status=200)
 
     # Method Not Allowed for other HTTP verbs
     logger.warning(f"Received webhook request with unsupported method: {request.method}")
     return HttpResponse(status=405)
 
-# --- Helper Function for Bots/Auto-Replies ---
+# ==============================================================================
+# Helper Function for Bots/Auto-Replies
+# ==============================================================================
 def handle_bot_or_autoreply(incoming_message: ChatMessage):
     """ Checks and sends bot responses or auto-replies based on incoming message. """
     if not incoming_message or not incoming_message.text_content or incoming_message.direction != 'IN':
@@ -207,6 +254,7 @@ def handle_bot_or_autoreply(incoming_message: ChatMessage):
             last_out_msg = ChatMessage.objects.filter(contact=contact, direction='OUT').order_by('-timestamp').first()
             # Simple loop prevention
             if not last_out_msg or last_out_msg.text_content != bot_response.response_text:
+                # Call utility to send the message
                 send_whatsapp_message(recipient_wa_id=contact.wa_id, message_type='text', text_content=bot_response.response_text)
                 logger.info(f"Sent bot response for trigger '{bot_response.trigger_phrase}' to {contact.wa_id}")
                 bot_responded = True
@@ -214,17 +262,18 @@ def handle_bot_or_autoreply(incoming_message: ChatMessage):
                  logger.info(f"Skipping bot response for '{bot_response.trigger_phrase}' to {contact.wa_id} to prevent potential loop.")
                  bot_responded = True # Still consider handled
     except Exception as e:
-        logger.error(f"Error checking/sending bot response for {contact.wa_id}: {e}")
+        logger.exception(f"Error checking/sending bot response for {contact.wa_id}: {e}") # Log full traceback
 
     # 2. Check for Auto-Reply (Only if no bot response was sent)
     if not bot_responded:
         # <<<--- IMPLEMENT YOUR AGENT AVAILABILITY LOGIC HERE --- >>>
-        # This could check business hours, staff status, etc.
-        agent_available = False # Default to unavailable for example
+        # Example: Check business hours, check if any staff user was recently active in this chat, etc.
+        agent_available = False # Default to unavailable for this example
 
         if not agent_available:
             try:
-                auto_reply_settings = AutoReply.objects.filter(is_active=True).first()
+                # Use get() assuming singleton pk=1, handle DoesNotExist
+                auto_reply_settings = AutoReply.objects.get(pk=1, is_active=True)
                 if auto_reply_settings:
                     last_out_msg = ChatMessage.objects.filter(contact=contact, direction='OUT').order_by('-timestamp').first()
                      # Simple loop prevention
@@ -233,11 +282,15 @@ def handle_bot_or_autoreply(incoming_message: ChatMessage):
                         logger.info(f"Sent auto-reply to {contact.wa_id}")
                     else:
                         logger.info(f"Skipping auto-reply to {contact.wa_id} to prevent potential loop.")
+            except AutoReply.DoesNotExist:
+                 logger.info("Auto-reply is not configured or not active.") # Expected if not set up
             except Exception as e:
-                logger.error(f"Error checking/sending auto-reply for {contact.wa_id}: {e}")
+                logger.exception(f"Error checking/sending auto-reply for {contact.wa_id}: {e}") # Log full traceback
 
 
-# --- Chat List & Detail ---
+# ==============================================================================
+# Chat List & Detail Views
+# ==============================================================================
 @user_passes_test(is_staff_user)
 def chat_list(request):
     """ Displays a list of contacts with recent chat activity. """
@@ -254,8 +307,7 @@ def chat_list(request):
         'contacts': contacts,
         'search_query': search_query,
     }
-    # Corrected template path
-    return render(request, 'whatsapp/chat_list.html', context)
+    return render(request, 'whatsapp_app/chat_list.html', context)
 
 @user_passes_test(is_staff_user)
 def chat_detail(request, wa_id):
@@ -274,10 +326,11 @@ def chat_detail(request, wa_id):
         'form': form,
         'last_message_timestamp': last_message_timestamp_iso,
     }
-    # Corrected template path
-    return render(request, 'whatsapp/chat_detail.html', context)
+    return render(request, 'whatsapp_app/chat_detail.html', context)
 
-# --- AJAX Endpoints for Chat ---
+# ==============================================================================
+# AJAX Endpoints for Chat
+# ==============================================================================
 @user_passes_test(is_staff_user)
 @require_POST
 def send_manual_message_ajax(request):
@@ -291,12 +344,14 @@ def send_manual_message_ajax(request):
     if form.is_valid():
         message_text = form.cleaned_data['text_content']
         try:
+            # Call the utility function to send via API and log the ChatMessage
             message_obj = send_whatsapp_message(
                 recipient_wa_id=contact.wa_id,
                 message_type='text',
                 text_content=message_text
             )
             if message_obj:
+                # Return details of the sent message for immediate UI update
                 return JsonResponse({
                     'status': 'success',
                     'message': { # Return the created message object details
@@ -311,11 +366,13 @@ def send_manual_message_ajax(request):
                     }
                 })
             else:
+                # Error occurred within send_whatsapp_message (should be logged there)
                 return JsonResponse({'status': 'error', 'message': 'Failed to initiate sending message via API.'}, status=500)
         except Exception as e:
-            logger.error(f"Error in send_manual_message_ajax view for {wa_id}: {e}")
+            logger.exception(f"Error in send_manual_message_ajax view for {wa_id}: {e}") # Log full traceback
             return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
     else:
+        # Form validation failed
         logger.warning(f"Manual message form validation failed for {wa_id}: {form.errors.as_json()}")
         return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
@@ -338,11 +395,13 @@ def get_latest_messages_ajax(request):
         if timezone.is_naive(last_timestamp):
             last_timestamp = timezone.make_aware(last_timestamp, timezone.get_default_timezone())
 
+        # Fetch messages strictly newer than the last one the client reported
         new_messages_qs = ChatMessage.objects.filter(
             contact=contact,
             timestamp__gt=last_timestamp
         ).order_by('timestamp')
 
+        # Select only needed fields for efficiency
         new_messages_data = list(new_messages_qs.values(
             'message_id', 'text_content', 'timestamp', 'direction', 'status',
             'media_url', 'message_type', 'template_name'
@@ -353,6 +412,7 @@ def get_latest_messages_ajax(request):
             if isinstance(msg_data.get('timestamp'), timezone.datetime):
                 msg_data['timestamp'] = msg_data['timestamp'].isoformat()
 
+        # Determine the timestamp for the *next* poll
         latest_ts_in_response = new_messages_qs.last().timestamp if new_messages_qs.exists() else last_timestamp
         next_poll_timestamp_iso = latest_ts_in_response.isoformat()
 
@@ -360,23 +420,25 @@ def get_latest_messages_ajax(request):
             'status': 'success',
             'new_messages': new_messages_data,
             'next_poll_timestamp': next_poll_timestamp_iso,
+            # 'updated_statuses': [] # Optional: Add logic to detect status changes
         })
     except Contact.DoesNotExist:
         logger.warning(f"Contact not found during latest messages poll: {wa_id}")
         return JsonResponse({'status': 'error', 'message': 'Contact not found'}, status=404)
     except Exception as e:
-        logger.exception(f"Error fetching latest messages for {wa_id}: {e}") # Log full traceback
+        logger.exception(f"Error fetching latest messages for {wa_id}: {e}")
         return JsonResponse({'status': 'error', 'message': 'Server error fetching messages'}, status=500)
 
 
-# --- Bot Response CRUD Views ---
+# ==============================================================================
+# Bot Response CRUD Views
+# ==============================================================================
 @user_passes_test(is_staff_user)
 def bot_response_list(request):
     """ Lists all configured bot responses. """
     bot_responses = BotResponse.objects.order_by('trigger_phrase')
     context = {'bot_responses': bot_responses}
-    # Corrected template path
-    return render(request, 'whatsapp/bot/bot_list.html', context)
+    return render(request, 'whatsapp_app/bot_list.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_create(request):
@@ -396,8 +458,7 @@ def bot_response_create(request):
     else:
         form = BotResponseForm()
     context = {'form': form, 'action': 'Create'}
-    # Corrected template path
-    return render(request, 'whatsapp/bot/bot_response_form.html', context)
+    return render(request, 'whatsapp_app/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_update(request, pk):
@@ -418,8 +479,7 @@ def bot_response_update(request, pk):
     else:
         form = BotResponseForm(instance=bot_response)
     context = {'form': form, 'bot_response': bot_response, 'action': 'Update'}
-    # Corrected template path
-    return render(request, 'whatsapp/bot/bot_response_form.html', context)
+    return render(request, 'whatsapp_app/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
 @require_POST
@@ -437,7 +497,9 @@ def bot_response_delete(request, pk):
     return redirect('whatsapp_app:bot_list')
 
 
-# --- Auto-Reply View ---
+# ==============================================================================
+# Auto-Reply View
+# ==============================================================================
 @user_passes_test(is_staff_user)
 def autoreply_settings_view(request):
     """ Manages auto-reply settings. """
@@ -457,18 +519,18 @@ def autoreply_settings_view(request):
     else:
         form = AutoReplySettingsForm(instance=settings)
     context = {'form': form, 'settings': settings}
-    # Corrected template path
-    return render(request, 'whatsapp/bot/autoreply_settings.html', context)
+    return render(request, 'whatsapp_app/autoreply_settings.html', context)
 
 
-# --- Marketing Campaign Views ---
+# ==============================================================================
+# Marketing Campaign Views
+# ==============================================================================
 @user_passes_test(is_staff_user)
 def campaign_list(request):
     """ Lists all marketing campaigns. """
     campaigns = MarketingCampaign.objects.select_related('template').order_by('-created_at')
     context = {'campaigns': campaigns}
-    # Corrected template path
-    return render(request, 'whatsapp/marketing/campaign_list.html', context)
+    return render(request, 'whatsapp_app/marketing/campaign_list.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_detail(request, pk):
@@ -489,8 +551,7 @@ def campaign_detail(request, pk):
             stats['failed_pct'] = round(stats['failed'] / base * 100, 1)
     upload_form = ContactUploadForm() if campaign.status == 'DRAFT' else None
     context = { 'campaign': campaign, 'recipients': recipients, 'stats': stats, 'upload_form': upload_form, 'celery_enabled': CELERY_ENABLED, }
-    # Corrected template path
-    return render(request, 'whatsapp/marketing/campaign_detail.html', context)
+    return render(request, 'whatsapp_app/marketing/campaign_detail.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_create(request):
@@ -507,8 +568,7 @@ def campaign_create(request):
         else: messages.error(request, "Please correct the errors highlighted below.")
     else: form = MarketingCampaignForm()
     context = {'form': form, 'action': 'Create'}
-    # Corrected template path
-    return render(request, 'whatsapp/marketing/campaign_form.html', context)
+    return render(request, 'whatsapp_app/marketing/campaign_form.html', context)
 
 @user_passes_test(is_staff_user)
 @require_POST
@@ -642,8 +702,8 @@ def template_list(request):
     """ Displays synced WhatsApp message templates. """
     templates = MarketingTemplate.objects.order_by('name', 'language')
     context = {'templates': templates}
-     # Corrected template path
-    return render(request, 'whatsapp/marketing/template_list.html', context)
+    # Corrected template path
+    return render(request, 'whatsapp_app/marketing/template_list.html', context)
 
 
 @user_passes_test(is_staff_user)
@@ -682,17 +742,8 @@ def sync_whatsapp_templates(request):
 # --- Placeholder views from urls.py (if needed temporarily) ---
 # Note: These should be removed or implemented properly
 
-def whatsapp_index(request):
-    from django.http import HttpResponse
-    return HttpResponse("WhatsApp Dashboard Placeholder")
-
-# Need a view for the webhook handler URL used in whatsapp_settings_view
-def webhook_handler(request):
-     # Placeholder view logic
-    from django.http import HttpResponse
-    return HttpResponse("Webhook Handler Placeholder")
-
-# Remove duplicate placeholder definitions if the real views exist above
+# Removed placeholders for views defined above
+# def whatsapp_index(request): ...
 # def chat_list(request): ...
 # def chat_detail(request, wa_id): ...
 # def template_list(request): ...
