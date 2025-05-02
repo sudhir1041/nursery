@@ -81,11 +81,11 @@
 
     {# --- Message Input Area --- #}
     <div class="chat-input-area">
-        {# *** CORRECTED: Added contact.wa_id to url tag *** #}
-        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' wa_id=contact.wa_id %}" class="whatsapp-form">
+        {# *** CORRECTED: Removed wa_id argument from url tag *** #}
+        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form">
              {% csrf_token %}
-             {# wa_id is now in the action URL, hidden input might not be needed by view #}
-             {# <input type="hidden" name="wa_id" value="{{ contact.wa_id }}"> #}
+             {# Add wa_id as hidden input SINCE view expects it in POST #}
+             <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
 
              {# Attach Button #}
              <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
