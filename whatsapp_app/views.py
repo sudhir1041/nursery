@@ -313,7 +313,7 @@ def chat_list(request):
     # Annotate with last message time for ordering
     contacts_with_messages = Contact.objects.annotate(
         last_message_time=Max('messages__timestamp')
-    ).filter(last_message_time__isnull=False) # Only contacts with messages
+        ).filter(last_message_time__isnull=False) 
 
     # Apply search filter if query exists
     if search_query:
