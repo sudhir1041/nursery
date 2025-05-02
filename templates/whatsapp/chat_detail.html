@@ -1,97 +1,103 @@
 {# whatsapp_app/templates/whatsapp_app/chat_detail.html #}
-{% extends "whatsapp/base_whatsapp.html" %}
-{% load static %} {# Load static tag library for chat.js #}
-{# Load crispy forms tags if you use it for the message form #}
-{% load crispy_forms_tags %}
+{% extends "whatsapp_app/base_whatsapp.html" %} {# Use the non-Bootstrap base template #}
+{% load static %}
 
-{% block whatsapp_content %} {# Override the whatsapp_content block #}
+{% block whatsapp_content %}
 
 {# --- Main Chat Container --- #}
-{# Add custom styling via CSS for a better chat appearance #}
-<div class="chat-container border rounded shadow-sm d-flex flex-column" style="height: calc(100vh - 200px); max-height: 700px;"> {# Example height calculation #}
+{# Uses custom CSS for layout and appearance #}
+<div class="chat-detail-container">
 
     {# --- Chat Header --- #}
-    <div class="chat-header p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
-        <div>
+    <div class="chat-header">
+        <div class="chat-header-info">
             {# Display Contact Name or WA ID #}
-            <h4 class="h5 mb-0">{{ contact.name|default:contact.wa_id }}</h4>
-            <small class="text-muted">{{ contact.wa_id }}</small>
+            <h4 class="contact-name">{{ contact.name|default:contact.wa_id }}</h4>
+            <small class="contact-wa-id">{{ contact.wa_id }}</small>
         </div>
-        <div>
-            {# Optional: Link to nursery customer profile if linked in models.py #}
-            {# Example:
-            {% if contact.customer %}
-                <a href="{% url 'your_customer_detail_view_name' contact.customer.pk %}" class="btn btn-sm btn-outline-secondary" title="View Customer Profile">
-                    <i class="bi bi-person-circle"></i> View Customer
+        <div class="chat-header-actions">
+            {# Optional: Link to nursery customer profile #}
+            {# {% if contact.customer %}
+                <a href="{% url 'your_customer_detail_view_name' contact.customer.pk %}" class="custom-button button-outline-secondary button-sm" title="View Customer Profile">
+                    <i class="fas fa-user-circle"></i> View Customer
                 </a>
-            {% endif %}
-            #}
-             <a href="{% url 'whatsapp_app:chat_list' %}" class="btn btn-sm btn-outline-secondary" title="Back to Chat List">
-                <i class="bi bi-arrow-left"></i> Back
+            {% endif %} #}
+             <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-outline-secondary button-sm" title="Back to Chat List">
+                 <i class="fas fa-arrow-left"></i> Back
              </a>
         </div>
     </div>
 
     {# --- Message Display Area --- #}
-    {# This div will be populated and scrolled by JavaScript #}
-    <div class="chat-messages flex-grow-1 p-3" id="message-list" style="overflow-y: auto; background-color: #e5ddd5;"
+    {# Populated and scrolled by chat.js #}
+    <div class="chat-messages" id="message-list"
          {# Pass data attributes needed by chat.js #}
          data-contact-wa-id="{{ contact.wa_id }}"
-         data-last-timestamp="{{ last_message_timestamp }}"> {# Initial timestamp for polling #}
+         data-last-timestamp="{{ last_message_timestamp }}"> {# Initial timestamp for polling/WebSocket #}
 
         {# Loop through messages passed from the view initially #}
         {% for message in messages %}
-        <div class="message mb-2 {% if message.direction == 'OUT' %}outgoing d-flex justify-content-end{% else %}incoming d-flex justify-content-start{% endif %}" data-message-id="{{ message.message_id }}">
-            {# Max width for bubbles #}
-            <div class="message-bubble d-inline-block p-2 px-3 rounded shadow-sm" style="max-width: 75%; background-color: {% if message.direction == 'OUT' %}#dcf8c6{% else %}#ffffff{% endif %}; border-top-left-radius: {% if message.direction == 'IN' %}0.1rem{% else %}0.75rem{% endif %}; border-top-right-radius: {% if message.direction == 'OUT' %}0.1rem{% else %}0.75rem{% endif %}; {% if message.direction == 'IN' %}border: 1px solid #f0f0f0;{% endif %}">
+        <div class="message {% if message.direction == 'OUT' %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.message_id }}">
+            <div class="message-bubble">
                 {# --- Message Content --- #}
-                {% if message.message_type == 'text' %}
-                    {# Use linebreaksbr filter to convert newlines to <br> #}
-                    <p class="mb-0 message-text" style="white-space: pre-wrap; word-break: break-word;">{{ message.text_content|linebreaksbr }}</p>
-                {% elif message.message_type == 'template' %}
-                     <p class="mb-0 fst-italic"><i class="bi bi-file-richtext me-1"></i><em>Template: {{ message.template_name }}</em></p>
-                     {# Display text content of template if available #}
-                     {% if message.text_content %}<p class="mb-0 mt-1 message-text" style="white-space: pre-wrap; word-break: break-word;">{{ message.text_content|linebreaksbr }}</p>{% endif %}
-                {% elif message.message_type == 'image' %}
-                     <p class="mb-1 fst-italic"><i class="bi bi-image me-1"></i><em>[Image]</em></p>
-                     {# Display image preview if media_url exists #}
-                     {% if message.media_url %}
-                        <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer">
-                            <img src="{{ message.media_url }}" alt="Image Attachment" class="img-fluid rounded" style="max-width: 200px; max-height: 200px; cursor: pointer; margin-top: 5px;">
-                        </a>
-                     {% endif %}
-                 {% elif message.message_type == 'document' %}
-                     <p class="mb-1 fst-italic"><i class="bi bi-file-earmark-text me-1"></i><em>[Document]</em></p>
-                     {% if message.media_url %}
-                        <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary mt-1">
-                           <i class="bi bi-download"></i> Download Document
-                        </a>
-                     {% endif %}
-                     {% if message.text_content %}<p class="mb-0 mt-1 message-text" style="white-space: pre-wrap; word-break: break-word;">{{ message.text_content|linebreaksbr }}</p>{% endif %}
-                {% else %}
-                     {# Fallback for other types #}
-                     <p class="mb-0 fst-italic"><em><i class="bi bi-file-earmark me-1"></i>[{{ message.get_message_type_display|default:message.message_type }}]</em></p>
-                     {% if message.text_content %}<p class="mb-0 mt-1 message-text" style="white-space: pre-wrap; word-break: break-word;">{{ message.text_content|linebreaksbr }}</p>{% endif %}
-                {% endif %}
-
-                 {# --- Message Meta (Timestamp & Status) --- #}
-                 <small class="message-meta d-block text-end mt-1 {% if message.direction == 'OUT' %}text-black-50{% else %}text-muted{% endif %}" style="font-size: 0.7rem;">
-                    {# Display timestamp #}
-                    {{ message.timestamp|date:"H:i" }}
-                    {# Display status icons for outgoing messages #}
-                    {% if message.direction == 'OUT' %}
-                        <span class="ms-1 message-status-icon" title="{{ message.get_status_display }}">
-                        {% if message.status == 'FAILED' %} <i class="bi bi-x-circle text-danger"></i>
-                        {% elif message.status == 'READ' %} <i class="bi bi-check2-all" style="color: #41a5e4;"></i> {# Blue double tick #}
-                        {% elif message.status == 'DELIVERED' %} <i class="bi bi-check2-all"></i> {# Grey double tick #}
-                        {% elif message.status == 'SENT' %} <i class="bi bi-check2"></i> {# Grey single tick #}
-                        {% elif message.status == 'PENDING' %} <i class="bi bi-clock"></i> {# Pending clock icon #}
+                <div class="message-text"> {# Base class for content #}
+                    {% if message.message_type == 'text' %}
+                        {{ message.text_content|linebreaksbr }} {# Use linebreaksbr for display #}
+                    {% elif message.message_type == 'template' %}
+                        <span class="template-indicator"><i class="fas fa-file-alt"></i> Template: {{ message.template_name|default:"Unknown" }}</span>
+                        {% if message.text_content %}
+                        <div class="template-text-content">{{ message.text_content|linebreaksbr }}</div>
                         {% endif %}
+                    {% elif message.message_type == 'image' %}
+                        <span class="media-indicator"><i class="fas fa-image"></i> [Image Received]</span>
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        {# Placeholder/Link for actual image - Requires backend endpoint #}
+                        {% if message.media_url %}
+                            {# Example link - replace with your actual media view URL #}
+                            {# <a href="{% url 'whatsapp_app:view_media' message.message_id %}" target="_blank" class="media-preview-link">View Image</a> #}
+                             <span class="text-muted">(Media URL available but preview not implemented)</span>
+                        {% endif %}
+                     {% elif message.message_type == 'video' %}
+                        <span class="media-indicator"><i class="fas fa-video"></i> [Video Received]</span>
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        {# Placeholder/Link #}
+                     {% elif message.message_type == 'audio' %}
+                         <span class="media-indicator"><i class="fas fa-volume-up"></i> [Audio Received]</span>
+                         {# Placeholder/Link #}
+                    {% elif message.message_type == 'document' %}
+                        <span class="media-indicator"><i class="fas fa-file-alt"></i> [Document: {{ message.filename|default:"Received" }}]</span>
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        {# Placeholder/Link #}
+                        {% if message.media_url %}
+                             {# Example link - replace with your actual media view URL #}
+                            {# <a href="{% url 'whatsapp_app:view_media' message.message_id %}" target="_blank" class="custom-button button-outline-secondary button-sm media-download-button"><i class="fas fa-download"></i> Download</a> #}
+                             <span class="text-muted">(Media URL available but download not implemented)</span>
+                        {% endif %}
+                    {% else %}
+                        {# Fallback for other types #}
+                        <span class="media-indicator"><i class="fas fa-file"></i> [{{ message.get_message_type_display|default:message.message_type }}]</span>
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                    {% endif %}
+                </div> {# End message-text #}
+
+                {# --- Message Meta (Timestamp & Status) --- #}
+                <div class="message-meta">
+                    <span class="message-time">{{ message.timestamp|date:"H:i" }}</span>
+                    {% if message.direction == 'OUT' %}
+                        <span class="message-status-icon" title="{{ message.get_status_display }}">
+                            {# Logic moved to chat.js getStatusIconHTML for dynamic updates #}
+                            {# Initial rendering can be done here if needed, but JS will override #}
+                            {% if message.status == 'FAILED' %} <i class="fas fa-exclamation-circle status-icon-failed"></i>
+                            {% elif message.status == 'READ' %} <i class="fas fa-check-double status-icon-read"></i>
+                            {% elif message.status == 'DELIVERED' %} <i class="fas fa-check-double status-icon-delivered"></i>
+                            {% elif message.status == 'SENT' %} <i class="fas fa-check status-icon-sent"></i>
+                            {% elif message.status == 'PENDING' %} <i class="fas fa-clock status-icon-pending"></i>
+                            {% endif %}
                         </span>
                     {% endif %}
-                </small>
-            </div>
-        </div>
+                </div>
+            </div> {# End message-bubble #}
+        </div> {# End message #}
         {% empty %}
         {# Message shown if no messages exist yet #}
         <p class="text-center text-muted mt-5" id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
@@ -99,31 +105,44 @@
     </div> {# End chat-messages #}
 
     {# --- Message Input Area --- #}
-    <div class="chat-input p-3 border-top bg-light">
-        {# The form action points to the AJAX view #}
-        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' contact.wa_id %}">
-            {# CSRF token needed if not handled globally in JS AJAX setup #}
+    <div class="chat-input-area">
+        {# The form action points to the AJAX view for non-WebSocket sending, #}
+        {# but WebSocket sending in chat.js overrides this default action. #}
+        {# Keep action for potential non-JS fallback or alternative sending methods. #}
+        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form">
              {% csrf_token %}
-             <div class="input-group">
-                 {# Render only the text_content field from the ManualMessageForm #}
-                 {# Use crispy tag if preferred: {% crispy form %} #}
-                 {{ form.text_content }}
-                 <button type="submit" class="btn btn-primary" title="Send Message">
-                     <i class="bi bi-send-fill"></i> Send
-                 </button>
-            </div>
-             {# Optional: Render hidden fields if needed (e.g., related order ID) #}
-             {# <input type="hidden" name="order_id" value="{{ order.id }}"> #}
+             {# Add wa_id as hidden input if needed by AJAX view #}
+             <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
+
+             {# Attach Button #}
+             <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
+                 <i class="fas fa-paperclip"></i>
+             </button>
+             {# Hidden File Input #}
+             <input type="file" id="chat-file-input" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+
+            {# Render only the text_content field from the ManualMessageForm #}
+            {# Ensure form.text_content widget has class="form-input chat-input" #}
+            {{ form.text_content }}
+
+            {# Send Button #}
+            <button type="submit" class="custom-button button-primary" title="Send Message">
+                <i class="fas fa-paper-plane"></i> {# Icon only for space #}
+            </button>
+             {# Uploading Indicator #}
+             <span id="file-upload-spinner" style="display: none; margin-left: 10px; color: #6c757d;">
+                 <i class="fas fa-spinner fa-spin"></i> Uploading...
+             </span>
         </form>
+         {# Optional: Add error display area for JS #}
+         <div id="chat-error-display" style="display: none; color: #dc3545; font-size: 0.9em; margin-top: 5px;"></div>
     </div>
 
-</div> {# End chat-container #}
+</div> {# End chat-detail-container #}
 {% endblock whatsapp_content %}
 
-{% block extra_js %} {# Add JavaScript specific to the chat page #}
-{{ block.super }} {# Include JS from base templates #}
-<script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
-{% endblock extra_js %}
-
-{# CSS is now linked in base_whatsapp.html via extra_head block #}
-
+{% block extra_scripts %} {# Add JavaScript specific to the chat page #}
+    {{ block.super }} {# Include JS from base templates #}
+    {# Ensure chat.js is included #}
+    <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
+{% endblock extra_scripts %}

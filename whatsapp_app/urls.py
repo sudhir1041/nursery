@@ -47,6 +47,8 @@ urlpatterns = [
     path('marketing/templates/', views.template_list, name='template_list'),
     # URL: /whatsapp/marketing/templates/sync/ (POST)
     path('marketing/templates/sync/', views.sync_whatsapp_templates, name='sync_templates'),
+
+    path('api/media/upload/', views.upload_whatsapp_media_ajax, name='whatsapp_media_upload_ajax'),
     
 
     # --- Bot/Auto-Reply Management (Optional - Add if using dedicated views) ---

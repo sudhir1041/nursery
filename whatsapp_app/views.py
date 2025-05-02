@@ -43,14 +43,17 @@ from .utils import (
 
 # --- Celery (Optional Background Tasks) ---
 try:
-    from .tasks import send_bulk_campaign_messages_task
-    # from .tasks import process_uploaded_contacts_task # If using background CSV processing
+    # Import the tasks needed by views
+    from .tasks import process_whatsapp_webhook_task, send_bulk_campaign_messages_task
     CELERY_ENABLED = True
 except ImportError:
     CELERY_ENABLED = False
     # Define dummy task functions if Celery is not installed/enabled
+    def process_whatsapp_webhook_task(*args, **kwargs):
+        logger.error("Celery not configured. Cannot run process_whatsapp_webhook_task.")
+        # Depending on how critical, you might raise error or just log
     def send_bulk_campaign_messages_task(*args, **kwargs):
-        logger.error("Celery not configured. Cannot run background tasks.")
+        logger.error("Celery not configured. Cannot run send_bulk_campaign_messages_task.")
         raise NotImplementedError("Celery is not enabled or tasks are not defined.")
 
 # --- Logger Setup ---
@@ -71,31 +74,22 @@ def dashboard(request):
     today = timezone.now().date()
     stats = {}
     try:
-        # Basic Counts
         stats['total_contacts'] = Contact.objects.count()
         stats['active_chats_count'] = Contact.objects.filter(messages__isnull=False).distinct().count()
-
-        # Message Stats for Today
         messages_today_qs = ChatMessage.objects.filter(timestamp__date=today)
         stats['messages_today'] = messages_today_qs.count()
         stats['incoming_today'] = messages_today_qs.filter(direction='IN').count()
         stats['outgoing_today'] = messages_today_qs.filter(direction='OUT').count()
-
-        # Outgoing Delivery Stats (Consider performance implications)
         outgoing_messages = ChatMessage.objects.filter(direction='OUT')
         total_outgoing = outgoing_messages.count()
         delivered_count = outgoing_messages.filter(status__in=['DELIVERED', 'READ']).count()
         failed_count = outgoing_messages.filter(status='FAILED').count()
         stats['success_rate'] = (delivered_count / total_outgoing * 100) if total_outgoing > 0 else 0
         stats['failed_count'] = failed_count
-
-        # Recent Campaigns
         stats['recent_campaigns'] = MarketingCampaign.objects.select_related('template').order_by('-created_at')[:5]
-
     except Exception as e:
         logger.exception(f"Error fetching dashboard stats: {e}") # Log full traceback
         messages.error(request, "Could not load all dashboard statistics.")
-        # Provide default values
         stats.setdefault('total_contacts', 0)
         stats.setdefault('active_chats_count', 0)
         stats.setdefault('messages_today', 0)
@@ -104,9 +98,9 @@ def dashboard(request):
         stats.setdefault('success_rate', 0)
         stats.setdefault('failed_count', 0)
         stats.setdefault('recent_campaigns', [])
-
     context = stats
-    return render(request, 'whatsapp/dashboard.html', context)
+    return render(request, 'whatsapp_app/dashboard.html', context)
+
 
 # ==============================================================================
 # Settings View
@@ -149,26 +143,25 @@ def whatsapp_settings_view(request):
         'settings': settings_instance,
         'full_webhook_url': full_webhook_url
     }
-    return render(request, 'whatsapp/settings_form.html', context)
+    return render(request, 'whatsapp_app/settings_form.html', context)
 
 
 # ==============================================================================
-# Webhook Handler
+# Webhook Handler (Updated for Celery)
 # ==============================================================================
 @csrf_exempt # WhatsApp doesn't send CSRF tokens
 def webhook_handler(request):
     """ Handles incoming notifications (messages, status updates) from WhatsApp. """
 
-    # 1. Verify Signature (Highly Recommended for Production)
-    # Ensure you have WHATSAPP_APP_SECRET in your Django settings
+    # 1. Verify Signature (Recommended for Production)
     app_secret = getattr(django_settings, 'WHATSAPP_APP_SECRET', None)
     if app_secret:
         signature = request.headers.get('X-Hub-Signature-256')
+        # Ensure verify_whatsapp_signature utility exists and works
         if not signature or not verify_whatsapp_signature(request.body, signature, app_secret):
             logger.warning("Invalid webhook signature received.")
             return HttpResponseForbidden("Invalid signature.")
     else:
-        # Only log this warning if not in DEBUG mode, maybe?
         if not django_settings.DEBUG:
              logger.warning("WHATSAPP_APP_SECRET not configured. Skipping webhook signature verification (INSECURE).")
 
@@ -180,7 +173,7 @@ def webhook_handler(request):
 
         if mode == 'subscribe' and verify_token_param and challenge:
             try:
-                settings = get_active_whatsapp_settings()
+                settings = get_active_whatsapp_settings() # Ensure this util exists
                 expected_token = settings.webhook_verify_token
                 if verify_token_param == expected_token:
                     logger.info(f"Webhook verification successful. Responding with challenge: {challenge}")
@@ -188,47 +181,65 @@ def webhook_handler(request):
                 else:
                     logger.warning(f"Webhook verification failed. Received token: '{verify_token_param}', Expected: '{expected_token}'")
                     return HttpResponseForbidden("Verification token mismatch.")
+            # Specific exceptions first
             except WhatsAppSettings.DoesNotExist:
                 logger.error("Webhook verification failed: WhatsAppSettings not found.")
                 return HttpResponseForbidden("Configuration error: Settings not found.")
             except ValueError as e: # Catches config errors from get_active_whatsapp_settings
                  logger.error(f"Webhook verification failed: Configuration error - {e}")
                  return HttpResponseForbidden(f"Configuration error: {e}")
-            except Exception as e:
-                logger.exception(f"Error during webhook GET verification: {e}")
+            except Exception as e: # Catch broader exceptions
+                logger.exception(f"Error during webhook GET verification: {e}") # Log traceback
                 return HttpResponseForbidden("Internal server error during verification.")
         else:
              logger.warning(f"Invalid GET verification request parameters received: Mode='{mode}', Token Provided='{bool(verify_token_param)}', Challenge Provided='{bool(challenge)}'")
              return HttpResponseBadRequest("Invalid verification request.")
 
 
-    # 3. Handle Incoming Notifications (POST)
+    # 3. Handle Incoming Notifications (POST) - Queue Celery Task
     if request.method == 'POST':
         try:
-            payload = json.loads(request.body)
-            logger.info(f"Received webhook payload: {json.dumps(payload, indent=2)}") # Log full payload in DEBUG?
+            # Get raw body for signature verification AND parsing by task
+            raw_body = request.body
+            # Basic check if body is empty
+            if not raw_body:
+                 logger.warning("Received empty POST request body in webhook.")
+                 return HttpResponseBadRequest("Empty request body.")
 
-            # Process the payload using the utility function
-            # This function should handle saving ChatMessage, updating status, etc.
-            processed_data = parse_incoming_whatsapp_message(payload)
+            # Decode body to pass as string to Celery (JSON serialization best practice)
+            payload_str = raw_body.decode('utf-8')
 
-            # Trigger Bot/Auto-Reply Logic ONLY if an incoming message was successfully processed
-            if processed_data and processed_data.get('type') == 'incoming_message':
-                message_obj = processed_data.get('message_object')
-                if message_obj and isinstance(message_obj, ChatMessage): # Check if it's a valid ChatMessage object
-                    handle_bot_or_autoreply(message_obj) # Call helper
-                else:
-                    logger.warning("parse_incoming_whatsapp_message indicated incoming message but did not return a valid message_object.")
+            # Log before queuing (consider sampling or reducing log level in production)
+            logger.info(f"Webhook POST received. Queueing processing task.")
+            # logger.debug(f"Webhook payload for task: {payload_str}") # Debug level for full payload
 
-            # Acknowledge receipt to WhatsApp IMMEDIATELY (required)
+            # --- Trigger Celery Task ---
+            if CELERY_ENABLED:
+                process_whatsapp_webhook_task.delay(payload_str=payload_str)
+            else:
+                # Fallback if Celery is not enabled (Process synchronously - less ideal)
+                logger.warning("Celery not enabled. Processing webhook synchronously.")
+                try:
+                    payload = json.loads(payload_str)
+                    processed_data = parse_incoming_whatsapp_message(payload)
+                    if processed_data and processed_data.get('type') == 'incoming_message':
+                        message_obj = processed_data.get('message_object')
+                        if message_obj and isinstance(message_obj, ChatMessage):
+                            handle_bot_or_autoreply(message_obj)
+                except Exception as sync_e:
+                     logger.exception(f"Error processing webhook synchronously: {sync_e}")
+                     # Don't let internal processing error prevent 200 OK
+
+            # Acknowledge receipt to WhatsApp IMMEDIATELY
             return HttpResponse(status=200)
 
         except json.JSONDecodeError:
-            logger.error("Invalid JSON received in webhook POST request.")
-            return HttpResponseBadRequest("Invalid JSON.")
+            logger.error("Invalid JSON received in webhook POST request (before queuing).")
+            # Still return 200 OK if possible, but log error
+            return HttpResponse(status=200) # Or BadRequest if you prefer, but Meta might retry
         except Exception as e:
-            logger.exception(f"Error processing webhook POST payload: {e}")
-            # Still return 200 OK to WhatsApp to prevent Meta from resending repeatedly.
+            logger.exception(f"Error before queuing webhook processing task: {e}")
+            # Still return 200 OK to WhatsApp
             return HttpResponse(status=200)
 
     # Method Not Allowed for other HTTP verbs
@@ -236,7 +247,7 @@ def webhook_handler(request):
     return HttpResponse(status=405)
 
 # ==============================================================================
-# Helper Function for Bots/Auto-Replies
+# Helper Function for Bots/Auto-Replies (Called by Celery Task or Webhook Fallback)
 # ==============================================================================
 def handle_bot_or_autoreply(incoming_message: ChatMessage):
     """ Checks and sends bot responses or auto-replies based on incoming message. """
@@ -307,7 +318,7 @@ def chat_list(request):
         'contacts': contacts,
         'search_query': search_query,
     }
-    return render(request, 'whatsapp/chat_list.html', context)
+    return render(request, 'whatsapp_app/chat_list.html', context)
 
 @user_passes_test(is_staff_user)
 def chat_detail(request, wa_id):
@@ -316,7 +327,7 @@ def chat_detail(request, wa_id):
     messages_qs = ChatMessage.objects.filter(contact=contact).order_by('timestamp')
     form = ManualMessageForm() # Ensure ManualMessageForm is defined in forms.py
 
-    # Get the timestamp of the very last message for AJAX polling
+    # Get the timestamp of the very last message for AJAX polling/WebSocket initial state
     last_msg = messages_qs.last()
     last_message_timestamp_iso = last_msg.timestamp.isoformat() if last_msg else timezone.now().isoformat()
 
@@ -326,15 +337,15 @@ def chat_detail(request, wa_id):
         'form': form,
         'last_message_timestamp': last_message_timestamp_iso,
     }
-    return render(request, 'whatsapp/chat_detail.html', context)
+    return render(request, 'whatsapp_app/chat_detail.html', context)
 
 # ==============================================================================
-# AJAX Endpoints for Chat
+# AJAX Endpoints for Chat (Used by chat.js)
 # ==============================================================================
 @user_passes_test(is_staff_user)
 @require_POST
 def send_manual_message_ajax(request):
-    """ AJAX endpoint to send a manual message. """
+    """ AJAX endpoint to send a manual message (triggers Celery Task). """
     wa_id = request.POST.get('wa_id')
     if not wa_id:
          return JsonResponse({'status': 'error', 'message': 'Missing wa_id parameter.'}, status=400)
@@ -344,33 +355,40 @@ def send_manual_message_ajax(request):
     if form.is_valid():
         message_text = form.cleaned_data['text_content']
         try:
-            # Call the utility function to send via API and log the ChatMessage
-            message_obj = send_whatsapp_message(
-                recipient_wa_id=contact.wa_id,
-                message_type='text',
-                text_content=message_text
-            )
-            if message_obj:
-                # Return details of the sent message for immediate UI update
-                return JsonResponse({
-                    'status': 'success',
-                    'message': { # Return the created message object details
-                        'message_id': message_obj.message_id,
-                        'text_content': message_obj.text_content,
-                        'timestamp': message_obj.timestamp.isoformat(),
-                        'direction': 'OUT',
-                        'status': message_obj.status,
-                        'message_type': message_obj.message_type,
-                        'template_name': message_obj.template_name,
-                        'media_url': message_obj.media_url,
-                    }
-                })
+            # --- Trigger Celery task to send message ---
+            if CELERY_ENABLED:
+                send_whatsapp_message_task.delay(
+                    recipient_wa_id=contact.wa_id,
+                    message_type='text',
+                    text_content=message_text
+                )
+                # Return success immediately after queuing
+                return JsonResponse({'status': 'success', 'message': 'Message queued for sending.'})
             else:
-                # Error occurred within send_whatsapp_message (should be logged there)
-                return JsonResponse({'status': 'error', 'message': 'Failed to initiate sending message via API.'}, status=500)
+                # Fallback: Send synchronously if Celery is disabled
+                logger.warning("Celery not enabled. Sending message synchronously.")
+                message_obj = send_whatsapp_message(
+                    recipient_wa_id=contact.wa_id,
+                    message_type='text',
+                    text_content=message_text
+                )
+                if message_obj:
+                     # Return details of the sent message
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': { # Return the created message object details
+                            'message_id': message_obj.message_id, 'text_content': message_obj.text_content,
+                            'timestamp': message_obj.timestamp.isoformat(), 'direction': 'OUT',
+                            'status': message_obj.status, 'message_type': message_obj.message_type,
+                            'template_name': message_obj.template_name, 'media_url': message_obj.media_url,
+                        }
+                    })
+                else:
+                    return JsonResponse({'status': 'error', 'message': 'Failed to send message synchronously.'}, status=500)
+
         except Exception as e:
-            logger.exception(f"Error in send_manual_message_ajax view for {wa_id}: {e}") # Log full traceback
-            return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
+            logger.exception(f"Error triggering send task for {wa_id}: {e}") # Log full traceback
+            return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred while queueing the message.'}, status=500)
     else:
         # Form validation failed
         logger.warning(f"Manual message form validation failed for {wa_id}: {form.errors.as_json()}")
@@ -379,7 +397,7 @@ def send_manual_message_ajax(request):
 @user_passes_test(is_staff_user)
 @require_GET
 def get_latest_messages_ajax(request):
-    """ AJAX endpoint for polling new messages for a specific chat. """
+    """ AJAX endpoint for polling new messages (Fallback if WebSockets fail). """
     wa_id = request.GET.get('wa_id')
     last_timestamp_str = request.GET.get('last_timestamp')
 
@@ -395,13 +413,11 @@ def get_latest_messages_ajax(request):
         if timezone.is_naive(last_timestamp):
             last_timestamp = timezone.make_aware(last_timestamp, timezone.get_default_timezone())
 
-        # Fetch messages strictly newer than the last one the client reported
         new_messages_qs = ChatMessage.objects.filter(
             contact=contact,
             timestamp__gt=last_timestamp
         ).order_by('timestamp')
 
-        # Select only needed fields for efficiency
         new_messages_data = list(new_messages_qs.values(
             'message_id', 'text_content', 'timestamp', 'direction', 'status',
             'media_url', 'message_type', 'template_name'
@@ -412,7 +428,6 @@ def get_latest_messages_ajax(request):
             if isinstance(msg_data.get('timestamp'), timezone.datetime):
                 msg_data['timestamp'] = msg_data['timestamp'].isoformat()
 
-        # Determine the timestamp for the *next* poll
         latest_ts_in_response = new_messages_qs.last().timestamp if new_messages_qs.exists() else last_timestamp
         next_poll_timestamp_iso = latest_ts_in_response.isoformat()
 
@@ -420,7 +435,6 @@ def get_latest_messages_ajax(request):
             'status': 'success',
             'new_messages': new_messages_data,
             'next_poll_timestamp': next_poll_timestamp_iso,
-            # 'updated_statuses': [] # Optional: Add logic to detect status changes
         })
     except Contact.DoesNotExist:
         logger.warning(f"Contact not found during latest messages poll: {wa_id}")
@@ -438,7 +452,7 @@ def bot_response_list(request):
     """ Lists all configured bot responses. """
     bot_responses = BotResponse.objects.order_by('trigger_phrase')
     context = {'bot_responses': bot_responses}
-    return render(request, 'whatsapp/bot/bot_list.html', context)
+    return render(request, 'whatsapp_app/bot_list.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_create(request):
@@ -458,7 +472,7 @@ def bot_response_create(request):
     else:
         form = BotResponseForm()
     context = {'form': form, 'action': 'Create'}
-    return render(request, 'whatsapp/bot/bot_response_form.html', context)
+    return render(request, 'whatsapp_app/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_update(request, pk):
@@ -479,7 +493,7 @@ def bot_response_update(request, pk):
     else:
         form = BotResponseForm(instance=bot_response)
     context = {'form': form, 'bot_response': bot_response, 'action': 'Update'}
-    return render(request, 'whatsapp/bot/bot_response_form.html', context)
+    return render(request, 'whatsapp_app/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
 @require_POST
@@ -519,7 +533,7 @@ def autoreply_settings_view(request):
     else:
         form = AutoReplySettingsForm(instance=settings)
     context = {'form': form, 'settings': settings}
-    return render(request, 'whatsapp/bot/autoreply_settings.html', context)
+    return render(request, 'whatsapp_app/autoreply_settings.html', context)
 
 
 # ==============================================================================
@@ -530,7 +544,7 @@ def campaign_list(request):
     """ Lists all marketing campaigns. """
     campaigns = MarketingCampaign.objects.select_related('template').order_by('-created_at')
     context = {'campaigns': campaigns}
-    return render(request, 'whatsapp/marketing/campaign_list.html', context)
+    return render(request, 'whatsapp_app/marketing/campaign_list.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_detail(request, pk):
@@ -551,7 +565,7 @@ def campaign_detail(request, pk):
             stats['failed_pct'] = round(stats['failed'] / base * 100, 1)
     upload_form = ContactUploadForm() if campaign.status == 'DRAFT' else None
     context = { 'campaign': campaign, 'recipients': recipients, 'stats': stats, 'upload_form': upload_form, 'celery_enabled': CELERY_ENABLED, }
-    return render(request, 'whatsapp/marketing/campaign_detail.html', context)
+    return render(request, 'whatsapp_app/marketing/campaign_detail.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_create(request):
@@ -568,8 +582,42 @@ def campaign_create(request):
         else: messages.error(request, "Please correct the errors highlighted below.")
     else: form = MarketingCampaignForm()
     context = {'form': form, 'action': 'Create'}
-    return render(request, 'whatsapp/marketing/campaign_form.html', context)
+    return render(request, 'whatsapp_app/marketing/campaign_form.html', context)
 
+# media file upload in chats 
+@user_passes_test(is_staff_user)
+@require_POST
+def upload_whatsapp_media_ajax(request):
+    """ Handles file uploads from chat interface, uploads to WhatsApp, returns media ID. """
+    if not request.FILES.get('media_file'):
+        return JsonResponse({'status': 'error', 'message': 'No media file found in request.'}, status=400)
+
+    media_file = request.FILES['media_file']
+    wa_id = request.POST.get('wa_id') # Optional: Get contact context if needed
+
+    # TODO: Add more robust validation (file size, type server-side)
+
+    try:
+        # --- Call utility to upload to WhatsApp ---
+        # This utility needs to handle the actual WhatsApp Graph API call for media uploads
+        # It should return a dictionary like {'id': 'whatsapp_media_id', 'type': 'image/video/etc'} or None on failure
+        upload_result = upload_media_to_whatsapp(media_file) # Implement this in utils.py
+
+        if upload_result and upload_result.get('id'):
+            logger.info(f"Successfully uploaded media for {wa_id}, received media_id: {upload_result['id']}")
+            return JsonResponse({
+                'status': 'success',
+                'media_id': upload_result['id'],
+                'media_type': upload_result.get('type', 'document') # Determine type based on file or API response
+            })
+        else:
+            logger.error(f"Failed to upload media to WhatsApp API for {wa_id}.")
+            return JsonResponse({'status': 'error', 'message': 'Failed to upload media to WhatsApp.'}, status=500)
+
+    except Exception as e:
+        logger.exception(f"Error during media upload for {wa_id}: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Server error during media upload.'}, status=500)
+    
 @user_passes_test(is_staff_user)
 @require_POST
 def upload_contacts_for_campaign(request, pk):
@@ -702,8 +750,7 @@ def template_list(request):
     """ Displays synced WhatsApp message templates. """
     templates = MarketingTemplate.objects.order_by('name', 'language')
     context = {'templates': templates}
-    # Corrected template path
-    return render(request, 'whatsapp/marketing/template_list.html', context)
+    return render(request, 'whatsapp_app/marketing/template_list.html', context)
 
 
 @user_passes_test(is_staff_user)
@@ -738,13 +785,10 @@ def sync_whatsapp_templates(request):
     except Exception as e: logger.exception(f"Unexpected error during WhatsApp template sync: {e}"); messages.error(request, f"An unexpected error occurred during sync: {e}")
     return redirect('whatsapp_app:template_list')
 
-
-# --- Placeholder views from urls.py (if needed temporarily) ---
-# Note: These should be removed or implemented properly
-
-# Removed placeholders for views defined above
+# --- Placeholder views removed as actual views are now implemented above ---
 # def whatsapp_index(request): ...
-# def chat_list(request): ...
-# def chat_detail(request, wa_id): ...
-# def template_list(request): ...
+# def chat_list(request): ... # Defined above
+# def chat_detail(request, wa_id): ... # Defined above
+# def template_list(request): ... # Defined above
+# def webhook_handler(request): ... # Defined above
 

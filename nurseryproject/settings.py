@@ -49,15 +49,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'daphne',
+    'channels',
+    'django_celery_beat',
     'woocommerce_app',
     'shopify_app',
     'facebook_app',
     'whatsapp_app',
     'shipment_app',
     'rest_framework',
-    'crispy_forms',
-    'crispy_bootstrap5',
-    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -217,14 +217,24 @@ LOGGING = {
     },
 }
 
-# Crispy Forms Settings
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-# Celery Configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0') # Use Redis on localhost, DB 0
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0') # Store results in Redis too (optional)
+
+REDIS_HOST = "127.0.0.1"
+REDIS_PORT = 6379
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
+        },
+    },
+}
+
+# Celery Configuration (Example)
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0' 
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1' 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE # Use Django's timezone (defined earlier in settings)
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler' # If using Celery Beat with DB
+CELERY_TIMEZONE = 'UTC' 
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
