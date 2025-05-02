@@ -1,9 +1,10 @@
 // whatsapp_app/static/whatsapp_app/js/chat.js
 
 /**
- * Handles real-time chat functionality using AJAX polling:
- * - Fetches new messages periodically.
- * - Sends new messages typed by the user.
+ * Handles real-time chat functionality using WebSockets:
+ * - Establishes WebSocket connection.
+ * - Sends text and initiates media uploads.
+ * - Receives messages and updates via WebSocket.
  * - Updates the chat UI dynamically using custom CSS classes.
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,31 +15,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const noMessagesPlaceholder = document.getElementById('no-messages-placeholder'); // Optional placeholder div
     const sendButton = messageForm?.querySelector('button[type="submit"]'); // Expects the submit button
     const sendButtonIcon = sendButton?.querySelector('i'); // Expects an <i> tag inside the button
+    const errorDisplay = document.getElementById('chat-error-display'); // Expects <div id="chat-error-display">
+    const attachButton = document.getElementById('attach-file-button'); // Expects <button id="attach-file-button">
+    const fileInput = document.getElementById('chat-file-input'); // Expects <input type="file" id="chat-file-input">
+    const fileUploadSpinner = document.getElementById('file-upload-spinner'); // Expects <span id="file-upload-spinner">
 
     // --- Basic Configuration & State ---
-    if (!messageList || !messageForm || !messageInput || !sendButton || !sendButtonIcon) {
-        console.log("Chat UI elements not found or incomplete. Chat script inactive.");
-        return; // Exit if essential elements aren't present
+    if (!messageList || !messageForm || !messageInput || !sendButton || !sendButtonIcon || !attachButton || !fileInput || !fileUploadSpinner) {
+        console.warn("Chat UI elements not found or incomplete. Chat script may not fully function.");
+        // Allow script to continue if some non-essential elements are missing, but log warning.
+        // return; // Uncomment this to completely stop if elements are missing
     }
 
-    const contactWaId = messageList.dataset.contactWaId; // Get WA ID from data attribute
-    let lastTimestamp = messageList.dataset.lastTimestamp; // Get initial timestamp from data attribute
-    let pollIntervalId = null; // To store the interval timer ID
-    const pollInterval = 5000; // Poll every 5 seconds (adjust as needed)
-    let isPolling = false; // Flag to prevent overlapping poll requests
-    let isSending = false; // Flag to prevent double message sends
-    const originalSendButtonHtml = sendButton.innerHTML; // Store original button content (icon + text)
+    const contactWaId = messageList?.dataset.contactWaId; // Get WA ID from data attribute
+    // lastTimestamp is less critical with WebSockets but can be useful for initial load or fallback
+    let lastTimestamp = messageList?.dataset.lastTimestamp;
+    let isSending = false; // Flag to prevent double message sends/uploads
+    const originalSendButtonHtml = sendButton?.innerHTML; // Store original button content
 
-    if (!contactWaId || !lastTimestamp) {
-        console.error("Chat script error: Missing 'data-contact-wa-id' or 'data-last-timestamp' attributes on #message-list.");
-        // Disable form if critical data is missing
-        messageInput.disabled = true;
-        sendButton.disabled = true;
-        sendButton.title = "Chat unavailable: Missing configuration.";
-        return;
+    if (!contactWaId) {
+        console.error("Chat script error: Missing 'data-contact-wa-id' attribute on #message-list.");
+        if(messageInput) messageInput.disabled = true;
+        if(sendButton) sendButton.disabled = true;
+        if(sendButton) sendButton.title = "Chat unavailable: Missing configuration.";
+        return; // Exit if contact ID is missing
     }
 
-    console.log(`Chat script initialized for contact ${contactWaId}, starting poll after ${lastTimestamp}`);
+    console.log(`Chat script initialized for contact ${contactWaId}`);
 
     // --- Helper: Get CSRF token from cookies ---
     function getCookie(name) {
@@ -57,17 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const csrftoken = getCookie('csrftoken');
     if (!csrftoken) {
-        console.warn("CSRF token not found. Message sending might fail.");
-        // Consider disabling send button if CSRF is absolutely required and missing
-        // sendButton.disabled = true;
-        // sendButton.title = "Cannot send messages: CSRF token missing.";
+        console.warn("CSRF token not found. File uploads might fail if not handled otherwise.");
     }
 
     // --- Helper: Format Timestamp for Display ---
     function formatTime(isoTimestamp) {
         if (!isoTimestamp) return '';
         try {
-            // Use browser's locale for time formatting (HH:MM)
             return new Date(isoTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         } catch (e) {
             console.error("Error formatting time:", e);
@@ -77,117 +76,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Helper: Get Status Icon HTML (Using Font Awesome) ---
     function getStatusIconHTML(status) {
-        // Ensure status is compared case-insensitively
         const statusLower = status ? status.toLowerCase() : '';
         switch (statusLower) {
-            case 'failed': return '<i class="fas fa-exclamation-circle status-icon-failed" title="Failed"></i>'; // Example custom class
-            case 'read': return '<i class="fas fa-check-double status-icon-read" title="Read"></i>'; // Example custom class (blue double tick)
-            case 'delivered': return '<i class="fas fa-check-double status-icon-delivered" title="Delivered"></i>'; // Example custom class (grey double tick)
-            case 'sent': return '<i class="fas fa-check status-icon-sent" title="Sent"></i>'; // Example custom class (grey single tick)
-            case 'pending': return '<i class="fas fa-clock status-icon-pending" title="Pending"></i>'; // Example custom class
-            default: return ''; // No icon for received or unknown
+            case 'failed': return '<i class="fas fa-exclamation-circle status-icon-failed" title="Failed"></i>';
+            case 'read': return '<i class="fas fa-check-double status-icon-read" title="Read"></i>';
+            case 'delivered': return '<i class="fas fa-check-double status-icon-delivered" title="Delivered"></i>';
+            case 'sent': return '<i class="fas fa-check status-icon-sent" title="Sent"></i>';
+            case 'pending': return '<i class="fas fa-clock status-icon-pending" title="Pending"></i>';
+            default: return '';
         }
     }
 
-    // --- Function to add a single message object to the UI ---
-    function addMessageToUI(msg) {
-        // Remove placeholder if it exists
-        if (noMessagesPlaceholder) {
-            noMessagesPlaceholder.style.display = 'none';
-        }
-
-        // Avoid adding duplicate messages
-        if (document.querySelector(`.message[data-message-id="${msg.message_id}"]`)) {
-            return;
-        }
-
-        const messageElement = document.createElement('div');
-        // Apply base and direction-specific classes (defined in your CSS)
-        messageElement.className = `message ${msg.direction === 'OUT' ? 'outgoing' : 'incoming'}`;
-        messageElement.dataset.messageId = msg.message_id; // Store ID for potential updates
-
-        const bubble = document.createElement('div');
-        bubble.className = 'message-bubble'; // Style bubble in CSS
-
-        // --- Message Content ---
-        const content = document.createElement('div');
-        content.className = 'message-text'; // Style text content in CSS
-
-        // Render content based on type (use textContent for safety against XSS)
-        if (msg.message_type === 'text') {
-            content.textContent = msg.text_content || '';
-        } else if (msg.message_type === 'template') {
-             // Use innerHTML carefully for formatting, ensure backend sanitizes template names
-            content.innerHTML = `<span class="template-indicator"><i class="fas fa-file-alt"></i> Template: ${msg.template_name || 'Unknown'}</span>`;
-            if(msg.text_content) {
-                 const templateText = document.createElement('div');
-                 templateText.className = 'template-text-content';
-                 templateText.textContent = msg.text_content; // Use textContent for safety
-                 content.appendChild(templateText);
-            }
-        } else if (msg.message_type === 'image' && msg.media_url) {
-            content.innerHTML = `<span class="media-indicator"><i class="fas fa-image"></i> [Image]</span>
-                                 <a href="${msg.media_url}" target="_blank" rel="noopener noreferrer" class="media-preview-link">
-                                     <img src="${msg.media_url}" alt="Image Attachment" class="media-image-preview">
-                                 </a>`; // Style .media-image-preview in CSS
-        } else if (msg.message_type === 'document') {
-            content.innerHTML = `<span class="media-indicator"><i class="fas fa-file-alt"></i> [Document]</span>`;
-            if (msg.media_url) {
-                content.innerHTML += `<a href="${msg.media_url}" target="_blank" rel="noopener noreferrer" class="custom-button button-outline-secondary button-sm media-download-button">
-                                          <i class="fas fa-download"></i> Download
-                                      </a>`; // Use custom button styles
-            }
-            if (msg.text_content) {
-                 const docCaption = document.createElement('p');
-                 docCaption.className = 'media-caption';
-                 docCaption.textContent = msg.text_content;
-                 content.appendChild(docCaption);
+    // --- Function to display errors in a non-blocking way ---
+    function displayError(message) {
+        console.error("Chat Error:", message);
+        if (errorDisplay) {
+            errorDisplay.textContent = message;
+            errorDisplay.style.display = message ? 'block' : 'none';
+            // Auto-hide non-connection errors after a delay
+            if (message && !message.toLowerCase().includes("connection")) {
+                 setTimeout(() => { if (errorDisplay) errorDisplay.style.display = 'none'; }, 6000);
             }
         } else {
-            // Fallback for other types
-            content.innerHTML = `<span class="media-indicator"><i class="fas fa-file"></i> [${msg.message_type || 'Unknown Type'}]</span>`;
-            if(msg.text_content) {
-                const otherCaption = document.createElement('p');
-                otherCaption.className = 'media-caption';
-                otherCaption.textContent = msg.text_content;
-                content.appendChild(otherCaption);
-            }
-        }
-        bubble.appendChild(content);
-
-        // --- Message Meta (Timestamp & Status) ---
-        const meta = document.createElement('div'); // Use div for easier styling/alignment
-        meta.className = 'message-meta'; // Style meta info (time, status) in CSS
-
-        const timeSpan = document.createElement('span');
-        timeSpan.className = 'message-time';
-        timeSpan.textContent = formatTime(msg.timestamp);
-        meta.appendChild(timeSpan);
-
-        if (msg.direction === 'OUT') {
-            const statusSpan = document.createElement('span');
-            statusSpan.className = 'message-status-icon'; // Style status icon container
-            statusSpan.innerHTML = getStatusIconHTML(msg.status); // Render icon HTML
-            meta.appendChild(statusSpan);
-        }
-        bubble.appendChild(meta);
-
-        messageElement.appendChild(bubble);
-        messageList.appendChild(messageElement);
-
-        // Update the global 'lastTimestamp' if this message is newer
-        if (msg.timestamp && new Date(msg.timestamp) > new Date(lastTimestamp)) {
-            lastTimestamp = msg.timestamp;
+            console.warn("No #chat-error-display element found.");
+            // Avoid alert() in production if possible
+            // alert(message);
         }
     }
 
     // --- Function to scroll message list to bottom ---
     function scrollToBottom(force = false) {
+        if (!messageList) return;
         const threshold = 150; // How close to bottom user needs to be to auto-scroll
         const isNearBottom = messageList.scrollHeight - messageList.scrollTop - messageList.clientHeight < threshold;
 
         if (force || isNearBottom) {
-            // Use smooth scrolling if available
             if ('scrollBehavior' in document.documentElement.style) {
                 messageList.scrollTo({ top: messageList.scrollHeight, behavior: 'smooth' });
             } else {
@@ -196,200 +119,274 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Function to display errors in a non-blocking way ---
-    function displayError(message) {
-        console.error("Chat Error:", message); // Log error to console
-        // TODO: Implement a user-friendly error display mechanism
-        // Example: Find an error div and set its text content
-        const errorDisplay = document.getElementById('chat-error-display'); // Assume you have <div id="chat-error-display"></div>
-        if (errorDisplay) {
-            errorDisplay.textContent = message;
-            errorDisplay.style.display = 'block'; // Make it visible
-            // Optionally hide after a few seconds
-            setTimeout(() => {
-                 if (errorDisplay) errorDisplay.style.display = 'none';
-            }, 5000);
-        } else {
-             // Fallback if error div doesn't exist (less ideal)
-             // alert(message);
-             console.warn("No #chat-error-display element found to show error message to user.");
+    // --- Function to add a single message object to the UI ---
+    function addMessageToUI(msg) {
+        if (!messageList) return; // Don't proceed if list doesn't exist
+        if (noMessagesPlaceholder) noMessagesPlaceholder.style.display = 'none';
+
+        // Avoid adding duplicate messages (check by WAMID)
+        if (msg.message_id && document.querySelector(`.message[data-message-id="${msg.message_id}"]`)) {
+             console.log(`Message ${msg.message_id} already exists, skipping UI add.`);
+            return;
+        }
+
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${msg.direction === 'OUT' ? 'outgoing' : 'incoming'}`;
+        if (msg.message_id) {
+            messageElement.dataset.messageId = msg.message_id;
+        }
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+
+        const content = document.createElement('div');
+        content.className = 'message-text'; // Base class
+
+        // --- Render based on type ---
+        const messageType = msg.message_type || 'text'; // Default to text
+        const textContent = msg.text_content || '';
+        const mediaUrl = msg.media_url; // URL from DB (potentially after download/save)
+        const filename = msg.filename || ''; // Filename if available
+
+        if (messageType === 'text') {
+            content.textContent = textContent;
+        } else if (messageType === 'template') {
+            content.innerHTML = `<span class="template-indicator"><i class="fas fa-file-alt"></i> Template: ${msg.template_name || 'Unknown'}</span>`;
+            if(textContent) {
+                 const templateText = document.createElement('div');
+                 templateText.className = 'template-text-content';
+                 templateText.textContent = textContent;
+                 content.appendChild(templateText);
+            }
+        } else if (messageType === 'image') {
+             content.innerHTML = `<span class="media-indicator"><i class="fas fa-image"></i> [Image Received]</span>`;
+             if (textContent) content.innerHTML += `<p class="media-caption">${textContent}</p>`;
+             if (mediaUrl) { // If URL is available (e.g., saved locally)
+                 content.innerHTML += `<a href="${mediaUrl}" target="_blank" rel="noopener noreferrer" class="media-preview-link">
+                                         <img src="${mediaUrl}" alt="Image Attachment" class="media-image-preview">
+                                     </a>`; // Style .media-image-preview in CSS
+             } else {
+                  content.innerHTML += `<span class="text-muted small">(Preview unavailable)</span>`;
+             }
+        } else if (messageType === 'video') {
+             content.innerHTML = `<span class="media-indicator"><i class="fas fa-video"></i> [Video Received]</span>`;
+             if (textContent) content.innerHTML += `<p class="media-caption">${textContent}</p>`;
+             if (mediaUrl) {
+                  // Provide download link or embed video player if desired
+                  content.innerHTML += `<a href="${mediaUrl}" target="_blank" rel="noopener noreferrer" class="custom-button button-outline-secondary button-sm media-download-button"><i class="fas fa-download"></i> View/Download Video</a>`;
+             } else {
+                  content.innerHTML += `<span class="text-muted small">(Link unavailable)</span>`;
+             }
+        } else if (messageType === 'audio') {
+             content.innerHTML = `<span class="media-indicator"><i class="fas fa-volume-up"></i> [Audio Received]</span>`;
+             if (mediaUrl) {
+                  // Embed audio player
+                  content.innerHTML += `<audio controls src="${mediaUrl}" class="media-audio-player"></audio>`;
+             } else {
+                  content.innerHTML += `<span class="text-muted small">(Audio unavailable)</span>`;
+             }
+        } else if (messageType === 'document') {
+            content.innerHTML = `<span class="media-indicator"><i class="fas fa-file-alt"></i> [Document: ${filename || 'Received'}]</span>`;
+             if (textContent) content.innerHTML += `<p class="media-caption">${textContent}</p>`;
+             if (mediaUrl) {
+                 content.innerHTML += `<a href="${mediaUrl}" target="_blank" rel="noopener noreferrer" class="custom-button button-outline-secondary button-sm media-download-button"><i class="fas fa-download"></i> Download Document</a>`;
+             } else {
+                 content.innerHTML += `<span class="text-muted small">(Link unavailable)</span>`;
+             }
+        } else { // Fallback
+            content.innerHTML = `<span class="media-indicator"><i class="fas fa-file"></i> [${messageType}]</span>`;
+            if(textContent) content.innerHTML += `<p class="media-caption">${textContent}</p>`;
+        }
+        bubble.appendChild(content);
+
+        // --- Message Meta ---
+        const meta = document.createElement('div');
+        meta.className = 'message-meta';
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'message-time';
+        timeSpan.textContent = formatTime(msg.timestamp);
+        meta.appendChild(timeSpan);
+        if (msg.direction === 'OUT') {
+            const statusSpan = document.createElement('span');
+            statusSpan.className = 'message-status-icon';
+            statusSpan.innerHTML = getStatusIconHTML(msg.status);
+            meta.appendChild(statusSpan);
+        }
+        bubble.appendChild(meta);
+
+        messageElement.appendChild(bubble);
+        messageList.appendChild(messageElement);
+
+        // Update lastTimestamp if needed (less critical now)
+        if (msg.timestamp && (!lastTimestamp || new Date(msg.timestamp) > new Date(lastTimestamp))) {
+            lastTimestamp = msg.timestamp;
+            // Update data attribute for potential fallback polling?
+            // messageList.dataset.lastTimestamp = lastTimestamp;
         }
     }
 
+    // --- Function to Update Message Status Icon ---
+    function updateMessageStatus(statusData) {
+         if (!statusData || !statusData.message_id || !statusData.status) return;
 
-    // --- Function to fetch new messages via AJAX ---
-    async function fetchNewMessages() {
-        if (isPolling) return;
-        isPolling = true;
+         const messageElement = document.querySelector(`.message[data-message-id="${statusData.message_id}"]`);
+         if (messageElement && messageElement.classList.contains('outgoing')) { // Only update outgoing messages
+             const statusIconSpan = messageElement.querySelector('.message-status-icon');
+             if (statusIconSpan) {
+                 const newIconHTML = getStatusIconHTML(statusData.status);
+                 if (statusIconSpan.innerHTML !== newIconHTML) { // Avoid unnecessary updates
+                     console.log(`Updating status for ${statusData.message_id} to ${statusData.status}`);
+                     statusIconSpan.innerHTML = newIconHTML;
+                     statusIconSpan.title = statusData.status; // Update tooltip
+                 }
+             }
+         }
+    }
 
-        // *** IMPORTANT: Define this URL in your urls.py and create the corresponding view ***
-        const fetchUrl = `/whatsapp/api/messages/latest/?wa_id=${contactWaId}&last_timestamp=${encodeURIComponent(lastTimestamp)}`;
+    // --- WebSocket Connection ---
+    const chatSocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const chatSocketUrl = `${chatSocketProtocol}://${window.location.host}/ws/chat/${contactWaId}/`;
+    let chatSocket = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
 
-        try {
-            const response = await fetch(fetchUrl, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
+    function connectWebSocket() {
+        console.log(`Attempting WebSocket connection (Attempt ${reconnectAttempts + 1})...`);
+        chatSocket = new WebSocket(chatSocketUrl);
+
+        chatSocket.onopen = function(e) {
+            console.log("WebSocket connection established.");
+            reconnectAttempts = 0;
+            displayError(""); // Clear connection errors
+        };
+
+        chatSocket.onmessage = function(e) {
+            try {
+                const data = JSON.parse(e.data);
+                console.log("WebSocket message received:", data);
+
+                if (data.type === 'chat_message' && data.message) {
+                    addMessageToUI(data.message);
+                    scrollToBottom();
+                } else if (data.type === 'status_update' && data.data) {
+                     updateMessageStatus(data.data); // Update status icon
+                } else if (data.type === 'message_sending') {
+                     console.log("Server acknowledged message sending task for:", data.text);
+                     // Optionally show a temporary "Sending..." state visually
+                } else if (data.type === 'error') {
+                     displayError(`Server error: ${data.message}`);
                 }
-            });
 
-            if (!response.ok) {
-                const errorText = await response.text(); // Get potential error details from body
-                console.error(`Error fetching messages: ${response.status} ${response.statusText}`, errorText);
-                displayError(`Error fetching messages (${response.status}). Please try again later.`); // User-friendly message
-                if (response.status === 404 || response.status === 403) {
-                    stopPolling();
-                    console.warn("Stopping polling due to client/server error (403/404).");
-                }
-                return;
-            }
+            } catch (error) { console.error("Error parsing WebSocket message:", error); }
+        };
 
-            const data = await response.json();
+        chatSocket.onerror = function(e) { console.error("WebSocket error:", e); }
 
-            if (data.status === 'success') {
-                if (data.new_messages && data.new_messages.length > 0) {
-                    console.log(`Received ${data.new_messages.length} new messages.`);
-                    data.new_messages.forEach(addMessageToUI);
-                    scrollToBottom(); // Auto-scroll if user is near bottom
-                }
-                // Update timestamp for the *next* poll
-                if (data.next_poll_timestamp && new Date(data.next_poll_timestamp) > new Date(lastTimestamp)) {
-                    lastTimestamp = data.next_poll_timestamp;
-                }
-                // TODO: Handle updated_statuses if implemented
-                // if (data.updated_statuses && data.updated_statuses.length > 0) {
-                //     updateMessageStatuses(data.updated_statuses); // Implement this function
-                // }
+        chatSocket.onclose = function(e) {
+            console.error(`WebSocket closed. Code: ${e.code}, Reason: ${e.reason}.`);
+            chatSocket = null;
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                const delay = Math.pow(2, reconnectAttempts) * 1000; // Exponential backoff
+                console.log(`Attempting reconnect in ${delay / 1000}s...`);
+                displayError(`Connection lost. Reconnecting (Attempt ${reconnectAttempts})...`);
+                setTimeout(connectWebSocket, delay);
             } else {
-                console.error("AJAX endpoint returned error:", data.message || "Unknown error");
-                displayError(data.message || "An error occurred while fetching messages.");
+                console.error("Max WebSocket reconnect attempts reached.");
+                displayError("Connection failed. Please refresh the page.");
+                if(messageInput) messageInput.disabled = true;
+                if(sendButton) sendButton.disabled = true;
+                if(sendButton) sendButton.title = "Connection failed.";
             }
-        } catch (error) {
-            console.error("Network or fetch error during polling:", error);
-            // Avoid alerting on every poll failure during network issues
-            // displayError("Network error checking for messages.");
-        } finally {
-            isPolling = false;
-        }
+        };
     }
 
-    // --- Function to send manual message via AJAX ---
-    async function sendManualMessage(event) {
-        event.preventDefault();
-        if (isSending) return;
-
+    // --- Function to send TEXT message via WebSocket ---
+    function sendWebSocketMessage(event) {
+        event?.preventDefault();
+        if (isSending || !chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+            if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) displayError("Cannot send: Connection not open.");
+            return;
+        }
         const messageText = messageInput.value.trim();
         if (!messageText) return;
 
-        // *** IMPORTANT: Define this URL in your urls.py and create the corresponding view ***
-        // It should match the form's action attribute if set, otherwise define explicitly
-        const sendUrl = messageForm.action || `/whatsapp/api/messages/send/`;
+        isSending = true; messageInput.disabled = true; sendButton.disabled = true;
+        sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-        isSending = true;
-        messageInput.disabled = true;
-        sendButton.disabled = true;
-        // Show spinner icon (Font Awesome)
-        sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...'; // Replace icon and text
+        console.log("Sending TEXT message via WebSocket:", messageText);
+        chatSocket.send(JSON.stringify({ 'type': 'text', 'message': messageText }));
 
-        const formData = new FormData();
-        formData.append('text_content', messageText);
-        formData.append('wa_id', contactWaId); // Send contact ID with the message
-        if (csrftoken) {
-            formData.append('csrfmiddlewaretoken', csrftoken);
+        // Reset form immediately (optimistic, message appears when echoed back)
+        messageInput.value = ''; messageInput.disabled = false; sendButton.disabled = false;
+        sendButton.innerHTML = originalSendButtonHtml; messageInput.focus(); isSending = false;
+    }
+
+    // --- Function to handle file upload and send media info via WebSocket ---
+    async function handleFileUpload() {
+        const file = fileInput.files[0];
+        if (!file || isSending || !chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+            if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) displayError("Cannot upload: Connection not open.");
+            return;
         }
+
+        // Client-side validation (add more checks as needed)
+        const maxSize = 16 * 1024 * 1024; // Example 16MB limit
+        if (file.size > maxSize) { displayError(`File exceeds ${maxSize/1024/1024}MB limit.`); fileInput.value = ''; return; }
+
+        isSending = true; attachButton.style.display = 'none'; fileUploadSpinner.style.display = 'inline-block';
+        sendButton.disabled = true; messageInput.disabled = true;
+
+        const uploadFormData = new FormData();
+        uploadFormData.append('media_file', file);
+        uploadFormData.append('wa_id', contactWaId);
+        if (csrftoken) uploadFormData.append('csrfmiddlewaretoken', csrftoken);
+
+        // *** Use the correct upload URL from your urls.py ***
+        const uploadUrl = '/whatsapp/api/media/upload/';
 
         try {
-            const response = await fetch(sendUrl, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                    // 'X-CSRFToken': csrftoken // Often not needed if token is in form data
-                }
-            });
-
+            const response = await fetch(uploadUrl, { method: 'POST', body: uploadFormData, headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
             const data = await response.json();
 
-            if (response.ok && data.status === 'success' && data.message) {
-                // Success - add the 'PENDING' message immediately
-                addMessageToUI(data.message); // Backend should return the created message object
-                scrollToBottom(true); // Force scroll
-                messageInput.value = ''; // Clear input
-                console.log("Message sent successfully via AJAX.");
+            if (response.ok && data.status === 'success' && data.media_id) {
+                console.log(`Media uploaded. ID: ${data.media_id}, Type: ${data.media_type}`);
+                // Send media info via WebSocket
+                chatSocket.send(JSON.stringify({
+                    'type': data.media_type || 'document',
+                    'media_id': data.media_id,
+                    'filename': file.name,
+                    'message': messageInput.value.trim() // Send current text as caption
+                }));
+                messageInput.value = ''; // Clear caption input
+                displayError('');
             } else {
-                // Handle errors
-                let errorMessage = "Failed to send message.";
-                if (data.message) {
-                    errorMessage = data.message;
-                } else if (data.errors && data.errors.text_content) {
-                    errorMessage = data.errors.text_content.join(' ');
-                } else if (!response.ok) {
-                    errorMessage = `Server error: ${response.status} ${response.statusText}`;
-                }
-                console.error("Error sending message:", errorMessage, data);
-                displayError(`Error: ${errorMessage}`); // Show error to user
+                const errorMsg = data.message || `Upload failed (${response.status}).`;
+                console.error("Media upload error:", errorMsg, data);
+                displayError(`Upload Error: ${errorMsg}`);
             }
         } catch (error) {
-            console.error("Network error sending message:", error);
-            displayError("Network error: Could not send message. Please check your connection.");
+            console.error("Network error during file upload:", error);
+            displayError("Network error: Could not upload file.");
         } finally {
-            // Re-enable form elements
-            messageInput.disabled = false;
-            sendButton.disabled = false;
-            sendButton.innerHTML = originalSendButtonHtml; // Restore original button content
-            messageInput.focus();
-            isSending = false;
-        }
-    }
-
-    // --- Start/Stop Polling ---
-    function startPolling() {
-        if (pollIntervalId === null) {
-            console.log("Starting message polling...");
-            fetchNewMessages(); // Fetch immediately
-            pollIntervalId = setInterval(fetchNewMessages, pollInterval);
-        }
-    }
-
-    function stopPolling() {
-        if (pollIntervalId !== null) {
-            console.log("Stopping message polling.");
-            clearInterval(pollIntervalId);
-            pollIntervalId = null;
+            isSending = false; attachButton.style.display = 'inline-block'; fileUploadSpinner.style.display = 'none';
+            sendButton.disabled = false; messageInput.disabled = false; fileInput.value = '';
         }
     }
 
     // --- Event Listeners ---
-    messageForm.addEventListener('submit', sendManualMessage);
-
-    messageInput.addEventListener('keydown', (event) => {
+    if (messageForm) messageForm.addEventListener('submit', sendWebSocketMessage);
+    if (messageInput) messageInput.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            if (messageInput.value.trim()) {
-                sendManualMessage(event);
-            }
+            if (messageInput.value.trim()) { sendWebSocketMessage(event); }
         }
     });
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            console.log("Tab became visible, resuming polling.");
-            fetchNewMessages(); // Fetch immediately on resume
-            startPolling();
-        } else {
-            console.log("Tab became hidden, pausing polling.");
-            stopPolling();
-        }
-    });
+    if (attachButton) attachButton.addEventListener('click', () => fileInput?.click());
+    if (fileInput) fileInput.addEventListener('change', handleFileUpload);
 
     // --- Initial Setup ---
-    scrollToBottom(true); // Scroll on load
-    if (document.visibilityState === 'visible') {
-        startPolling(); // Start polling if tab is visible
-    } else {
-         console.log("Tab initially hidden, polling paused.");
-    }
+    scrollToBottom(true);
+    connectWebSocket();
 
 }); // End DOMContentLoaded

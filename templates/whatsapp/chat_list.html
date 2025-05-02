@@ -106,4 +106,10 @@
     {% endif %}
 
 </div> {# End whatsapp-chat-list-container #}
+{% block extra_scripts %} {# Add JavaScript specific to the chat page #}
+    {{ block.super }} {# Include JS from base templates #}
+    {# Ensure chat.js is included #}
+    <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
+{% endblock extra_scripts %}
+
 {% endblock whatsapp_content %}
