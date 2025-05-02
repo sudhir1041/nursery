@@ -1,220 +1,372 @@
 # whatsapp_app/tasks.py
-
-from celery import shared_task
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from django.db import transaction
+from celery import shared_task, Task
 from django.utils import timezone
-# --- Added for Media Saving ---
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-# -----------------------------
-import json
+from django.db import transaction, OperationalError
+from django.db.models import Q
+import time
 import logging
 
-# Import necessary models and utils from your app
-from .models import Contact, ChatMessage, BotResponse, AutoReply, MarketingCampaign, CampaignContact
-# Assume utils handle the actual API calls and DB saving correctly
-from .utils import parse_incoming_whatsapp_message, send_whatsapp_message, download_whatsapp_media # Import download util
-# Import the helper function from views (ensure no circular imports)
-try:
-    from .views import handle_bot_or_autoreply
-except ImportError:
-    # Define a dummy if there's a circular import - move the function later
-    def handle_bot_or_autoreply(message_obj):
-        logger.warning("handle_bot_or_autoreply could not be imported, likely circular import.")
-        pass
+# Import models and utils carefully to avoid circular imports if tasks are complex
+# It's often safer to import within the task function if needed,
+# but for models/utils used frequently, module-level is okay.
+from .models import MarketingCampaign, CampaignContact, WhatsAppSettings
+from .utils import send_whatsapp_message, get_active_whatsapp_settings
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # Use logger from settings
 
-# --- Task for Processing Incoming Webhooks ---
+# --- Base Task with Retry Logic for Database Errors ---
+class BaseWhatsappTask(Task):
+    """Base Celery task with automatic retry for database OperationalError."""
+    # Retry on database connection/locking issues
+    autoretry_for = (OperationalError, )
+    # Wait 5 seconds before first retry, then increase delay
+    retry_kwargs = {'max_retries': 3, 'countdown': 5}
+    # Use exponential backoff for subsequent retries
+    retry_backoff = True
+    retry_backoff_max = 60 # Maximum delay 60 seconds
+    retry_jitter = True # Add random jitter to avoid thundering herd
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def process_whatsapp_webhook_task(self, payload_str):
+# --- Bulk Campaign Sending Task ---
+@shared_task(bind=True, base=BaseWhatsappTask) # Use bind=True to access self, base=BaseTask for retries
+def send_bulk_campaign_messages_task(self, campaign_id: int):
     """
-    Celery task to process incoming webhook payload asynchronously.
-    Parses the payload, saves messages/updates status, downloads media,
-    broadcasts to channels, and triggers bot/auto-reply logic.
+    Celery task to send messages for a specific marketing campaign.
+
+    Iterates through pending recipients in batches and calls the send_whatsapp_message utility.
+    Handles basic rate limiting and updates campaign/recipient status.
+
+    Args:
+        campaign_id: The primary key of the MarketingCampaign object.
     """
-    # --- (Code for process_whatsapp_webhook_task remains the same) ---
-    logger.info(f"Celery task [ID: {self.request.id}]: Starting webhook payload processing.")
+    task_id = self.request.id # Get Celery task ID for logging
+    logger.info(f"[Task ID: {task_id}] Starting task send_bulk_campaign_messages for Campaign ID: {campaign_id}")
     try:
-        payload = json.loads(payload_str)
-        processed_data = parse_incoming_whatsapp_message(payload)
-        data_type = processed_data.get('type') if processed_data else None
-        message_obj = processed_data.get('message_object') if processed_data else None
-        media_url_for_db = None
-        if message_obj and isinstance(message_obj, ChatMessage) and hasattr(message_obj, 'media_id_from_payload') and message_obj.media_id_from_payload:
-            logger.info(f"Task {self.request.id}: Media detected (ID: {message_obj.media_id_from_payload}) for message {message_obj.message_id}. Attempting download.")
+        # Fetch the campaign with related template for efficiency
+        campaign = MarketingCampaign.objects.select_related('template').get(id=campaign_id)
+    except MarketingCampaign.DoesNotExist:
+        logger.warning(f"[Task ID: {task_id}] Campaign ID {campaign_id} not found. Task aborted.")
+        return f"Campaign {campaign_id} not found."
+    except OperationalError as db_exc:
+         logger.warning(f"[Task ID: {task_id}] Database error fetching campaign {campaign_id}. Retrying task...")
+         raise self.retry(exc=db_exc) # Retry using base task settings
+
+    # --- Validate Campaign Status ---
+    # Ensure the campaign should actually be sending
+    if campaign.status not in ['SENDING', 'SCHEDULED']:
+        logger.warning(f"[Task ID: {task_id}] Campaign {campaign_id} is in status '{campaign.status}', not 'SENDING' or 'SCHEDULED'. Task aborted.")
+        return f"Campaign {campaign_id} not in a sendable state ({campaign.status})."
+
+    # --- Mark as Sending if it was Scheduled ---
+    if campaign.status == 'SCHEDULED':
+         try:
+             with transaction.atomic():
+                 # Re-fetch campaign inside transaction to ensure atomicity if needed, or use select_for_update
+                 campaign_to_update = MarketingCampaign.objects.select_for_update().get(id=campaign_id)
+                 if campaign_to_update.status == 'SCHEDULED': # Double check status
+                     campaign_to_update.status = 'SENDING'
+                     if not campaign_to_update.started_at: # Set started_at only once
+                         campaign_to_update.started_at = timezone.now()
+                     campaign_to_update.save(update_fields=['status', 'started_at'])
+                     campaign = campaign_to_update # Use the updated instance
+                     logger.info(f"[Task ID: {task_id}] Marked campaign {campaign_id} as SENDING.")
+                 else:
+                      logger.warning(f"[Task ID: {task_id}] Campaign {campaign_id} status changed from SCHEDULED before update. Current: {campaign_to_update.status}. Aborting task.")
+                      return f"Campaign {campaign_id} status changed from SCHEDULED."
+
+         except OperationalError as db_exc:
+              logger.warning(f"[Task ID: {task_id}] Database error updating campaign {campaign_id} status to SENDING. Retrying task...")
+              raise self.retry(exc=db_exc)
+         except MarketingCampaign.DoesNotExist: # Should not happen if fetched above, but safety check
+              logger.error(f"[Task ID: {task_id}] Campaign {campaign_id} disappeared during status update. Task aborted.")
+              return f"Campaign {campaign_id} not found during update."
+
+
+    # --- Fetch Pending Recipients ---
+    # Process recipients in batches to avoid loading too many into memory
+    batch_size = 100 # Adjust batch size based on memory/performance
+    # Query for recipients still marked as PENDING for this campaign
+    pending_recipients_qs = CampaignContact.objects.filter(
+        campaign=campaign,
+        status='PENDING'
+    ).select_related('contact') # Include contact data
+
+    processed_in_batch = 0
+    total_sent_successfully_in_task = 0 # Count successful API calls in this task run
+    total_failed_in_task = 0 # Count failures during this task run
+    # Rate limit delay (seconds) - adjust based on WhatsApp limits/recommendations (e.g., 1 message/sec)
+    rate_limit_delay = 1.0
+
+    logger.info(f"[Task ID: {task_id}] Campaign {campaign_id}: Found approx {pending_recipients_qs.count()} pending recipients. Processing in batches of {batch_size}.")
+
+    # Loop through batches of pending recipients
+    while True: # Keep processing batches until no pending recipients are found
+        try:
+            # Get the next batch using slicing
+            batch = list(pending_recipients_qs[:batch_size])
+        except OperationalError as db_exc:
+             logger.warning(f"[Task ID: {task_id}] Database error fetching recipient batch for campaign {campaign_id}. Retrying task...")
+             raise self.retry(exc=db_exc)
+
+        if not batch:
+            logger.info(f"[Task ID: {task_id}] Campaign {campaign_id}: No more pending recipients found in this iteration.")
+            break # Exit the while loop if the batch is empty
+
+        logger.info(f"[Task ID: {task_id}] Campaign {campaign_id}: Processing batch of {len(batch)} recipients.")
+        processed_in_batch = 0 # Reset counter for this batch
+
+        for recipient in batch:
+            # Ensure we haven't processed this recipient in a concurrent task run (unlikely with batches but possible)
+            if recipient.status != 'PENDING':
+                 logger.warning(f"[Task ID: {task_id}] Recipient {recipient.pk} for campaign {campaign_id} status is '{recipient.status}', not PENDING. Skipping.")
+                 continue
+
             try:
-                media_result = download_whatsapp_media(message_obj.media_id_from_payload)
-                if media_result:
-                    media_content_bytes, content_type = media_result
-                    file_name_to_save = f"whatsapp_media/{message_obj.message_id}_{getattr(message_obj, 'filename', message_obj.media_id_from_payload) or 'media'}"
-                    saved_path = default_storage.save(file_name_to_save, ContentFile(media_content_bytes))
-                    media_url_for_db = default_storage.url(saved_path)
-                    logger.info(f"Task {self.request.id}: Saved downloaded media for msg {message_obj.message_id} to: {saved_path} (URL: {media_url_for_db})")
-                    message_obj.media_url = media_url_for_db
-                    message_obj.save(update_fields=['media_url'])
-                else: logger.error(f"Task {self.request.id}: Failed to download media for ID {message_obj.media_id_from_payload}")
-            except Exception as download_err: logger.exception(f"Task {self.request.id}: Error during media download/saving for media ID {message_obj.media_id_from_payload}: {download_err}")
-        if data_type == 'incoming_message':
-            if message_obj and isinstance(message_obj, ChatMessage):
-                room_group_name = f'chat_{message_obj.contact.wa_id}'
-                message_data = {'message_id': message_obj.message_id, 'text_content': message_obj.text_content, 'timestamp': message_obj.timestamp.isoformat(), 'direction': 'IN', 'status': message_obj.status, 'message_type': message_obj.message_type, 'template_name': message_obj.template_name, 'media_url': message_obj.media_url}
-                try:
-                    channel_layer = get_channel_layer(); async_to_sync(channel_layer.group_send)(room_group_name, {'type': 'chat_message', 'message': message_data})
-                    logger.info(f"Celery task [ID: {self.request.id}]: Sent incoming message {message_obj.message_id} (type: {message_obj.message_type}) to channel group {room_group_name}")
-                except Exception as e: logger.exception(f"Celery task [ID: {self.request.id}]: Failed to send message to channel layer for {message_obj.contact.wa_id}: {e}")
-                if message_obj.message_type == 'text': handle_bot_or_autoreply(message_obj)
-            else: logger.warning(f"Celery task [ID: {self.request.id}]: parse_incoming_whatsapp_message indicated incoming message but did not return valid message_object.")
-        elif data_type == 'status_update':
-             status_data = processed_data.get('status_data')
-             if status_data:
-                 try:
-                     channel_layer = get_channel_layer(); wa_id = status_data.get('wa_id')
-                     if wa_id: room_group_name = f'chat_{wa_id}'; async_to_sync(channel_layer.group_send)(room_group_name, {'type': 'status_update', 'data': status_data}); logger.info(f"Celery task [ID: {self.request.id}]: Broadcasted status update for message {status_data.get('message_id')} to {room_group_name}")
-                     else: logger.warning(f"Celery task [ID: {self.request.id}]: Cannot broadcast status update, wa_id not found: {status_data}")
-                 except Exception as e: logger.exception(f"Celery task [ID: {self.request.id}]: Failed to send status update to channel layer: {e}")
-        elif processed_data: logger.info(f"Celery task [ID: {self.request.id}]: Processed webhook event type: {data_type}")
-        else: logger.warning(f"Celery task [ID: {self.request.id}]: parse_incoming_whatsapp_message returned None or empty data.")
-        logger.info(f"Celery task [ID: {self.request.id}]: Webhook payload processing finished successfully.")
-    except json.JSONDecodeError: logger.error(f"Celery task [ID: {self.request.id}]: Invalid JSON in payload: {payload_str[:500]}...")
-    except Exception as exc: logger.exception(f"Celery task [ID: {self.request.id}]: Error processing webhook payload."); raise self.retry(exc=exc)
+                # --- Construct Template Components for this recipient ---
+                components_list = []
+                template_structure = campaign.template.components # JSON field from template model
+                variables = recipient.template_variables or {} # Variables stored for this contact
+
+                # Validate template structure (should be a list of components)
+                if not isinstance(template_structure, list):
+                     logger.error(f"[Task ID: {task_id}] Campaign {campaign_id}, Recipient {recipient.pk}: Invalid template component structure (not a list): {template_structure}")
+                     raise ValueError("Invalid template structure in DB")
+
+                # Iterate through component specifications in the template structure
+                for component_spec in template_structure:
+                    component_type = component_spec.get('type', '').upper()
+                    if not component_type: continue # Skip if type is missing
+
+                    component_data = {"type": component_type} # Base for this component's payload
+                    parameters = [] # Parameters for this specific component (e.g., body, header)
+
+                    # --- Body Parameter Substitution ---
+                    if component_type == 'BODY':
+                        text_template = component_spec.get('text', '')
+                        # Find expected variable placeholders like {{1}}, {{2}}
+                        expected_var_indices = [str(i) for i in range(1, text_template.count('{{') + 1)]
+                        for var_num_str in expected_var_indices:
+                             # Get value from recipient's variables, default to empty string if missing
+                             param_value = variables.get(var_num_str, '')
+                             parameters.append({"type": "text", "text": str(param_value)}) # Ensure value is string
+
+                    # --- Header Parameter Substitution (Example: TEXT Header) ---
+                    elif component_type == 'HEADER' and component_spec.get('format') == 'TEXT':
+                         text_template = component_spec.get('text', '')
+                         # Header usually expects only one variable {{1}}
+                         if '{{1}}' in text_template:
+                              param_value = variables.get('1', '') # Get variable '1'
+                              parameters.append({"type": "text", "text": str(param_value)})
+                    # Add elif for other header formats (IMAGE, DOCUMENT, VIDEO) if needed
+                    # elif component_type == 'HEADER' and component_spec.get('format') == 'IMAGE':
+                    #     link = variables.get('header_image_url', '') # Get URL from variables
+                    #     if link: parameters.append({"type": "image", "image": {"link": link}})
+
+                    # --- Button Parameter Substitution (Example: URL Button with dynamic part) ---
+                    elif component_type == 'BUTTONS':
+                         buttons = component_spec.get('buttons', [])
+                         button_params = [] # Params specific to this button component
+                         for button_index, button_spec in enumerate(buttons):
+                             if button_spec.get('type') == 'URL':
+                                 url_template = button_spec.get('url', '')
+                                 # Find the variable number expected in the URL suffix (usually '1')
+                                 if '{{1}}' in url_template:
+                                     # Get the corresponding variable value (e.g., from key 'button_url_1')
+                                     # Define a clear convention for variable keys in your CSV/data source
+                                     var_key = f"button_url_{button_index}_1" # Example key
+                                     param_value = variables.get(var_key, '')
+                                     # Parameter for URL button needs index and text payload
+                                     button_params.append({
+                                         "type": "text",
+                                         "text": str(param_value) # The dynamic part of the URL suffix
+                                     })
+                         # Parameters for buttons are added at the component level, associated by index
+                         if button_params:
+                              # Note: The API structure for button parameters might differ slightly, check Meta docs.
+                              # This assumes parameters map sequentially to buttons needing them.
+                              component_data['parameters'] = button_params
 
 
-# --- Task for Sending a Single Message (Updated Logging) ---
+                    # Add parameters list to the component data if parameters were generated
+                    # Button parameters are handled within the 'BUTTONS' block above
+                    if parameters and component_type != 'BUTTONS':
+                         component_data['parameters'] = parameters
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=300)
-def send_whatsapp_message_task(self, recipient_wa_id, message_type, text_content=None, template_name=None, components=None, media_id=None, media_link=None, filename=None, campaign_contact_id=None):
-    """
-    Celery task to send an outgoing WhatsApp message via the API utility.
-    Handles different message types including media. Includes enhanced logging.
-    """
-    task_id = self.request.id
-    logger.info(f"Celery task [ID: {task_id}]: Starting send_whatsapp_message_task for {recipient_wa_id}, type: {message_type}")
-    logger.debug(f"Task [ID: {task_id}] Received args: recipient={recipient_wa_id}, type={message_type}, text={text_content}, template={template_name}, media_id={media_id}, media_link={media_link}, filename={filename}, campaign_contact_id={campaign_contact_id}")
+                    components_list.append(component_data)
+                # --- End Component Construction ---
 
-    message_obj = None
-    final_status = 'FAILED' # Assume failure unless proven otherwise
-    error_detail = None
 
-    try:
-        # Call the utility function which handles API call AND saving ChatMessage
-        logger.info(f"Task [ID: {task_id}]: Calling send_whatsapp_message utility...")
-        message_obj = send_whatsapp_message(
-            recipient_wa_id=recipient_wa_id,
-            message_type=message_type,
-            text_content=text_content, # Caption for media, body for text/template
-            template_name=template_name,
-            components=components, # Pass components if sending template
-            media_id=media_id, # Pass media ID obtained from WhatsApp upload API
-            media_link=media_link, # Or pass a public link for WhatsApp to fetch
-            filename=filename # Optional filename for documents
-        )
-
-        if message_obj:
-            # If util returns an object, assume API call was accepted (status might be SENT or PENDING)
-            final_status = message_obj.status
-            logger.info(f"Celery task [ID: {task_id}]: Message {message_obj.message_id} ({final_status}) successfully processed by send_whatsapp_message utility for {recipient_wa_id}.")
-
-            # --- Broadcast the SENT/PENDING message back via WebSocket ---
-            try:
-                channel_layer = get_channel_layer()
-                room_group_name = f'chat_{recipient_wa_id}'
-                message_data = { # Prepare data for WebSocket clients
-                    'message_id': message_obj.message_id,
-                    'text_content': message_obj.text_content,
-                    'timestamp': message_obj.timestamp.isoformat(),
-                    'direction': 'OUT',
-                    'status': message_obj.status,
-                    'message_type': message_obj.message_type,
-                    'template_name': message_obj.template_name,
-                    'media_url': message_obj.media_url,
-                    # 'filename': message_obj.filename # Include if available
+                # --- Prepare API Call Parameters ---
+                message_params = {
+                    'recipient_wa_id': recipient.contact.wa_id,
+                    'message_type': 'template',
+                    'template_name': campaign.template.name,
+                    'template_language': campaign.template.language,
+                    'template_components': components_list,
                 }
-                async_to_sync(channel_layer.group_send)(
-                    room_group_name,
-                    {'type': 'chat_message', 'message': message_data}
-                )
-                logger.info(f"Celery task [ID: {task_id}]: Broadcasted sent message {message_obj.message_id} to channel group {room_group_name}")
-            except Exception as e:
-                 logger.exception(f"Celery task [ID: {task_id}]: Failed to broadcast sent message status for {recipient_wa_id}: {e}") # Log traceback
 
-        else:
-            # The send_whatsapp_message util should log the specific API error
-            logger.error(f"Celery task [ID: {task_id}]: send_whatsapp_message utility returned None (indicating failure) for {recipient_wa_id}.")
-            error_detail = "Failed in send_whatsapp_message utility (check util logs)."
-            # No retry needed here if the util handles its own logic/errors, but mark as failed.
+                # --- Call the Sending Utility ---
+                # This function handles the actual API call and initial logging
+                message_obj = send_whatsapp_message(**message_params)
 
-    except Exception as exc:
-        logger.exception(f"Celery task [ID: {task_id}]: Unexpected error sending message to {recipient_wa_id}.") # Log traceback
-        error_detail = str(exc)
-        # Retry based on task settings
-        try:
-            logger.warning(f"Task [ID: {task_id}]: Retrying due to error: {exc}")
-            raise self.retry(exc=exc)
-        except Exception as retry_exc:
-             # Handle case where retries are exhausted or retry fails
-             logger.error(f"Celery task [ID: {task_id}]: Max retries reached or retry failed for sending to {recipient_wa_id}. Marking as FAILED.")
-             final_status = 'FAILED'
-
-
-    # --- Update CampaignContact status if applicable ---
-    if campaign_contact_id:
-        try:
-            # Ensure CampaignContact model was imported
-            if CampaignContact:
-                updated_count = CampaignContact.objects.filter(pk=campaign_contact_id).update(
-                    status=final_status,
-                    message_id=message_obj.message_id if message_obj else None,
-                    sent_time=message_obj.timestamp if message_obj and final_status != 'FAILED' else None,
-                    error_message=error_detail if final_status == 'FAILED' else None
-                )
-                if updated_count > 0:
-                     logger.info(f"Celery task [ID: {task_id}]: Updated CampaignContact {campaign_contact_id} status to {final_status}.")
+                # --- Update Recipient Status based on API call outcome ---
+                # Check if send_whatsapp_message returned a valid message object with SENT status
+                if message_obj and message_obj.message_id and message_obj.status == 'SENT':
+                    recipient.status = 'SENT'
+                    recipient.message_id = message_obj.message_id # Store the WAMID
+                    recipient.sent_time = timezone.now()
+                    recipient.error_message = None # Clear previous errors
+                    total_sent_successfully_in_task += 1
                 else:
-                     logger.warning(f"Celery task [ID: {task_id}]: Could not find CampaignContact with ID {campaign_contact_id} to update status.")
-            else:
-                 logger.error(f"Celery task [ID: {task_id}]: Cannot update CampaignContact status - Model not imported.")
-        except Exception as e:
-             logger.exception(f"Celery task [ID: {task_id}]: Failed to update CampaignContact status for ID {campaign_contact_id}: {e}")
+                    # API call failed or didn't return WAMID (error logged in send_whatsapp_message/log_failed_message)
+                    recipient.status = 'FAILED'
+                    # Error message might be set by log_failed_message, or set a generic one
+                    if not recipient.error_message:
+                         recipient.error_message = "Failed during API send attempt (check util logs)."
+                    total_failed_in_task += 1
+
+                # Save recipient status within the loop (atomic update)
+                try:
+                     # Use atomic transaction for saving recipient status
+                     with transaction.atomic():
+                          recipient.save(update_fields=['status', 'message_id', 'sent_time', 'error_message'])
+                except OperationalError as db_exc:
+                     logger.warning(f"[Task ID: {task_id}] Database error saving recipient {recipient.pk} status for campaign {campaign_id}. Retrying task...")
+                     raise self.retry(exc=db_exc) # Retry the whole task on DB error during save
+
+                processed_in_batch += 1
+
+                # --- Rate Limiting Delay ---
+                time.sleep(rate_limit_delay) # Pause between messages
+
+            except ValueError as e: # Catch errors during component construction etc.
+                 logger.error(f"[Task ID: {task_id}] Data error processing recipient {recipient.pk} for campaign {campaign_id}: {e}")
+                 recipient.status = 'FAILED'
+                 recipient.error_message = f"Data processing error: {e}"[:500] # Truncate error
+                 total_failed_in_task += 1
+                 try:
+                      with transaction.atomic():
+                           recipient.save(update_fields=['status', 'error_message'])
+                 except OperationalError as db_exc:
+                      logger.warning(f"[Task ID: {task_id}] Database error saving FAILED recipient {recipient.pk} status for campaign {campaign_id}. Retrying task...")
+                      raise self.retry(exc=db_exc)
+                 processed_in_batch += 1 # Count as processed (failed)
+            except Exception as e:
+                 # Catch unexpected errors during processing a single recipient
+                 logger.exception(f"[Task ID: {task_id}] Unexpected error processing recipient {recipient.pk} for campaign {campaign_id}: {e}")
+                 recipient.status = 'FAILED'
+                 recipient.error_message = f"Unexpected task error: {e}"[:500]
+                 total_failed_in_task += 1
+                 try:
+                      with transaction.atomic():
+                           recipient.save(update_fields=['status', 'error_message'])
+                 except OperationalError as db_exc:
+                      logger.warning(f"[Task ID: {task_id}] Database error saving FAILED recipient {recipient.pk} status for campaign {campaign_id}. Retrying task...")
+                      raise self.retry(exc=db_exc)
+                 processed_in_batch += 1 # Count as processed (failed)
+                 # Optional: Add a small delay even after errors
+                 time.sleep(rate_limit_delay / 2)
 
 
-    logger.info(f"Celery task [ID: {task_id}]: Finished send_whatsapp_message_task for {recipient_wa_id}. Final status: {final_status}")
-    return message_obj.message_id if message_obj else None
+        logger.info(f"[Task ID: {task_id}] Campaign {campaign_id}: Finished processing batch. Processed this batch: {processed_in_batch}. Successful sends in task run: {total_sent_successfully_in_task}. Failed in task run: {total_failed_in_task}.")
+        # Check if the batch processed was smaller than requested, indicating end of queue for this run
+        if len(batch) < batch_size:
+             logger.info(f"[Task ID: {task_id}] Campaign {campaign_id}: Last batch processed in this task run.")
+             break # Exit while loop
 
-
-# --- Task for Sending Bulk Campaign Messages ---
-
-@shared_task(bind=True)
-def send_bulk_campaign_messages_task(self, campaign_id):
-    """
-    Celery task to iterate through campaign recipients and queue individual message sending tasks.
-    """
-    # --- (Code for send_bulk_campaign_messages_task remains the same as before) ---
-    logger.info(f"Celery task [ID: {self.request.id}]: Starting bulk send for campaign ID: {campaign_id}")
+    # --- Final Campaign Status Update ---
+    # After processing all available batches in this task run, check overall campaign status
     try:
-        campaign = MarketingCampaign.objects.select_related('template').get(pk=campaign_id)
-        if campaign.status != 'SENDING': logger.warning(f"Celery task [ID: {self.request.id}]: Campaign {campaign_id} status is '{campaign.status}', not 'SENDING'. Aborting."); return f"Campaign {campaign_id} not in SENDING state."
-        pending_recipients = CampaignContact.objects.filter(campaign=campaign, status='PENDING').select_related('contact')
-        recipient_count = pending_recipients.count(); logger.info(f"Celery task [ID: {self.request.id}]: Found {recipient_count} pending recipients for campaign {campaign_id}.")
-        if recipient_count == 0: logger.info(f"Celery task [ID: {self.request.id}]: No pending recipients for campaign {campaign_id}. Marking completed."); campaign.status = 'COMPLETED'; campaign.completed_at = timezone.now(); campaign.save(update_fields=['status', 'completed_at']); return f"Campaign {campaign_id} completed (no pending recipients)."
-        queued_count = 0
-        for recipient in pending_recipients.iterator():
-            try:
-                # --- TODO: Implement proper component formatting ---
-                formatted_components = campaign.template.components # Placeholder
-                send_whatsapp_message_task.delay(recipient_wa_id=recipient.contact.wa_id, message_type='template', template_name=campaign.template.name, components=formatted_components, campaign_contact_id=recipient.id)
-                queued_count += 1
-            except Exception as e: logger.error(f"Celery task [ID: {self.request.id}]: Failed to queue message for recipient {recipient.contact.wa_id} (CC ID: {recipient.id}) in campaign {campaign_id}: {e}"); recipient.status = 'FAILED'; recipient.error_message = f"Failed to queue send task: {e}"; recipient.save(update_fields=['status', 'error_message'])
-        logger.info(f"Celery task [ID: {self.request.id}]: Queued {queued_count} send tasks for campaign {campaign_id}.")
-        campaign.status = 'COMPLETED'; campaign.completed_at = timezone.now(); campaign.save(update_fields=['status', 'completed_at']); logger.info(f"Celery task [ID: {self.request.id}]: Marked campaign {campaign_id} as COMPLETED after queueing.")
-        return f"Campaign {campaign_id}: Queued {queued_count} messages."
-    except MarketingCampaign.DoesNotExist: logger.error(f"Celery task [ID: {self.request.id}]: Campaign ID {campaign_id} not found."); return f"Campaign ID {campaign_id} not found."
-    except Exception as exc:
-        logger.exception(f"Celery task [ID: {self.request.id}]: Unexpected error during bulk send for campaign {campaign_id}.");
-        try: MarketingCampaign.objects.filter(pk=campaign_id).update(status='FAILED')
-        except Exception as update_e: logger.error(f"Celery task [ID: {self.request.id}]: Also failed to update campaign {campaign_id} status to FAILED: {update_e}")
-        raise self.retry(exc=exc)
+        # Re-fetch campaign to get latest status in case of concurrent updates (less likely with Celery)
+        campaign.refresh_from_db()
+        # Check if *any* recipients are *still* pending for this campaign
+        # This accounts for cases where the task might restart or only process partial batches
+        still_pending = CampaignContact.objects.filter(campaign=campaign, status='PENDING').exists()
+        final_status = campaign.status # Keep current status unless changing
 
+        if not still_pending and campaign.status == 'SENDING':
+            # No more pending recipients AND campaign is marked as SENDING
+            # Campaign is now completed (potentially with failures)
+            # Check if there were any failures *at all* during the campaign's entire run
+            any_failures_ever = CampaignContact.objects.filter(campaign=campaign, status='FAILED').exists()
+            final_status = 'FAILED' if any_failures_ever else 'COMPLETED'
+            campaign.completed_at = timezone.now()
+            campaign.status = final_status
+            # Use atomic transaction for final update
+            with transaction.atomic():
+                campaign.save(update_fields=['status', 'completed_at'])
+            logger.info(f"[Task ID: {task_id}] Campaign '{campaign.name}' (ID: {campaign_id}) marked as {final_status}. Successful sends in task run: {total_sent_successfully_in_task}. Failed in task run: {total_failed_in_task}.")
+        elif still_pending:
+            # This case might happen if the task was interrupted/retried and didn't finish all batches
+            logger.warning(f"[Task ID: {task_id}] Campaign {campaign_id} task finished but still has PENDING recipients. Status remains {campaign.status}.")
+        else:
+             # Campaign might already be COMPLETED/FAILED/CANCELLED from another run or action
+             logger.info(f"[Task ID: {task_id}] Campaign {campaign_id} task finished. Current status is {campaign.status} (no update needed).")
+
+
+        return f"Campaign {campaign_id} processing finished for this task run. Final Status: {final_status}. Sent in run: {total_sent_successfully_in_task}, Failed in run: {total_failed_in_task}."
+
+    except OperationalError as db_exc:
+         logger.warning(f"[Task ID: {task_id}] Database error during final status update for campaign {campaign_id}. Retrying task...")
+         # This retry might re-process the last batch, ensure task logic is idempotent if possible
+         raise self.retry(exc=db_exc)
+    except Exception as final_err:
+         logger.exception(f"[Task ID: {task_id}] Error during final status update for campaign {campaign_id}: {final_err}")
+         # Don't retry here, just log the failure to update status
+         return f"Campaign {campaign_id} processing finished but failed final status update. Check logs."
+
+
+# --- Optional Task for Background CSV Processing ---
+# @shared_task(base=BaseWhatsappTask)
+# def process_uploaded_contacts_task(campaign_id: int, contacts_data: list):
+#     """
+#     Processes a list of contact data (from CSV) in the background.
+#     Creates Contact and CampaignContact objects. Use for large uploads.
+#     Args:
+#         campaign_id: The ID of the MarketingCampaign.
+#         contacts_data: A list of dictionaries, where each dict contains
+#                        {'wa_id': '...', 'name': '...', 'variables': {...}}
+#     """
+#     logger.info(f"Starting background processing of {len(contacts_data)} contacts for campaign {campaign_id}")
+#     try:
+#         campaign = MarketingCampaign.objects.get(id=campaign_id)
+#         added_count = 0
+#         skipped_count = 0
+#         # Use transaction.atomic for bulk creation efficiency and atomicity
+#         with transaction.atomic():
+#             for item in contacts_data:
+#                 try:
+#                     # Validate item data here if not done before sending to task
+#                     if not item.get('wa_id'): continue
+#
+#                     contact, contact_created = Contact.objects.get_or_create(wa_id=item['wa_id'])
+#                     if item.get('name') and (contact_created or contact.name != item['name']):
+#                         contact.name = item['name']
+#                         contact.save(update_fields=['name'])
+#
+#                     _, cc_created = CampaignContact.objects.get_or_create(
+#                         campaign=campaign,
+#                         contact=contact,
+#                         defaults={'template_variables': item.get('variables')}
+#                     )
+#                     if cc_created:
+#                         added_count += 1
+#                     else:
+#                         skipped_count += 1
+#                 except Exception as item_err:
+#                      logger.error(f"Error processing item {item} for campaign {campaign_id} in background task: {item_err}")
+#                      # Decide whether to skip or fail the whole task based on error severity
+#
+#         logger.info(f"Finished background processing for campaign {campaign_id}. Added: {added_count}, Skipped: {skipped_count}")
+#         # Optional: Update campaign status or notify user upon completion
+#         # campaign.notes = f"CSV processed: Added {added_count}, Skipped {skipped_count}"
+#         # campaign.save(update_fields=['notes'])
+#         return f"Processed {added_count} new contacts, skipped {skipped_count} duplicates."
+#
+#     except MarketingCampaign.DoesNotExist:
+#          logger.error(f"Campaign {campaign_id} not found during background contact processing.")
+#          # Don't retry if campaign doesn't exist
+#          return "Campaign not found."
+#     except Exception as e:
+#          logger.exception(f"Error during background contact processing for campaign {campaign_id}: {e}")
+#          # Re-raise to potentially trigger Celery base task retries for DB errors etc.
+#          raise
