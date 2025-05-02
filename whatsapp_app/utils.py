@@ -15,7 +15,7 @@ from django.core.files.storage import default_storage
 
 # Import models from the *same app*
 try:
-    from .models import WhatsAppSettings, Contact, ChatMessage,CampaignContact
+    from .models import WhatsAppSettings, Contact, ChatMessage, CampaignContact # Added CampaignContact
 except ImportError as e:
      logging.error(f"Could not import models in utils.py: {e}. Check app structure and INSTALLED_APPS.")
      WhatsAppSettings, Contact, ChatMessage, CampaignContact = None, None, None, None
@@ -42,7 +42,6 @@ def get_active_whatsapp_settings() -> WhatsAppSettings:
 # --- Sending Messages ---
 def send_whatsapp_message(recipient_wa_id: str, message_type: str, **kwargs) -> ChatMessage | None:
     """ Sends a message via the WhatsApp Cloud API and logs it in ChatMessage. """
-    # --- (Code for send_whatsapp_message remains the same as before) ---
     if ChatMessage is None or Contact is None: logger.error("Cannot send message: Contact or ChatMessage model not imported."); return None
     try:
         settings = get_active_whatsapp_settings(); api_url = f"{GRAPH_API_URL}/{settings.phone_number_id}/messages"
@@ -81,7 +80,6 @@ def send_whatsapp_message(recipient_wa_id: str, message_type: str, **kwargs) -> 
 def log_failed_message(recipient_wa_id: str, message_type: str, error_details: str,
                        log_content: str | None = None, media_url: str | None = None, **kwargs):
     """ Creates a ChatMessage entry with FAILED status. """
-    # --- (Code for log_failed_message remains the same as before) ---
     if ChatMessage is None or Contact is None: logger.error("Cannot log failed message: Models not imported."); return
     try:
         contact, _ = Contact.objects.get_or_create(wa_id=recipient_wa_id)
@@ -122,10 +120,12 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                             contact, created = Contact.objects.update_or_create(wa_id=sender_wa_id, defaults={'name': profile_name} if profile_name else {})
                             if created: logger.info(f"Created contact: {sender_wa_id} ({profile_name})")
                             elif profile_name and contact.name != profile_name: contact.name = profile_name; contact.save(update_fields=['name']); logger.info(f"Updated contact name: {sender_wa_id}")
-                            text_content = None; media_url = None; filename = None; media_id_from_payload = None
+                            text_content = None; media_url = None; filename = None; media_id_from_payload = None # Initialize media_id
                             if msg_type == 'text': text_content = msg_data.get("text", {}).get("body")
                             elif msg_type == 'reaction': reaction = msg_data.get('reaction', {}); reacted_msg_id = reaction.get('message_id'); text_content = f"Reacted '{reaction.get('emoji', '?')}' to {reacted_msg_id}"
-                            elif msg_type in ['image', 'video', 'audio', 'document', 'sticker']: media_info = msg_data.get(msg_type, {}); media_id_from_payload = media_info.get('id'); caption = media_info.get('caption'); filename = media_info.get('filename'); text_content = caption or f"Received {msg_type}"; logger.info(f"Received {msg_type} media ID {media_id_from_payload}"); # media_url = download_whatsapp_media(media_id_from_payload)
+                            elif msg_type in ['image', 'video', 'audio', 'document', 'sticker']:
+                                media_info = msg_data.get(msg_type, {}); media_id_from_payload = media_info.get('id'); # Get media_id here
+                                caption = media_info.get('caption'); filename = media_info.get('filename'); text_content = caption or f"Received {msg_type}"; logger.info(f"Received {msg_type} media ID {media_id_from_payload}"); # media_url = download_whatsapp_media(media_id_from_payload)
                             elif msg_type == 'location': loc = msg_data.get('location', {}); text_content = f"Location: Lat {loc.get('latitude')}, Lon {loc.get('longitude')}"; text_content += f" ({loc.get('name')})" if loc.get('name') else ""
                             elif msg_type == 'contacts': contacts_shared = msg_data.get('contacts', []); names = [c.get('name', {}).get('formatted_name', 'Unknown') for c in contacts_shared]; text_content = f"Shared contact(s): {', '.join(names)}"
                             elif msg_type == 'interactive': interactive_data = msg_data.get('interactive', {}); interactive_type = interactive_data.get('type'); reply_info = interactive_data.get('button_reply' if interactive_type == 'button_reply' else 'list_reply', {}); text_content = f"{interactive_type.replace('_',' ').title()}: '{reply_info.get('title')}' (ID: {reply_info.get('id')})"
@@ -133,19 +133,20 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                             else: text_content = f"Received unhandled message type: {msg_type}"; logger.warning(f"Unhandled type '{msg_type}': {msg_data}")
 
                             whatsapp_dt = None
-                            try:
-                                # *** CORRECTED LINE ***
-                                # Use datetime.timezone.utc (imported as dt_timezone.utc)
-                                whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=dt_timezone.utc)
-                            except (ValueError, TypeError):
-                                logger.warning(f"Could not parse WhatsApp timestamp: {timestamp_ms_str}")
+                            try: whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=dt_timezone.utc)
+                            except (ValueError, TypeError): logger.warning(f"Could not parse WhatsApp timestamp: {timestamp_ms_str}")
 
+                            # --- CORRECTED: Removed media_id argument ---
                             message = ChatMessage.objects.create(
                                 message_id=message_id, contact=contact, direction='IN', status='RECEIVED',
                                 message_type=msg_type, text_content=text_content, media_url=media_url,
-                                timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt,
-                                media_id=media_id_from_payload # Store media_id if available
+                                timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt
+                                # Removed: media_id=media_id_from_payload
                             )
+                            # --- Store media_id on the object AFTER creation if needed for download ---
+                            if media_id_from_payload:
+                                message.media_id_from_payload = media_id_from_payload # Store it temporarily if needed
+
                             logger.info(f"Processed incoming {msg_type} message {message_id} from {sender_wa_id}")
                             if not processed_info: processed_info = {'type': 'incoming_message', 'message_object': message}
                         except Exception as msg_proc_err: logger.exception(f"Error processing one incoming message: {msg_proc_err}. Data: {msg_data}")
@@ -161,7 +162,10 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                                 message.status = new_status; update_fields = ['status']
                                 if new_status == 'FAILED' and status_data.get("errors"): message.error_message = json.dumps(status_data["errors"]); update_fields.append('error_message')
                                 message.save(update_fields=update_fields); logger.info(f"Updated status for {message_wamid} to {new_status}")
-                                try: updated_count = CampaignContact.objects.filter(message_id=message_wamid).update(status=new_status);
+                                try: # Update campaign contact status
+                                    if CampaignContact: # Check if model was imported
+                                        updated_count = CampaignContact.objects.filter(message_id=message_wamid).update(status=new_status)
+                                        if updated_count > 0: logger.info(f"Updated CampaignContact status for {message_wamid} to {new_status}")
                                 except Exception as cc_update_err: logger.error(f"Error updating CampaignContact status for {message_wamid}: {cc_update_err}")
                                 if not processed_info: processed_info = {'type': 'status_update', 'status_data': {'message_id': message_wamid, 'status': new_status, 'wa_id': recipient_id}}
                             elif not new_status: logger.warning(f"Unknown status type '{status}' for {message_wamid}")
