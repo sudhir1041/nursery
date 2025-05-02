@@ -305,18 +305,33 @@ def handle_bot_or_autoreply(incoming_message: ChatMessage):
 def chat_list(request):
     """ Displays a list of contacts with recent chat activity. """
     search_query = request.GET.get('q', '').strip()
+
+    # Get contacts, ordered by the timestamp of their last message
+    # Annotate with last message time for ordering
     contacts_with_messages = Contact.objects.annotate(
         last_message_time=Max('messages__timestamp')
-    ).filter(last_message_time__isnull=False)
+    ).filter(last_message_time__isnull=False) # Only contacts with messages
+
+    # Apply search filter if query exists
     if search_query:
         contacts_with_messages = contacts_with_messages.filter(
             Q(name__icontains=search_query) | Q(wa_id__icontains=search_query)
+            # Add search on linked customer/user fields if applicable
+            # | Q(customer__name__icontains=search_query)
         )
+
+    # Order by the annotated last message time
     contacts = contacts_with_messages.order_by('-last_message_time')
+
+    # Note: Getting last message preview here is inefficient.
+    # It's better to display this in the template by accessing messages.last
+    # or store it on the Contact model via signals/tasks if performance is critical.
+
     context = {
         'contacts': contacts,
         'search_query': search_query,
     }
+    # Ensure the template path matches your project structure
     return render(request, 'whatsapp/chat_list.html', context)
 
 @user_passes_test(is_staff_user)
