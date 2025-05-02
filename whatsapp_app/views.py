@@ -543,7 +543,7 @@ def campaign_list(request):
     """ Lists all marketing campaigns. """
     campaigns = MarketingCampaign.objects.select_related('template').order_by('-created_at')
     context = {'campaigns': campaigns}
-    return render(request, 'whatsapp/bot/marketing/campaign_list.html', context)
+    return render(request, 'whatsapp/marketing/campaign_list.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_detail(request, pk):
