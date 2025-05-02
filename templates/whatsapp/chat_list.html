@@ -1,19 +1,22 @@
-{# whatsapp_app/templates/whatsapp/chat_list.html #}
-{% extends "whatsapp/base_whatsapp.html" %}
+{# whatsapp_app/templates/whatsapp_app/chat_list.html #}
+{% extends "whatsapp/base_whatsapp.html" %} {# Ensure this path to your base template is correct #}
 {% load static %}
 
-{% block whatsapp_content %}
-<div class="whatsapp-chat-list-container">
-    <h3 class="page-title">Chats</h3>
+{% block whatsapp_content %} {# Override the whatsapp_content block #}
+<div class="whatsapp-chat-list-container"> {# Custom container #}
+    <h3 class="page-title">Chats</h3> {# Custom title class #}
     <hr class="divider">
 
     {# --- Search Bar --- #}
     <div class="search-bar-container">
+        {# Form uses GET method, action points to the same view #}
         <form method="get" action="{% url 'whatsapp_app:chat_list' %}" class="search-form">
-            <div class="search-input-wrapper">
-                <i class="fas fa-search search-icon"></i>
+            <div class="search-input-wrapper"> {# Custom wrapper #}
+                <i class="fas fa-search search-icon"></i> {# Font Awesome icon #}
+                {# Input field uses the search_query context variable #}
                 <input type="text" name="q" class="search-input" placeholder="Search by Contact Name or WhatsApp Number..." value="{{ search_query|default:'' }}" aria-label="Search Chats">
-                <button class="custom-button button-secondary" type="submit">Search</button>
+                <button class="custom-button button-secondary" type="submit">Search</button> {# Custom button #}
+                {# Clear button shown only if search_query exists #}
                 {% if search_query %}
                     <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-danger button-clear" title="Clear Search">&times;</a>
                 {% endif %}
@@ -22,38 +25,46 @@
     </div>
 
     {# --- List of Chats --- #}
-    <div class="chat-list">
+    <div class="chat-list"> {# Custom list container #}
+        {# Loop through the 'contacts' queryset passed from the view #}
         {% for contact in contacts %}
-        <a href="{% url 'whatsapp_app:chat_detail' contact.wa_id %}" class="chat-list-item">
+        {# Link each item to the chat detail view using contact.wa_id #}
+        <a href="{% url 'whatsapp_app:chat_detail' contact.wa_id %}" class="chat-list-item"> {# Custom list item class #}
             <div class="chat-item-header">
+                {# Display contact name or fallback to WA ID #}
                 <h5 class="chat-contact-name">{{ contact.name|default:contact.wa_id }}</h5>
+                {# Display time since last message (uses annotation 'last_message_time' from view) #}
                 <small class="chat-last-time">
                     {% if contact.last_message_time %}
                         {{ contact.last_message_time|timesince }} ago
                     {% else %}
-                        Never
+                        Never {# Fallback, though view filters this out #}
                     {% endif %}
                 </small>
             </div>
-            <p class="chat-last-message">
-                {% if contact.last_message_content %}
-                    {% if contact.messages.last.direction == 'OUT' %}
-                        <i class="fas fa-arrow-up chat-direction-icon" title="Outgoing"></i>
+            {# Display last message preview (inefficient but works with view) #}
+            {% with last_message=contact.messages.last %}
+                <p class="chat-last-message">
+                    {% if last_message %}
+                        {% if last_message.direction == 'OUT' %}
+                            <i class="fas fa-arrow-up chat-direction-icon" title="Outgoing"></i>
+                        {% else %}
+                            <i class="fas fa-arrow-down chat-direction-icon" title="Incoming"></i>
+                        {% endif %}
+                        {{ last_message.text_content|default:"(Media/Template)"|striptags|truncatechars:80 }}
                     {% else %}
-                        <i class="fas fa-arrow-down chat-direction-icon" title="Incoming"></i>
+                        <span class="no-messages-text">(No messages yet)</span>
                     {% endif %}
-                    {{ contact.last_message_content|default:"(Media/Template)"|striptags|truncatechars:80 }}
-                {% else %}
-                    <span class="no-messages-text">(No messages yet)</span>
-                {% endif %}
-            </p>
+                </p>
+            {% endwith %}
+            {# Display WA ID subtly #}
             <small class="chat-wa-id">{{ contact.wa_id }}</small>
-            {% if contact.unread_count > 0 %}
-                <span class="unread-badge">{{ contact.unread_count }}</span>
-            {% endif %}
+            {# Optional: Unread count badge placeholder #}
+            {# {% if contact.unread_count > 0 %}<span class="unread-badge">{{ contact.unread_count }}</span>{% endif %} #}
         </a>
         {% empty %}
-        <div class="chat-list-empty">
+        {# Display message if no contacts found #}
+        <div class="chat-list-empty"> {# Custom class for empty state #}
             {% if search_query %}
                 <p>No contacts found matching your search criteria '{{ search_query }}'.</p>
             {% else %}
@@ -64,9 +75,11 @@
     </div>
 
     {# --- Pagination --- #}
-    {% if is_paginated %}
+    {# Include pagination controls if using pagination in the view #}
+    {# Note: Your provided view doesn't include pagination logic, so this part won't render unless you add pagination #}
+    {% if page_obj.has_other_pages %}
       <nav aria-label="Chat list navigation" class="pagination-container">
-        <ul class="pagination-custom">
+        <ul class="pagination-custom"> {# Custom pagination class #}
           {% if page_obj.has_previous %}
             <li class="page-item-custom"><a class="page-link-custom" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}">&laquo; First</a></li>
             <li class="page-item-custom"><a class="page-link-custom" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a></li>
@@ -86,9 +99,10 @@
       </nav>
     {% endif %}
 
-</div>
+</div> {# End whatsapp-chat-list-container #}
 {% endblock whatsapp_content %}
 
-{% block extra_scripts %}
-    {{ block.super }}
+{% block extra_scripts %} {# Add JavaScript specific to the chat list page if needed #}
+    {{ block.super }} {# Include JS from base templates #}
+    {# Example: <script src="{% static 'whatsapp_app/js/chat_list_interactions.js' %}"></script> #}
 {% endblock extra_scripts %}
