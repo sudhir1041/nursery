@@ -18,8 +18,8 @@ from dotenv import load_dotenv
 from django.conf import settings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-from channels.layers import get_channel_layer
-channel_layer = get_channel_layer()
+# from channels.layers import get_channel_layer
+# channel_layer = get_channel_layer()
 
 
 # --- Load Environment Variables ---
