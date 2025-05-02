@@ -1,5 +1,5 @@
-{# whatsapp_app/templates/whatsapp_app/chat_list.html #}
-{% extends "whatsapp/base_whatsapp.html" %} {# Ensure this path is correct #}
+{# whatsapp_app/templates/whatsapp/chat_list.html #} {# Path matches the render call in the view #}
+{% extends "whatsapp_app/base_whatsapp.html" %} {# Ensure this path to your base template is correct #}
 {% load static %}
 
 {% block whatsapp_content %} {# Override the whatsapp_content block #}
@@ -35,6 +35,7 @@
                     {% if contact.last_message_time %}
                         {{ contact.last_message_time|timesince }} ago
                     {% else %}
+                        {# Should not happen due to view filter, but good fallback #}
                         Never
                     {% endif %}
                 </small>
@@ -106,10 +107,10 @@
     {% endif %}
 
 </div> {# End whatsapp-chat-list-container #}
-{% block extra_scripts %} {# Add JavaScript specific to the chat page #}
+{% endblock whatsapp_content %}
+
+{% block extra_scripts %} {# Add JavaScript specific to the chat list page if needed #}
     {{ block.super }} {# Include JS from base templates #}
-    {# Ensure chat.js is included #}
-    <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
+    <script src="{% static 'whatsapp_app/js/chat.js' %}"></script> 
 {% endblock extra_scripts %}
 
-{% endblock whatsapp_content %}
