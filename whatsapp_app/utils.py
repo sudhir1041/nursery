@@ -5,15 +5,17 @@ import json
 import logging
 import hmac # For webhook signature verification
 import hashlib # For webhook signature verification
-from datetime import datetime
-from django.utils import timezone
+from datetime import datetime, timezone as dt_timezone # Import timezone from datetime
+from django.utils import timezone # Keep Django's timezone for other uses like timezone.now()
 from django.conf import settings as django_settings # For project level settings like WA_APP_SECRET
 from django.core.files.uploadedfile import UploadedFile # For type hinting
 from typing import Tuple, Optional # For type hinting
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 # Import models from the *same app*
 try:
-    from .models import WhatsAppSettings, Contact, ChatMessage, CampaignContact
+    from .models import WhatsAppSettings, Contact, ChatMessage,CampaignContact
 except ImportError as e:
      logging.error(f"Could not import models in utils.py: {e}. Check app structure and INSTALLED_APPS.")
      WhatsAppSettings, Contact, ChatMessage, CampaignContact = None, None, None, None
@@ -96,8 +98,11 @@ def log_failed_message(recipient_wa_id: str, message_type: str, error_details: s
 
 # --- Handling Incoming Webhooks ---
 def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
-    """ Parses the incoming webhook payload from WhatsApp. """
-    # --- (Code for parse_incoming_whatsapp_message remains the same as before) ---
+    """
+    Parses the incoming webhook payload from WhatsApp.
+    Updates or creates Contact and ChatMessage objects.
+    Handles different notification types (messages, status updates).
+    """
     if ChatMessage is None or Contact is None: logger.error("Cannot parse incoming: Models not imported."); return None
     logger.debug(f"Parsing webhook payload: {json.dumps(payload, indent=2)}")
     if not payload or payload.get("object") != "whatsapp_business_account": logger.warning("Invalid webhook payload."); return None
@@ -111,7 +116,7 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                     for msg_data in messages_data:
                         try:
                             sender_wa_id = msg_data.get("from"); message_id = msg_data.get("id"); timestamp_ms_str = msg_data.get("timestamp"); msg_type = msg_data.get("type")
-                            if not all([sender_wa_id, message_id, msg_type, timestamp_ms_str]): logger.warning(f"Skipping incomplete message: {msg_data}"); continue
+                            if not all([sender_wa_id, message_id, msg_type, timestamp_ms_str]): logger.warning(f"Skipping incomplete message data: {msg_data}"); continue
                             if ChatMessage.objects.filter(message_id=message_id).exists(): logger.info(f"Message {message_id} already processed."); continue
                             profile_name = next((c.get("profile", {}).get("name") for c in contacts_data if c.get("wa_id") == sender_wa_id), None)
                             contact, created = Contact.objects.update_or_create(wa_id=sender_wa_id, defaults={'name': profile_name} if profile_name else {})
@@ -120,19 +125,27 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                             text_content = None; media_url = None; filename = None; media_id_from_payload = None
                             if msg_type == 'text': text_content = msg_data.get("text", {}).get("body")
                             elif msg_type == 'reaction': reaction = msg_data.get('reaction', {}); reacted_msg_id = reaction.get('message_id'); text_content = f"Reacted '{reaction.get('emoji', '?')}' to {reacted_msg_id}"
-                            elif msg_type in ['image', 'video', 'audio', 'document', 'sticker']: media_info = msg_data.get(msg_type, {}); media_id_from_payload = media_info.get('id'); caption = media_info.get('caption'); filename = media_info.get('filename'); text_content = caption or f"Received {msg_type}"; logger.info(f"Received {msg_type} media ID {media_id_from_payload}"); # media_url = download_whatsapp_media(media_id_from_payload) # Call download here if needed immediately
+                            elif msg_type in ['image', 'video', 'audio', 'document', 'sticker']: media_info = msg_data.get(msg_type, {}); media_id_from_payload = media_info.get('id'); caption = media_info.get('caption'); filename = media_info.get('filename'); text_content = caption or f"Received {msg_type}"; logger.info(f"Received {msg_type} media ID {media_id_from_payload}"); # media_url = download_whatsapp_media(media_id_from_payload)
                             elif msg_type == 'location': loc = msg_data.get('location', {}); text_content = f"Location: Lat {loc.get('latitude')}, Lon {loc.get('longitude')}"; text_content += f" ({loc.get('name')})" if loc.get('name') else ""
                             elif msg_type == 'contacts': contacts_shared = msg_data.get('contacts', []); names = [c.get('name', {}).get('formatted_name', 'Unknown') for c in contacts_shared]; text_content = f"Shared contact(s): {', '.join(names)}"
                             elif msg_type == 'interactive': interactive_data = msg_data.get('interactive', {}); interactive_type = interactive_data.get('type'); reply_info = interactive_data.get('button_reply' if interactive_type == 'button_reply' else 'list_reply', {}); text_content = f"{interactive_type.replace('_',' ').title()}: '{reply_info.get('title')}' (ID: {reply_info.get('id')})"
                             elif msg_type == 'unsupported': text_content = "Received an unsupported message type."
                             else: text_content = f"Received unhandled message type: {msg_type}"; logger.warning(f"Unhandled type '{msg_type}': {msg_data}")
-                            whatsapp_dt = None; 
-                            try: 
-                                whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=timezone.utc)
-                            except (ValueError, TypeError) as dt_err:
-                                logger.error(f"Error parsing timestamp {timestamp_ms_str}: {dt_err}")
-                                whatsapp_dt = timezone.now()
-                            message = ChatMessage.objects.create(message_id=message_id, contact=contact, direction='IN', status='RECEIVED', message_type=msg_type, text_content=text_content, media_url=media_url, timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt, media_id=media_id_from_payload) # Store media_id if available
+
+                            whatsapp_dt = None
+                            try:
+                                # *** CORRECTED LINE ***
+                                # Use datetime.timezone.utc (imported as dt_timezone.utc)
+                                whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=dt_timezone.utc)
+                            except (ValueError, TypeError):
+                                logger.warning(f"Could not parse WhatsApp timestamp: {timestamp_ms_str}")
+
+                            message = ChatMessage.objects.create(
+                                message_id=message_id, contact=contact, direction='IN', status='RECEIVED',
+                                message_type=msg_type, text_content=text_content, media_url=media_url,
+                                timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt,
+                                media_id=media_id_from_payload # Store media_id if available
+                            )
                             logger.info(f"Processed incoming {msg_type} message {message_id} from {sender_wa_id}")
                             if not processed_info: processed_info = {'type': 'incoming_message', 'message_object': message}
                         except Exception as msg_proc_err: logger.exception(f"Error processing one incoming message: {msg_proc_err}. Data: {msg_data}")
@@ -199,116 +212,48 @@ def verify_whatsapp_signature(payload: bytes, signature: str | None, secret: str
     except Exception as e: logger.error(f"Error during webhook signature verification: {e}"); return False
 
 
-# --- NEW: Media Download Utility ---
+# --- Media Download Utility ---
 def download_whatsapp_media(media_id: str) -> Optional[Tuple[bytes, str]]:
-    """
-    Downloads media file associated with the given media ID from WhatsApp.
-
-    Args:
-        media_id: The opaque media ID obtained from the incoming message webhook.
-
-    Returns:
-        A tuple containing (media_content_bytes, content_type_string)
-        or None if the download fails.
-    """
-    if not media_id:
-        logger.warning("Download attempted with no media ID.")
-        return None
-
+    """ Downloads media file associated with the given media ID from WhatsApp. """
+    # --- (Code for download_whatsapp_media remains the same as before) ---
+    if not media_id: logger.warning("Download attempted with no media ID."); return None
     try:
-        settings = get_active_whatsapp_settings()
-        headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
-
-        # 1. Get Media Object Info (including temporary URL)
-        media_info_url = f"{GRAPH_API_URL}/{media_id}"
-        logger.debug(f"Fetching media info from: {media_info_url}")
-        info_response = requests.get(media_info_url, headers=headers, timeout=15)
-        info_response.raise_for_status()
-        media_info = info_response.json()
-        download_url = media_info.get('url')
-
-        if not download_url:
-            logger.error(f"Could not retrieve download URL for media ID {media_id}. Response: {media_info}")
-            return None
-
+        settings = get_active_whatsapp_settings(); headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
+        media_info_url = f"{GRAPH_API_URL}/{media_id}"; logger.debug(f"Fetching media info from: {media_info_url}")
+        info_response = requests.get(media_info_url, headers=headers, timeout=15); info_response.raise_for_status()
+        media_info = info_response.json(); download_url = media_info.get('url')
+        if not download_url: logger.error(f"Could not retrieve download URL for media ID {media_id}. Response: {media_info}"); return None
         logger.debug(f"Retrieved temporary download URL: {download_url}")
-
-        # 2. Download the actual media file using the temporary URL (NO auth header needed here)
-        media_response = requests.get(download_url, timeout=60) # Longer timeout for download
-        media_response.raise_for_status()
-
-        content_type = media_response.headers.get('content-type', 'application/octet-stream') # Get content type
-        media_content = media_response.content # Get raw bytes
-
+        media_response = requests.get(download_url, timeout=60); media_response.raise_for_status()
+        content_type = media_response.headers.get('content-type', 'application/octet-stream'); media_content = media_response.content
         logger.info(f"Successfully downloaded media ID {media_id} ({content_type}, {len(media_content)} bytes).")
         return media_content, content_type
-
-    except requests.exceptions.RequestException as e:
-        logger.error(f"HTTP Error downloading media ID {media_id}: {e}. Response: {e.response.text if e.response else 'N/A'}")
-        return None
-    except WhatsAppSettings.DoesNotExist as e:
-         logger.error(f"Cannot download media: {e}")
-         return None
-    except Exception as e:
-        logger.exception(f"Unexpected error downloading media ID {media_id}: {e}")
-        return None
+    except requests.exceptions.RequestException as e: logger.error(f"HTTP Error downloading media ID {media_id}: {e}. Response: {e.response.text if e.response else 'N/A'}"); return None
+    except WhatsAppSettings.DoesNotExist as e: logger.error(f"Cannot download media: {e}"); return None
+    except Exception as e: logger.exception(f"Unexpected error downloading media ID {media_id}: {e}"); return None
 
 
-# --- NEW: Media Upload Utility ---
+# --- Media Upload Utility ---
 def upload_media_to_whatsapp(media_file: UploadedFile) -> dict | None:
-    """
-    Uploads a media file to WhatsApp using the /media endpoint to get a reusable ID.
-
-    Args:
-        media_file: An UploadedFile object (from request.FILES).
-
-    Returns:
-        A dictionary containing the 'id' and potentially 'type' of the uploaded media,
-        or None if the upload fails.
-    """
+    """ Uploads a media file to WhatsApp using the /media endpoint to get a reusable ID. """
+    # --- (Code for upload_media_to_whatsapp remains the same as before) ---
     try:
-        settings = get_active_whatsapp_settings()
-        api_url = f"{GRAPH_API_URL}/{settings.phone_number_id}/media"
+        settings = get_active_whatsapp_settings(); api_url = f"{GRAPH_API_URL}/{settings.phone_number_id}/media"
         headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
-        # Prepare file data for multipart/form-data request
-        files = {
-            # Use media_file.name for filename, media_file for content, media_file.content_type
-            'file': (media_file.name, media_file, media_file.content_type),
-        }
-        payload = {
-            'messaging_product': 'whatsapp',
-            'type': media_file.content_type # Pass content type
-        }
-
+        files = {'file': (media_file.name, media_file, media_file.content_type)}
+        payload = {'messaging_product': 'whatsapp', 'type': media_file.content_type}
         logger.info(f"Attempting to upload media file '{media_file.name}' ({media_file.content_type}) to WhatsApp.")
-        response = requests.post(api_url, headers=headers, data=payload, files=files, timeout=60) # Longer timeout for uploads
-        response.raise_for_status() # Check for HTTP errors
-
-        response_data = response.json()
-        media_id = response_data.get('id')
-
+        response = requests.post(api_url, headers=headers, data=payload, files=files, timeout=60)
+        response.raise_for_status(); response_data = response.json(); media_id = response_data.get('id')
         if media_id:
             logger.info(f"Media uploaded successfully. Media ID: {media_id}")
-            # Determine simple type for consumer/JS (optional)
-            content_type = media_file.content_type.lower()
-            media_type = 'document' # Default
+            content_type = media_file.content_type.lower(); media_type = 'document'
             if content_type.startswith('image/'): media_type = 'image'
             elif content_type.startswith('video/'): media_type = 'video'
             elif content_type.startswith('audio/'): media_type = 'audio'
-            # Note: WhatsApp might re-process/re-classify, but this gives a hint
-
             return {'id': media_id, 'type': media_type}
-        else:
-            logger.error(f"WhatsApp media upload API call successful but did not return a media ID. Response: {response_data}")
-            return None
-
-    except requests.exceptions.RequestException as e:
-        logger.error(f"HTTP Error uploading media: {e}. Response: {e.response.text if e.response else 'N/A'}")
-        return None
-    except WhatsAppSettings.DoesNotExist as e:
-         logger.error(f"Cannot upload media: {e}")
-         return None
-    except Exception as e:
-        logger.exception(f"Unexpected error uploading media file {media_file.name}: {e}")
-        return None
+        else: logger.error(f"WhatsApp media upload API call successful but did not return a media ID. Response: {response_data}"); return None
+    except requests.exceptions.RequestException as e: logger.error(f"HTTP Error uploading media: {e}. Response: {e.response.text if e.response else 'N/A'}"); return None
+    except WhatsAppSettings.DoesNotExist as e: logger.error(f"Cannot upload media: {e}"); return None
+    except Exception as e: logger.exception(f"Unexpected error uploading media file {media_file.name}: {e}"); return None
 
