@@ -1,15 +1,21 @@
 import os
+import django # Import django
 from django.core.asgi import get_asgi_application
-# Import Channels routing and middleware
+# Import Channels routing and middleware AFTER django.setup()
 from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack # Handles Django auth over WebSockets
-# Import your app's routing configuration
-import whatsapp_app.routing
+from channels.auth import AuthMiddlewareStack
 
-# Set the default Django settings module for the 'asgi' application.
+# Set the default Django settings module first
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nurseryproject.settings')
 
-# Get the standard Django ASGI application to handle traditional HTTP requests first.
+# --- IMPORTANT: Call django.setup() here ---
+django.setup()
+# ---------------------------------------------
+
+# Now import things that might depend on Django apps being ready
+import whatsapp_app.routing # Import your app's routing configuration
+
+# Get the standard Django ASGI application AFTER setup
 django_asgi_app = get_asgi_application()
 
 # Define the ASGI application routing
