@@ -43,13 +43,13 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Application definition
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'daphne',
     'channels',
     'django_celery_beat',
     'woocommerce_app',
