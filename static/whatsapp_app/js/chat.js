@@ -393,3 +393,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 }); // End DOMContentLoaded
+// --- WebSocket Message Handler ---
+const chatSocket = new WebSocket(
+    'ws://' + window.location.host + '/ws/chat/' + contactWaId + '/'
+);
+
+chatSocket.onmessage = function(e) {
+    try {
+        const data = JSON.parse(e.data);
+        // Log received WebSocket data
+        console.log("WebSocket onmessage - Received data:", JSON.stringify(data));
+
+        if (data.type === 'chat_message' && data.message) {
+            // Log message details before adding to UI
+            console.log(`WebSocket onmessage - Calling addMessageToUI for ID: ${data.message.message_id} DIR: ${data.message.direction}`);
+            addMessageToUI(data.message);
+            scrollToBottom();
+        }
+    } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+    }
+};
+
+chatSocket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+};
