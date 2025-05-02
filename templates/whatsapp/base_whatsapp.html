@@ -86,7 +86,7 @@
     </nav>
 
     {# --- Display Django Messages (Styled via whatsapp_style.css) --- #}
-    {% if messages %}
+    {% comment %} {% if messages %}
     <div class="whatsapp-messages-container">
         {% for message in messages %}
             {# Custom message item classes based on tags #}
@@ -96,7 +96,7 @@
             </div>
         {% endfor %}
     </div>
-    {% endif %}
+    {% endif %} {% endcomment %}
 
     {# --- Main Content Area for Specific WhatsApp Pages --- #}
     <div class="whatsapp-page-content">

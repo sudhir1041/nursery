@@ -28,7 +28,7 @@
         {% for message in messages %}
         <div class="message {% if message.direction == 'OUT' %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.message_id }}">
             <div class="message-bubble">
-                <div class="message-text"> {# Base class for content #}
+                <div class="message-text">
                     {% if message.message_type == 'text' %}
                         {{ message.text_content|linebreaksbr }}
                     {% elif message.message_type == 'template' %}
@@ -57,7 +57,7 @@
                         <span class="media-indicator"><i class="fas fa-file"></i> [{{ message.get_message_type_display|default:message.message_type }}]</span>
                         {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
                     {% endif %}
-                </div> {# End message-text #}
+                </div>
 
                 <div class="message-meta">
                     <span class="message-time">{{ message.timestamp|date:"H:i" }}</span>
@@ -72,49 +72,40 @@
                         </span>
                     {% endif %}
                 </div>
-            </div> {# End message-bubble #}
-        </div> {# End message #}
+            </div>
+        </div>
         {% empty %}
         <p class="text-center text-muted mt-5" id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
         {% endfor %}
-    </div> {# End chat-messages #}
+    </div>
 
     {# --- Message Input Area --- #}
     <div class="chat-input-area">
-        {# *** CORRECTED: Removed wa_id argument from url tag *** #}
         <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form">
              {% csrf_token %}
-             {# Add wa_id as hidden input SINCE view expects it in POST #}
              <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
 
-             {# Attach Button #}
              <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
                  <i class="fas fa-paperclip"></i>
              </button>
-             {# Hidden File Input #}
              <input type="file" id="chat-file-input" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
 
-            {# Render text_content field #}
             {{ form.text_content }}
 
-            {# Send Button #}
             <button type="submit" class="custom-button button-primary" title="Send Message">
-                <i class="fas fa-paper-plane"></i> {# Icon only for space #}
+                <i class="fas fa-paper-plane"></i>
             </button>
-             {# Uploading Indicator #}
              <span id="file-upload-spinner" style="display: none; margin-left: 10px; color: #6c757d;">
                  <i class="fas fa-spinner fa-spin"></i> Uploading...
              </span>
         </form>
-         {# Optional: Add error display area for JS #}
          <div id="chat-error-display" style="display: none; color: #dc3545; font-size: 0.9em; margin-top: 5px;"></div>
     </div>
 
-</div> {# End chat-detail-container #}
+</div>
 {% endblock whatsapp_content %}
 
-{% block extra_scripts %} {# Add JavaScript specific to the chat page #}
-    {{ block.super }} {# Include JS from base templates #}
-    {# Ensure chat.js is included #}
+{% block extra_scripts %}
+    {{ block.super }}
     <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
 {% endblock extra_scripts %}
