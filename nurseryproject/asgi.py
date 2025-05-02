@@ -1,18 +1,27 @@
-import os
-from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import whatsapp_app.routing
+    # nurseryproject/asgi.py (or your project's asgi.py)
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nurseryproject.settings')
+    import os
+    from django.core.asgi import get_asgi_application
+    from channels.routing import ProtocolTypeRouter, URLRouter
+    from channels.auth import AuthMiddlewareStack # Handles Django auth over WebSockets
+    # --- Import your app's routing ---
+    import whatsapp_app.routing
 
-django_asgi_app = get_asgi_application()
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nurseryproject.settings')
 
-application = ProtocolTypeRouter({
-    "http": django_asgi_app,
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            whatsapp_app.routing.websocket_urlpatterns
-        )
-    ),
-})
+    # Get the standard Django ASGI app first for HTTP requests
+    django_asgi_app = get_asgi_application()
+
+    application = ProtocolTypeRouter({
+        # Django's ASGI application to handle traditional HTTP requests
+        "http": django_asgi_app,
+
+        # WebSocket handler
+        "websocket": AuthMiddlewareStack( # Handles user authentication
+            URLRouter(
+                # --- Point to your app's WebSocket URL patterns ---
+                whatsapp_app.routing.websocket_urlpatterns
+            )
+        ),
+    })
+    
