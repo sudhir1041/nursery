@@ -334,7 +334,7 @@ h4.section-title {
 .copy-field .copy-btn.button-success { /* ... */ } .copy-field .copy-btn.button-error { /* ... */ }
 
 
-/* --- Chat List Specific Styles (UPDATED) --- */
+/* --- Chat List Specific Styles (UPDATED for better view) --- */
 .whatsapp-chat-list-container .page-title { /* Inherits */ }
 .whatsapp-chat-list-container .divider { /* Inherits */ }
 .search-bar-container { margin-bottom: 1.5rem; max-width: 600px; }
@@ -347,36 +347,86 @@ h4.section-title {
 
 /* Chat List Styling */
 .chat-list {
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
+    border: 1px solid #dee2e6; /* Slightly darker border */
+    border-radius: 6px; /* Slightly more rounded */
     background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    overflow: hidden; /* Clip borders of items */
-    margin-bottom: 1.5rem; /* Space before pagination */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06); /* Slightly more shadow */
+    overflow: hidden;
+    margin-bottom: 1.5rem;
 }
 
 .chat-list-item {
     display: block;
-    padding: 0.8rem 1.25rem; /* Adjusted padding */
+    padding: 1rem 1.25rem; /* Increased padding */
     text-decoration: none;
-    color: #333;
-    border-bottom: 1px solid #e9ecef; /* Lighter border */
-    transition: background-color 0.15s ease-in-out;
+    color: #343a40; /* Darker base text */
+    border-bottom: 1px solid #e9ecef; /* Lighter separator */
+    transition: background-color 0.15s ease-in-out, transform 0.1s ease-out;
     position: relative;
+    cursor: pointer;
 }
 .chat-list-item:last-child { border-bottom: none; }
-.chat-list-item:hover { background-color: #f8f9fa; color: #000; }
+.chat-list-item:hover {
+    background-color: #f8f9fa; /* Standard light hover */
+    /* transform: scale(1.01); */ /* Optional: subtle scale effect */
+}
+.chat-list-item:active {
+     transform: scale(0.99); /* Click effect */
+}
 
-.chat-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.3rem; } /* Slightly more space */
-.chat-contact-name { margin: 0; font-size: 1.05rem; font-weight: 500; color: #212529; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; } /* Slightly smaller, bolder */
-.chat-last-time { font-size: 0.75rem; color: #6c757d; white-space: nowrap; margin-left: 1rem; flex-shrink: 0; }
-.chat-last-message { font-size: 0.85rem; color: #555; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 20px; } /* Less muted, less margin */
-.chat-last-message .no-messages-text { font-style: italic; color: #888; }
-.chat-direction-icon { font-size: 0.8em; margin-right: 0.4em; opacity: 0.9; display: inline-block; vertical-align: middle; color: #888; } /* Slightly more visible */
-.chat-wa-id { font-size: 0.7rem; color: #adb5bd; display: block; margin-top: 0.1rem; } /* Even smaller */
+
+.chat-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.4rem; /* More space */
+}
+.chat-contact-name {
+    margin: 0;
+    font-size: 1.1rem; /* Slightly larger */
+    font-weight: 600; /* Bolder */
+    color: #212529;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: calc(100% - 100px); /* Ensure space for time */
+}
+.chat-last-time {
+    font-size: 0.75rem;
+    color: #495057; /* Less muted */
+    white-space: nowrap;
+    margin-left: 1rem;
+    flex-shrink: 0;
+}
+.chat-last-message {
+    font-size: 0.9rem; /* Slightly larger preview */
+    color: #495057; /* Less muted */
+    margin-bottom: 0.3rem; /* More space */
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding-right: 25px; /* Ensure space for potential badge */
+    display: flex; /* Align icon and text */
+    align-items: center;
+}
+.chat-last-message .no-messages-text { font-style: italic; color: #868e96; }
+.chat-direction-icon {
+    font-size: 0.85em;
+    margin-right: 0.5em; /* More space */
+    opacity: 0.8;
+    color: #6c757d; /* Muted icon */
+    flex-shrink: 0; /* Prevent icon shrinking */
+}
+.chat-wa-id {
+    font-size: 0.75rem; /* Keep small */
+    color: #adb5bd;
+    display: block;
+}
 
 .unread-badge { /* ... existing styles ... */ }
-.chat-list-empty { padding: 2.5rem; text-align: center; color: #6c757d; font-size: 0.95rem; } /* Slightly larger text */
+.chat-list-empty {
+    padding: 3rem 1.5rem; /* More padding */
+    text-align: center;
+    color: #6c757d;
+    font-size: 1rem; /* Larger text */
+    border-bottom: none;
+}
 .chat-list-empty p { margin-bottom: 0; }
 
 
