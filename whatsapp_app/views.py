@@ -21,6 +21,11 @@ import logging
 import uuid # For webhook token generation if needed
 import hmac # For signature verification
 import hashlib # For signature verification
+# --- Django Imports ---
+
+from django.db.models import Count, Q, Max, Sum, Subquery, OuterRef
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import user_passes_test
 
 # --- App Imports ---
 # Models from this app
@@ -305,36 +310,75 @@ def handle_bot_or_autoreply(incoming_message: ChatMessage):
 # Chat List & Detail Views
 # ==============================================================================
 @user_passes_test(is_staff_user)
+@user_passes_test(is_staff_user)
 def chat_list(request):
     """ Displays a list of contacts with recent chat activity. """
     search_query = request.GET.get('q', '').strip()
 
     # Get contacts, ordered by the timestamp of their last message
-    # Annotate with last message time for ordering
+    # Annotate with last message time and last message content for ordering and preview
     contacts_with_messages = Contact.objects.annotate(
-        last_message_time=Max('messages__timestamp')
-    ).filter(last_message_time__isnull=False) # Only contacts with messages
+        last_message_time=Max('messages__timestamp'),
+        last_message_content=Subquery(
+            ChatMessage.objects.filter(
+                contact=OuterRef('pk')
+            ).order_by('-timestamp').values('text_content')[:1]
+        ),
+        unread_count=Count(
+            'messages',
+            filter=Q(messages__direction='IN', messages__read_status=False)
+        )
+    ).filter(last_message_time__isnull=False)
 
     # Apply search filter if query exists
     if search_query:
         contacts_with_messages = contacts_with_messages.filter(
-            Q(name__icontains=search_query) | Q(wa_id__icontains=search_query)
-            # Add search on linked customer/user fields if applicable
-            # | Q(customer__name__icontains=search_query)
-        )
+            Q(name__icontains=search_query) | 
+            Q(wa_id__icontains=search_query) |
+            Q(messages__text_content__icontains=search_query)
+        ).distinct()
 
     # Order by the annotated last message time
     contacts = contacts_with_messages.order_by('-last_message_time')
 
-    # Note: Getting last message preview here is inefficient.
-    # It's better to display this in the template by accessing messages.last
-    # or store it on the Contact model via signals/tasks if performance is critical.
+    # Add pagination
+    paginator = Paginator(contacts, 20)  # Show 20 contacts per page
+    page = request.GET.get('page')
+    try:
+        contacts_page = paginator.page(page)
+    except PageNotAnInteger:
+        contacts_page = paginator.page(1)
+    except EmptyPage:
+        contacts_page = paginator.page(paginator.num_pages)
 
     context = {
-        'contacts': contacts,
+        'contacts': contacts_page,
         'search_query': search_query,
+        'total_contacts': contacts.count(),
+        'unread_total': contacts.aggregate(Sum('unread_count'))['unread_count__sum'] or 0,
+        'page_obj': contacts_page,
+        'is_paginated': contacts_page.has_other_pages(),
     }
-    # Ensure the template path matches your project structure
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Return JSON response for AJAX requests
+        chat_data = []
+        for contact in contacts_page:
+            chat_data.append({
+                'id': contact.id,
+                'wa_id': contact.wa_id,
+                'name': contact.name or contact.wa_id,
+                'last_message': contact.last_message_content,
+                'last_message_time': contact.last_message_time.isoformat() if contact.last_message_time else None,
+                'unread_count': contact.unread_count,
+                'avatar_url': contact.avatar_url if hasattr(contact, 'avatar_url') else None,
+            })
+        return JsonResponse({
+            'chats': chat_data,
+            'has_next': contacts_page.has_next(),
+            'next_page': contacts_page.next_page_number() if contacts_page.has_next() else None
+        })
+
     return render(request, 'whatsapp/chat_list.html', context)
 
 @user_passes_test(is_staff_user)
