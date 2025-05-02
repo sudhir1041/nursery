@@ -126,7 +126,12 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                             elif msg_type == 'interactive': interactive_data = msg_data.get('interactive', {}); interactive_type = interactive_data.get('type'); reply_info = interactive_data.get('button_reply' if interactive_type == 'button_reply' else 'list_reply', {}); text_content = f"{interactive_type.replace('_',' ').title()}: '{reply_info.get('title')}' (ID: {reply_info.get('id')})"
                             elif msg_type == 'unsupported': text_content = "Received an unsupported message type."
                             else: text_content = f"Received unhandled message type: {msg_type}"; logger.warning(f"Unhandled type '{msg_type}': {msg_data}")
-                            whatsapp_dt = None; try: whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=timezone.utc); except: pass
+                            whatsapp_dt = None; 
+                            try: 
+                                whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=timezone.utc)
+                            except (ValueError, TypeError) as dt_err:
+                                logger.error(f"Error parsing timestamp {timestamp_ms_str}: {dt_err}")
+                                whatsapp_dt = timezone.now()
                             message = ChatMessage.objects.create(message_id=message_id, contact=contact, direction='IN', status='RECEIVED', message_type=msg_type, text_content=text_content, media_url=media_url, timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt, media_id=media_id_from_payload) # Store media_id if available
                             logger.info(f"Processed incoming {msg_type} message {message_id} from {sender_wa_id}")
                             if not processed_info: processed_info = {'type': 'incoming_message', 'message_object': message}
