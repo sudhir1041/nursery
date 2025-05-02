@@ -43,7 +43,7 @@ from .utils import (
 # --- Celery (Optional Background Tasks) ---
 try:
     # Import the tasks needed by views
-    from .tasks import process_whatsapp_webhook_task, send_bulk_campaign_messages_task
+    from .tasks import process_whatsapp_webhook_task, send_bulk_campaign_messages_task, send_whatsapp_message_task
     CELERY_ENABLED = True
 except ImportError:
     CELERY_ENABLED = False
@@ -53,6 +53,9 @@ except ImportError:
         # Depending on how critical, you might raise error or just log
     def send_bulk_campaign_messages_task(*args, **kwargs):
         logger.error("Celery not configured. Cannot run send_bulk_campaign_messages_task.")
+        raise NotImplementedError("Celery is not enabled or tasks are not defined.")
+    def send_whatsapp_message_task(*args, **kwargs):
+        logger.error("Celery not configured. Cannot run send_whatsapp_message_task.")
         raise NotImplementedError("Celery is not enabled or tasks are not defined.")
 
 # --- Logger Setup ---
@@ -688,11 +691,21 @@ def upload_contacts_for_campaign(request, pk):
 
 @user_passes_test(is_staff_user)
 @require_POST
+@user_passes_test(is_staff_user)
+@require_POST 
 def schedule_campaign(request, pk):
     """ Schedules or starts sending a campaign immediately via Celery. """
-    if not CELERY_ENABLED:
+    try:
+        # Check if Celery is enabled by attempting to ping the broker
+        from celery.task.control import inspect
+        insp = inspect()
+        if not insp.ping():
+            messages.error(request, "Background task processing (Celery) is not enabled. Cannot schedule or send campaigns.")
+            return redirect('whatsapp_app:campaign_detail', pk=pk)
+    except Exception:
         messages.error(request, "Background task processing (Celery) is not enabled. Cannot schedule or send campaigns.")
         return redirect('whatsapp_app:campaign_detail', pk=pk)
+
     campaign = get_object_or_404(MarketingCampaign, pk=pk)
     if campaign.status not in ['DRAFT', 'SCHEDULED', 'CANCELLED']:
         messages.error(request, "Campaign cannot be scheduled or sent in its current state.")
