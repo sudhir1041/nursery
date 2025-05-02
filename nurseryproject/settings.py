@@ -40,6 +40,13 @@ ALLOWED_HOSTS = [
     'admin.nurserynisarga.in',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://admin.nurserynisarga.in',
+    'http://127.0.0.1:8000',
+    # 'http://localhost:8000',
+]
+
+
 LOGIN_URL = '/accounts/login/' 
 LOGIN_REDIRECT_URL = '/' 
 LOGOUT_REDIRECT_URL = '/accounts/login/'
