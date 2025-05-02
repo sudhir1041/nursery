@@ -1,4 +1,3 @@
-# views.py (within your whatsapp_app)
 
 # --- Django Imports ---
 from django.shortcuts import render, redirect, get_object_or_404
@@ -99,7 +98,7 @@ def dashboard(request):
         stats.setdefault('failed_count', 0)
         stats.setdefault('recent_campaigns', [])
     context = stats
-    return render(request, 'whatsapp_app/dashboard.html', context)
+    return render(request, 'whatsapp/dashboard.html', context)
 
 
 # ==============================================================================
@@ -143,7 +142,7 @@ def whatsapp_settings_view(request):
         'settings': settings_instance,
         'full_webhook_url': full_webhook_url
     }
-    return render(request, 'whatsapp_app/settings_form.html', context)
+    return render(request, 'whatsapp/settings_form.html', context)
 
 
 # ==============================================================================
@@ -318,7 +317,7 @@ def chat_list(request):
         'contacts': contacts,
         'search_query': search_query,
     }
-    return render(request, 'whatsapp_app/chat_list.html', context)
+    return render(request, 'whatsapp/chat_list.html', context)
 
 @user_passes_test(is_staff_user)
 def chat_detail(request, wa_id):
@@ -337,7 +336,7 @@ def chat_detail(request, wa_id):
         'form': form,
         'last_message_timestamp': last_message_timestamp_iso,
     }
-    return render(request, 'whatsapp_app/chat_detail.html', context)
+    return render(request, 'whatsapp/chat_detail.html', context)
 
 # ==============================================================================
 # AJAX Endpoints for Chat (Used by chat.js)
@@ -452,7 +451,7 @@ def bot_response_list(request):
     """ Lists all configured bot responses. """
     bot_responses = BotResponse.objects.order_by('trigger_phrase')
     context = {'bot_responses': bot_responses}
-    return render(request, 'whatsapp_app/bot_list.html', context)
+    return render(request, 'whatsapp/bot/bot_list.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_create(request):
@@ -472,7 +471,7 @@ def bot_response_create(request):
     else:
         form = BotResponseForm()
     context = {'form': form, 'action': 'Create'}
-    return render(request, 'whatsapp_app/bot_response_form.html', context)
+    return render(request, 'whatsapp/bot/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
 def bot_response_update(request, pk):
@@ -493,7 +492,7 @@ def bot_response_update(request, pk):
     else:
         form = BotResponseForm(instance=bot_response)
     context = {'form': form, 'bot_response': bot_response, 'action': 'Update'}
-    return render(request, 'whatsapp_app/bot_response_form.html', context)
+    return render(request, 'whatsapp/bot/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
 @require_POST
@@ -533,7 +532,7 @@ def autoreply_settings_view(request):
     else:
         form = AutoReplySettingsForm(instance=settings)
     context = {'form': form, 'settings': settings}
-    return render(request, 'whatsapp_app/autoreply_settings.html', context)
+    return render(request, 'whatsapp/bot/autoreply_settings.html', context)
 
 
 # ==============================================================================
@@ -544,7 +543,7 @@ def campaign_list(request):
     """ Lists all marketing campaigns. """
     campaigns = MarketingCampaign.objects.select_related('template').order_by('-created_at')
     context = {'campaigns': campaigns}
-    return render(request, 'whatsapp_app/marketing/campaign_list.html', context)
+    return render(request, 'whatsapp/bot/marketing/campaign_list.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_detail(request, pk):
@@ -565,7 +564,7 @@ def campaign_detail(request, pk):
             stats['failed_pct'] = round(stats['failed'] / base * 100, 1)
     upload_form = ContactUploadForm() if campaign.status == 'DRAFT' else None
     context = { 'campaign': campaign, 'recipients': recipients, 'stats': stats, 'upload_form': upload_form, 'celery_enabled': CELERY_ENABLED, }
-    return render(request, 'whatsapp_app/marketing/campaign_detail.html', context)
+    return render(request, 'whatsapp/marketing/campaign_detail.html', context)
 
 @user_passes_test(is_staff_user)
 def campaign_create(request):
@@ -582,7 +581,7 @@ def campaign_create(request):
         else: messages.error(request, "Please correct the errors highlighted below.")
     else: form = MarketingCampaignForm()
     context = {'form': form, 'action': 'Create'}
-    return render(request, 'whatsapp_app/marketing/campaign_form.html', context)
+    return render(request, 'whatsapp/marketing/campaign_form.html', context)
 
 # media file upload in chats 
 @user_passes_test(is_staff_user)
@@ -750,7 +749,7 @@ def template_list(request):
     """ Displays synced WhatsApp message templates. """
     templates = MarketingTemplate.objects.order_by('name', 'language')
     context = {'templates': templates}
-    return render(request, 'whatsapp_app/marketing/template_list.html', context)
+    return render(request, 'whatsapp/marketing/template_list.html', context)
 
 
 @user_passes_test(is_staff_user)
