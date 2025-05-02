@@ -99,12 +99,15 @@ def log_failed_message(recipient_wa_id: str, message_type: str, error_details: s
 
 # --- Handling Incoming Webhooks ---
 def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
-    """ Parses the incoming webhook payload from WhatsApp. """
-    # --- (Code for parse_incoming_whatsapp_message remains the same, including the fix for timezone.utc) ---
+    """
+    Parses the incoming webhook payload from WhatsApp.
+    Updates or creates Contact and ChatMessage objects.
+    Handles different notification types (messages, status updates).
+    """
     if ChatMessage is None or Contact is None: logger.error("Cannot parse incoming: Models not imported."); return None
     logger.debug(f"Parsing webhook payload: {json.dumps(payload, indent=2)}")
     if not payload or payload.get("object") != "whatsapp_business_account": logger.warning("Invalid webhook payload."); return None
-    processed_info = None; media_id_from_payload = None # Define media_id here
+    processed_info = None; media_id_from_payload = None
     for entry in payload.get("entry", []):
         for change in entry.get("changes", []):
             if change.get("field") == "messages":
@@ -129,8 +132,22 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                             elif msg_type == 'interactive': interactive_data = msg_data.get('interactive', {}); interactive_type = interactive_data.get('type'); reply_info = interactive_data.get('button_reply' if interactive_type == 'button_reply' else 'list_reply', {}); text_content = f"{interactive_type.replace('_',' ').title()}: '{reply_info.get('title')}' (ID: {reply_info.get('id')})"
                             elif msg_type == 'unsupported': text_content = "Received an unsupported message type."
                             else: text_content = f"Received unhandled message type: {msg_type}"; logger.warning(f"Unhandled type '{msg_type}': {msg_data}")
-                            whatsapp_dt = None; try: whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=dt_timezone.utc); except: pass
-                            message = ChatMessage.objects.create(message_id=message_id, contact=contact, direction='IN', status='RECEIVED', message_type=msg_type, text_content=text_content, media_url=media_url, timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt)
+
+                            # --- CORRECTED: Try/Except block for timestamp parsing ---
+                            whatsapp_dt = None
+                            try:
+                                # Use datetime.timezone.utc (imported as dt_timezone.utc)
+                                whatsapp_dt = datetime.fromtimestamp(int(timestamp_ms_str), tz=dt_timezone.utc)
+                            except (ValueError, TypeError):
+                                logger.warning(f"Could not parse WhatsApp timestamp: {timestamp_ms_str}")
+                            # --- End Correction ---
+
+                            message = ChatMessage.objects.create(
+                                message_id=message_id, contact=contact, direction='IN', status='RECEIVED',
+                                message_type=msg_type, text_content=text_content, media_url=media_url,
+                                timestamp=timezone.now(), whatsapp_timestamp=whatsapp_dt
+                                # NOTE: media_id is NOT saved here by default
+                            )
                             # Store media_id temporarily on object if present, for task to use
                             if media_id_from_payload: message.media_id_from_payload = media_id_from_payload
                             logger.info(f"Processed incoming {msg_type} message {message_id} from {sender_wa_id}")
@@ -247,55 +264,32 @@ def upload_media_to_whatsapp(media_file: UploadedFile) -> dict | None:
     except Exception as e: logger.exception(f"Unexpected error uploading media file {media_file.name}: {e}"); return None
 
 
-# --- NEW: Helper Function for Bots/Auto-Replies (Moved from views.py) ---
+# --- Helper Function for Bots/Auto-Replies (Moved from views.py) ---
 def handle_bot_or_autoreply(incoming_message: ChatMessage):
     """ Checks and sends bot responses or auto-replies based on incoming message. """
-    if BotResponse is None or AutoReply is None: # Check if models imported
-         logger.error("Cannot handle bot/autoreply: Models not imported.")
-         return
-    if not incoming_message or not incoming_message.text_content or incoming_message.direction != 'IN':
-        return # Only process incoming text messages
-
-    contact = incoming_message.contact
-    message_text_lower = incoming_message.text_content.lower().strip()
-    bot_responded = False
-
-    # 1. Check for Bot Triggers
-    try:
+    # --- (Code for handle_bot_or_autoreply remains the same) ---
+    if BotResponse is None or AutoReply is None: logger.error("Cannot handle bot/autoreply: Models not imported."); return
+    if not incoming_message or not incoming_message.text_content or incoming_message.direction != 'IN': return
+    contact = incoming_message.contact; message_text_lower = incoming_message.text_content.lower().strip(); bot_responded = False
+    try: # Check Bot Triggers
         bot_response = BotResponse.objects.filter(is_active=True, trigger_phrase__iexact=message_text_lower).first()
         if bot_response:
             last_out_msg = ChatMessage.objects.filter(contact=contact, direction='OUT').order_by('-timestamp').first()
-            # Simple loop prevention
             if not last_out_msg or last_out_msg.text_content != bot_response.response_text:
-                # Call utility to send the message
                 send_whatsapp_message(recipient_wa_id=contact.wa_id, message_type='text', text_content=bot_response.response_text)
-                logger.info(f"Sent bot response for trigger '{bot_response.trigger_phrase}' to {contact.wa_id}")
-                bot_responded = True
-            else:
-                 logger.info(f"Skipping bot response for '{bot_response.trigger_phrase}' to {contact.wa_id} to prevent potential loop.")
-                 bot_responded = True # Still consider handled
-    except Exception as e:
-        logger.exception(f"Error checking/sending bot response for {contact.wa_id}: {e}") # Log full traceback
-
-    # 2. Check for Auto-Reply (Only if no bot response was sent)
-    if not bot_responded:
-        # <<<--- IMPLEMENT YOUR AGENT AVAILABILITY LOGIC HERE --- >>>
-        agent_available = False # Default to unavailable for this example
-
+                logger.info(f"Sent bot response for '{bot_response.trigger_phrase}' to {contact.wa_id}"); bot_responded = True
+            else: logger.info(f"Skipping bot response loop for '{bot_response.trigger_phrase}' to {contact.wa_id}"); bot_responded = True
+    except Exception as e: logger.exception(f"Error checking/sending bot response for {contact.wa_id}: {e}")
+    if not bot_responded: # Check Auto-Reply
+        agent_available = False # <<<--- IMPLEMENT YOUR AVAILABILITY LOGIC HERE --- >>>
         if not agent_available:
             try:
-                # Use get() assuming singleton pk=1, handle DoesNotExist
                 auto_reply_settings = AutoReply.objects.get(pk=1, is_active=True)
-                if auto_reply_settings:
-                    last_out_msg = ChatMessage.objects.filter(contact=contact, direction='OUT').order_by('-timestamp').first()
-                     # Simple loop prevention
-                    if not last_out_msg or last_out_msg.text_content != auto_reply_settings.message_text:
-                        send_whatsapp_message(recipient_wa_id=contact.wa_id, message_type='text', text_content=auto_reply_settings.message_text)
-                        logger.info(f"Sent auto-reply to {contact.wa_id}")
-                    else:
-                        logger.info(f"Skipping auto-reply to {contact.wa_id} to prevent potential loop.")
-            except AutoReply.DoesNotExist:
-                 logger.info("Auto-reply is not configured or not active.") # Expected if not set up
-            except Exception as e:
-                logger.exception(f"Error checking/sending auto-reply for {contact.wa_id}: {e}") # Log full traceback
+                last_out_msg = ChatMessage.objects.filter(contact=contact, direction='OUT').order_by('-timestamp').first()
+                if not last_out_msg or last_out_msg.text_content != auto_reply_settings.message_text:
+                    send_whatsapp_message(recipient_wa_id=contact.wa_id, message_type='text', text_content=auto_reply_settings.message_text)
+                    logger.info(f"Sent auto-reply to {contact.wa_id}")
+                else: logger.info(f"Skipping auto-reply loop to {contact.wa_id}")
+            except AutoReply.DoesNotExist: logger.info("Auto-reply inactive or not configured.")
+            except Exception as e: logger.exception(f"Error checking/sending auto-reply for {contact.wa_id}: {e}")
 
