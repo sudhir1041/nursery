@@ -114,7 +114,7 @@
     {# --- Message Input Area (Uses .chat-input-area from CSS) --- #}
     <div class="chat-input-area">
         {# Uses .whatsapp-form (general form class) #}
-        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form">
+        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form" onsubmit="return validateForm()">
             {% csrf_token %}
             <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
 
@@ -150,6 +150,18 @@
     {# Ensure chat.js is loaded and handles scrolling, message fetching, sending, status updates etc. #}
     <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
     <script>
+        function validateForm() {
+            const textInput = document.querySelector('.chat-input-area textarea');
+            const fileInput = document.getElementById('chat-file-input');
+            
+            if (!textInput.value.trim() && !fileInput.files.length) {
+                document.getElementById('chat-error-display').style.display = 'block';
+                document.getElementById('chat-error-display').textContent = 'Please enter a message or attach a file';
+                return false;
+            }
+            return true;
+        }
+
         // Basic scroll to bottom on load (might be in chat.js already)
         document.addEventListener('DOMContentLoaded', function() {
             const messageList = document.getElementById('message-list');
@@ -210,7 +222,9 @@
                     // Submit on Enter press, unless Shift+Enter is pressed (for new line)
                     if (event.key === 'Enter' && !event.shiftKey) {
                         event.preventDefault(); // Prevent default Enter behavior (new line)
-                        document.getElementById('manual-message-form').requestSubmit(); // Submit the form
+                        if(validateForm()) {
+                            document.getElementById('manual-message-form').requestSubmit(); // Submit the form
+                        }
                     }
                 });
 
