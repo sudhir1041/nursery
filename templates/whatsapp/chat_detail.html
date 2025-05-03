@@ -4,70 +4,101 @@
 
 {% block whatsapp_content %}
 
-{# --- Main Chat Container --- #}
+{# --- Main Chat Container (Uses .chat-detail-container from CSS) --- #}
 <div class="chat-detail-container">
 
-    {# --- Chat Header --- #}
+    {# --- Chat Header (Uses .chat-header from CSS) --- #}
     <div class="chat-header">
-        <div class="chat-header-info">
-            <h4 class="contact-name">{{ contact.name|default:contact.wa_id }}</h4>
-            <small class="contact-wa-id">{{ contact.wa_id }}</small>
+        <div class="chat-header-info"> {# Assuming CSS handles layout #}
+             {# Placeholder for profile picture if available #}
+            <img src="{{ contact.profile_pic_url|default:'/static/images/default_avatar.png' }}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;"> 
+            <div>
+                <div style="display: flex; align-items: center;"> {# Inline style for simple alignment #}
+                    <h4 class="contact-name">{{ contact.name|default:contact.wa_id }}</h4>
+                    
+                    {% if contact.is_online is not None %} {# Check if status is available #}
+                        <span class="status-indicator {% if contact.is_online %}status-online{% else %}status-offline{% endif %}"
+                              title="{% if contact.is_online %}Online{% else %}Offline{% endif %}">
+                        </span>
+                    {% endif %}
+                </div>
+                <small class="contact-wa-id">{{ contact.wa_id }}</small>
+            </div>
         </div>
-        <div class="chat-header-actions">
+        <div class="chat-header-actions"> {# Assuming CSS handles layout #}
              <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-outline-secondary button-sm" title="Back to Chat List">
                  <i class="fas fa-arrow-left"></i> Back
              </a>
         </div>
     </div>
 
-    {# --- Message Display Area --- #}
+    {# --- Message Display Area (Uses #message-list from CSS) --- #}
     <div class="chat-messages" id="message-list"
          data-contact-wa-id="{{ contact.wa_id }}"
          data-last-timestamp="{{ last_message_timestamp }}">
 
         {% for message in messages %}
+        {# Uses .message, .incoming, .outgoing classes from CSS #}
         <div class="message {% if message.direction == 'OUT' %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.message_id }}">
+            {# Uses .message-bubble from CSS #}
             <div class="message-bubble">
+                {# Uses .message-text from CSS #}
                 <div class="message-text">
+                    {# --- Message Type Handling --- #}
                     {% if message.message_type == 'text' %}
                         {{ message.text_content|linebreaksbr }}
                     {% elif message.message_type == 'template' %}
+                        {# Uses .template-indicator from CSS #}
                         <span class="template-indicator"><i class="fas fa-file-alt"></i> Template: {{ message.template_name|default:"Unknown" }}</span>
                         {% if message.text_content %}
+                        {# Uses .template-text-content from CSS #}
                         <div class="template-text-content">{{ message.text_content|linebreaksbr }}</div>
                         {% endif %}
                     {% elif message.message_type == 'image' %}
+                        {# Uses .media-indicator from CSS #}
                         <span class="media-indicator"><i class="fas fa-image"></i> [Image Received]</span>
+                         {% if message.media_url %}
+                            {# Basic link, styling handled by browser/CSS #}
+                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">View Image</a>
+                         {% else %}
+                            <span class="text-muted small">(No media URL)</span> {# Generic text style #}
+                         {% endif %}
                         {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
-                        {% if message.media_url %}
-                             <span class="text-muted small">(Media URL available but preview not implemented)</span>
-                        {% endif %}
-                     {% elif message.message_type == 'video' %}
+                    {% elif message.message_type == 'video' %}
                         <span class="media-indicator"><i class="fas fa-video"></i> [Video Received]</span>
+                        {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">View Video</a>{% endif %}
                         {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
-                     {% elif message.message_type == 'audio' %}
+                    {% elif message.message_type == 'audio' %}
                          <span class="media-indicator"><i class="fas fa-volume-up"></i> [Audio Received]</span>
+                         {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">Play Audio</a>{% endif %}
                     {% elif message.message_type == 'document' %}
                         <span class="media-indicator"><i class="fas fa-file-alt"></i> [Document: {{ message.filename|default:"Received" }}]</span>
+                         {% if message.media_url %}
+                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-download-button custom-button button-sm button-outline-secondary">Download Document</a>
+                         {% else %}
+                             <span class="text-muted small">(No media URL)</span>
+                         {% endif %}
                         {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
-                        {% if message.media_url %}
-                             <span class="text-muted small">(Media URL available but download not implemented)</span>
-                        {% endif %}
                     {% else %}
-                        <span class="media-indicator"><i class="fas fa-file"></i> [{{ message.get_message_type_display|default:message.message_type }}]</span>
+                        {# Fallback for other/unknown types #}
+                        <span class="media-indicator"><i class="fas fa-file"></i> [{{ message.get_message_type_display|default:message.message_type|capfirst }} Received]</span>
                         {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
                     {% endif %}
                 </div>
 
+                {# --- Message Metadata (Time & Status) --- #}
+                {# Uses .message-meta from CSS #}
                 <div class="message-meta">
                     <span class="message-time">{{ message.timestamp|date:"H:i" }}</span>
                     {% if message.direction == 'OUT' %}
+                        {# Uses .message-status-icon and specific status classes from CSS #}
                         <span class="message-status-icon" title="{{ message.get_status_display }}">
                             {% if message.status == 'FAILED' %} <i class="fas fa-exclamation-circle status-icon-failed"></i>
                             {% elif message.status == 'READ' %} <i class="fas fa-check-double status-icon-read"></i>
                             {% elif message.status == 'DELIVERED' %} <i class="fas fa-check-double status-icon-delivered"></i>
                             {% elif message.status == 'SENT' %} <i class="fas fa-check status-icon-sent"></i>
                             {% elif message.status == 'PENDING' %} <i class="fas fa-clock status-icon-pending"></i>
+                            {% else %} <i class="fas fa-question-circle"></i> {# Unknown status #}
                             {% endif %}
                         </span>
                     {% endif %}
@@ -75,31 +106,40 @@
             </div>
         </div>
         {% empty %}
-        <p class="text-center text-muted mt-5" id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
+        {# Uses #no-messages-placeholder from CSS #}
+        <p id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
         {% endfor %}
     </div>
 
-    {# --- Message Input Area --- #}
+    {# --- Message Input Area (Uses .chat-input-area from CSS) --- #}
     <div class="chat-input-area">
+        {# Uses .whatsapp-form (general form class) #}
         <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form">
-             {% csrf_token %}
-             <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
+            {% csrf_token %}
+            <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
 
-             <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
-                 <i class="fas fa-paperclip"></i>
-             </button>
-             <input type="file" id="chat-file-input" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+            {# Attach Button (Uses .custom-button from CSS) #}
+            <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
+                <i class="fas fa-paperclip"></i>
+            </button>
+            <input type="file" id="chat-file-input" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
 
-            {{ form.text_content }}
+            {# Text Input - Renders textarea. Add 'chat-input' class for specific styling #}
+            {# Apply 'form-input' from your CSS, and potentially 'chat-input' if defined #}
+            {{ form.text_content }} {# Add widget attrs in forms.py: 'class': 'form-input chat-input' #}
 
+            {# Send Button (Uses .custom-button from CSS) #}
             <button type="submit" class="custom-button button-primary" title="Send Message">
                 <i class="fas fa-paper-plane"></i>
             </button>
+
+             {# Spinner (optional) - Basic inline style #}
              <span id="file-upload-spinner" style="display: none; margin-left: 10px; color: #6c757d;">
                  <i class="fas fa-spinner fa-spin"></i> Uploading...
              </span>
         </form>
-         <div id="chat-error-display" style="display: none; color: #dc3545; font-size: 0.9em; margin-top: 5px;"></div>
+         {# Uses #chat-error-display from CSS #}
+         <div id="chat-error-display" style="display: none;"></div>
     </div>
 
 </div>
@@ -107,5 +147,327 @@
 
 {% block extra_scripts %}
     {{ block.super }}
+    {# Ensure chat.js is loaded and handles scrolling, message fetching, sending, status updates etc. #}
     <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
+    <script>
+        // Basic scroll to bottom on load (might be in chat.js already)
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageList = document.getElementById('message-list');
+            if (messageList) {
+                messageList.scrollTop = messageList.scrollHeight;
+
+                // --- Add CSS for Status Indicator ---
+                // Ideally, move this to your main whatsapp_style.css file
+                const style = document.createElement('style');
+                style.textContent = `
+                    .status-indicator {
+                        display: inline-block;
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 50%;
+                        margin-left: 8px; /* Adjusted margin */
+                        vertical-align: middle;
+                    }
+                    .status-online {
+                        background-color: #28a745; /* Green */
+                    }
+                    .status-offline {
+                        background-color: #6c757d; /* Gray */
+                    }
+
+                    /* Ensure the text input gets the correct base styles if not applied via widget */
+                    /* You might need to adjust the selector based on the rendered input ID/name */
+                    textarea[name="text_content"].form-input.chat-input {
+                         /* Styles are primarily from .form-input and .chat-input in whatsapp_style.css */
+                         /* Add any overrides if needed, e.g., specific height/resize behavior */
+                         flex-grow: 1; /* Make textarea take available space in flex container */
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Handle file input trigger
+            const attachButton = document.getElementById('attach-file-button');
+            const fileInput = document.getElementById('chat-file-input');
+            if (attachButton && fileInput) {
+                attachButton.addEventListener('click', () => fileInput.click());
+                // Add logic here or in chat.js to handle file selection
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        console.log('File selected:', file.name);
+                        // TODO: Implement file upload logic (likely via AJAX in chat.js)
+                        // document.getElementById('file-upload-spinner').style.display = 'inline-block';
+                    }
+                });
+            }
+
+             // Handle Enter key press in textarea to submit form (optional)
+            // Make sure the textarea has the ID 'id_text_content' or adjust selector
+            const textInput = document.querySelector('.chat-input-area textarea'); // More robust selector
+            if (textInput) {
+                textInput.addEventListener('keypress', function(event) {
+                    // Submit on Enter press, unless Shift+Enter is pressed (for new line)
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault(); // Prevent default Enter behavior (new line)
+                        document.getElementById('manual-message-form').requestSubmit(); // Submit the form
+                    }
+                });
+
+                // Auto-resize textarea height (optional but common for chat inputs)
+                function autoResizeTextarea() {
+                    textInput.style.height = 'auto'; // Reset height
+                    // Set height based on scroll height, respecting max-height from CSS
+                    const maxHeight = parseInt(window.getComputedStyle(textInput).maxHeight, 10) || 120; // Default max-height
+                    textInput.style.height = Math.min(textInput.scrollHeight, maxHeight) + 'px';
+                }
+                textInput.addEventListener('input', autoResizeTextarea);
+                autoResizeTextarea(); // Initial resize on load
+            }
+
+        });
+    </script>
+{# whatsapp_app/templates/whatsapp_app/chat_detail.html #}
+{% extends "whatsapp/base_whatsapp.html" %} {# Use the non-Bootstrap base template #}
+{% load static %}
+
+{% block whatsapp_content %}
+
+{# --- Main Chat Container (Uses .chat-detail-container from CSS) --- #}
+<div class="chat-detail-container">
+
+    {# --- Chat Header (Uses .chat-header from CSS) --- #}
+    <div class="chat-header">
+        <div class="chat-header-info"> {# Assuming CSS handles layout #}
+             {# Placeholder for profile picture if available #}
+            <img src="{{ contact.profile_pic_url|default:'/static/images/default_avatar.png' }}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;"> 
+            <div>
+                <div style="display: flex; align-items: center;"> {# Inline style for simple alignment #}
+                    <h4 class="contact-name">{{ contact.name|default:contact.wa_id }}</h4>
+                    
+                    {% if contact.is_online is not None %} {# Check if status is available #}
+                        <span class="status-indicator {% if contact.is_online %}status-online{% else %}status-offline{% endif %}"
+                              title="{% if contact.is_online %}Online{% else %}Offline{% endif %}">
+                        </span>
+                    {% endif %}
+                </div>
+                <small class="contact-wa-id">{{ contact.wa_id }}</small>
+            </div>
+        </div>
+        <div class="chat-header-actions"> {# Assuming CSS handles layout #}
+             <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-outline-secondary button-sm" title="Back to Chat List">
+                 <i class="fas fa-arrow-left"></i> Back
+             </a>
+        </div>
+    </div>
+
+    {# --- Message Display Area (Uses #message-list from CSS) --- #}
+    <div class="chat-messages" id="message-list"
+         data-contact-wa-id="{{ contact.wa_id }}"
+         data-last-timestamp="{{ last_message_timestamp }}">
+
+        {% for message in messages %}
+        {# Uses .message, .incoming, .outgoing classes from CSS #}
+        <div class="message {% if message.direction == 'OUT' %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.message_id }}">
+            {# Uses .message-bubble from CSS #}
+            <div class="message-bubble">
+                {# Uses .message-text from CSS #}
+                <div class="message-text">
+                    {# --- Message Type Handling --- #}
+                    {% if message.message_type == 'text' %}
+                        {{ message.text_content|linebreaksbr }}
+                    {% elif message.message_type == 'template' %}
+                        {# Uses .template-indicator from CSS #}
+                        <span class="template-indicator"><i class="fas fa-file-alt"></i> Template: {{ message.template_name|default:"Unknown" }}</span>
+                        {% if message.text_content %}
+                        {# Uses .template-text-content from CSS #}
+                        <div class="template-text-content">{{ message.text_content|linebreaksbr }}</div>
+                        {% endif %}
+                    {% elif message.message_type == 'image' %}
+                        {# Uses .media-indicator from CSS #}
+                        <span class="media-indicator"><i class="fas fa-image"></i> [Image Received]</span>
+                         {% if message.media_url %}
+                            {# Basic link, styling handled by browser/CSS #}
+                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">View Image</a>
+                         {% else %}
+                            <span class="text-muted small">(No media URL)</span> {# Generic text style #}
+                         {% endif %}
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                    {% elif message.message_type == 'video' %}
+                        <span class="media-indicator"><i class="fas fa-video"></i> [Video Received]</span>
+                        {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">View Video</a>{% endif %}
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                    {% elif message.message_type == 'audio' %}
+                         <span class="media-indicator"><i class="fas fa-volume-up"></i> [Audio Received]</span>
+                         {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">Play Audio</a>{% endif %}
+                    {% elif message.message_type == 'document' %}
+                        <span class="media-indicator"><i class="fas fa-file-alt"></i> [Document: {{ message.filename|default:"Received" }}]</span>
+                         {% if message.media_url %}
+                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-download-button custom-button button-sm button-outline-secondary">Download Document</a>
+                         {% else %}
+                             <span class="text-muted small">(No media URL)</span>
+                         {% endif %}
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                    {% else %}
+                        {# Fallback for other/unknown types #}
+                        <span class="media-indicator"><i class="fas fa-file"></i> [{{ message.get_message_type_display|default:message.message_type|capfirst }} Received]</span>
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                    {% endif %}
+                </div>
+
+                {# --- Message Metadata (Time & Status) --- #}
+                {# Uses .message-meta from CSS #}
+                <div class="message-meta">
+                    <span class="message-time">{{ message.timestamp|date:"H:i" }}</span>
+                    {% if message.direction == 'OUT' %}
+                        {# Uses .message-status-icon and specific status classes from CSS #}
+                        <span class="message-status-icon" title="{{ message.get_status_display }}">
+                            {% if message.status == 'FAILED' %} <i class="fas fa-exclamation-circle status-icon-failed"></i>
+                            {% elif message.status == 'READ' %} <i class="fas fa-check-double status-icon-read"></i>
+                            {% elif message.status == 'DELIVERED' %} <i class="fas fa-check-double status-icon-delivered"></i>
+                            {% elif message.status == 'SENT' %} <i class="fas fa-check status-icon-sent"></i>
+                            {% elif message.status == 'PENDING' %} <i class="fas fa-clock status-icon-pending"></i>
+                            {% else %} <i class="fas fa-question-circle"></i> {# Unknown status #}
+                            {% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        {# Uses #no-messages-placeholder from CSS #}
+        <p id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
+        {% endfor %}
+    </div>
+
+    {# --- Message Input Area (Uses .chat-input-area from CSS) --- #}
+    <div class="chat-input-area">
+        {# Uses .whatsapp-form (general form class) #}
+        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form" onsubmit="return validateForm()">
+            {% csrf_token %}
+            <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
+
+            {# Attach Button (Uses .custom-button from CSS) #}
+            <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
+                <i class="fas fa-paperclip"></i>
+            </button>
+            <input type="file" id="chat-file-input" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+
+            {# Text Input - Renders textarea. Add 'chat-input' class for specific styling #}
+            {# Apply 'form-input' from your CSS, and potentially 'chat-input' if defined #}
+            {{ form.text_content }} {# Add widget attrs in forms.py: 'class': 'form-input chat-input' #}
+
+            {# Send Button (Uses .custom-button from CSS) #}
+            <button type="submit" class="custom-button button-primary" title="Send Message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+
+             {# Spinner (optional) - Basic inline style #}
+             <span id="file-upload-spinner" style="display: none; margin-left: 10px; color: #6c757d;">
+                 <i class="fas fa-spinner fa-spin"></i> Uploading...
+             </span>
+        </form>
+         {# Uses #chat-error-display from CSS #}
+         <div id="chat-error-display" style="display: none;"></div>
+    </div>
+
+</div>
+{% endblock whatsapp_content %}
+
+{% block extra_scripts %}
+    {{ block.super }}
+    {# Ensure chat.js is loaded and handles scrolling, message fetching, sending, status updates etc. #}
+    <script src="{% static 'whatsapp_app/js/chat.js' %}"></script>
+    <script>
+        function validateForm() {
+            const textInput = document.querySelector('.chat-input-area textarea');
+            const fileInput = document.getElementById('chat-file-input');
+            
+            if (!textInput.value.trim() && !fileInput.files.length) {
+                document.getElementById('chat-error-display').style.display = 'block';
+                document.getElementById('chat-error-display').textContent = 'Please enter a message or attach a file';
+                return false;
+            }
+            return true;
+        }
+
+        // Basic scroll to bottom on load (might be in chat.js already)
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageList = document.getElementById('message-list');
+            if (messageList) {
+                messageList.scrollTop = messageList.scrollHeight;
+
+                // --- Add CSS for Status Indicator ---
+                // Ideally, move this to your main whatsapp_style.css file
+                const style = document.createElement('style');
+                style.textContent = `
+                    .status-indicator {
+                        display: inline-block;
+                        width: 10px;
+                        height: 10px;
+                        border-radius: 50%;
+                        margin-left: 8px; /* Adjusted margin */
+                        vertical-align: middle;
+                    }
+                    .status-online {
+                        background-color: #28a745; /* Green */
+                    }
+                    .status-offline {
+                        background-color: #6c757d; /* Gray */
+                    }
+
+                    /* Ensure the text input gets the correct base styles if not applied via widget */
+                    /* You might need to adjust the selector based on the rendered input ID/name */
+                    textarea[name="text_content"].form-input.chat-input {
+                         /* Styles are primarily from .form-input and .chat-input in whatsapp_style.css */
+                         /* Add any overrides if needed, e.g., specific height/resize behavior */
+                         flex-grow: 1; /* Make textarea take available space in flex container */
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Handle file input trigger
+            const attachButton = document.getElementById('attach-file-button');
+            const fileInput = document.getElementById('chat-file-input');
+            if (attachButton && fileInput) {
+                attachButton.addEventListener('click', () => fileInput.click());
+                // Add logic here or in chat.js to handle file selection
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        console.log('File selected:', file.name);
+                        // TODO: Implement file upload logic (likely via AJAX in chat.js)
+                        // document.getElementById('file-upload-spinner').style.display = 'inline-block';
+                    }
+                });
+            }
+
+             // Handle Enter key press in textarea to submit form (optional)
+            // Make sure the textarea has the ID 'id_text_content' or adjust selector
+            const textInput = document.querySelector('.chat-input-area textarea'); // More robust selector
+            if (textInput) {
+                textInput.addEventListener('keypress', function(event) {
+                    // Submit on Enter press, unless Shift+Enter is pressed (for new line)
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault(); // Prevent default Enter behavior (new line)
+                        if(validateForm()) {
+                            document.getElementById('manual-message-form').requestSubmit(); // Submit the form
+                        }
+                    }
+                });
+
+                // Auto-resize textarea height (optional but common for chat inputs)
+                function autoResizeTextarea() {
+                    textInput.style.height = 'auto'; // Reset height
+                    // Set height based on scroll height, respecting max-height from CSS
+                    const maxHeight = parseInt(window.getComputedStyle(textInput).maxHeight, 10) || 120; // Default max-height
+                    textInput.style.height = Math.min(textInput.scrollHeight, maxHeight) + 'px';
+                }
+                textInput.addEventListener('input', autoResizeTextarea);
+                autoResizeTextarea(); // Initial resize on load
+            }
+
+        });
+    </script>
 {% endblock extra_scripts %}
