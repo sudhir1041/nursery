@@ -17,11 +17,15 @@ def dashboard_view(request):
     """
     Calculates and displays dashboard statistics for orders across platforms,
     categorizing by pending/processing vs. other statuses based on primary status fields.
+    Shows data for last 30 days only.
     """
-    # Get querysets for all platforms
-    woo_orders = WooCommerceOrder.objects.all()
-    shopify_orders = ShopifyOrder.objects.all()
-    fb_orders = Facebook_orders.objects.all()
+    # Calculate date 30 days ago from now
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+
+    # Get querysets for all platforms filtered by last 30 days
+    woo_orders = WooCommerceOrder.objects.filter(date_created_woo__gte=thirty_days_ago)
+    shopify_orders = ShopifyOrder.objects.filter(created_at_shopify__gte=thirty_days_ago)
+    fb_orders = Facebook_orders.objects.filter(date_created__gte=thirty_days_ago)
 
     # --- Calculate Total Counts ---
     woo_total = woo_orders.count()
@@ -60,8 +64,6 @@ def dashboard_view(request):
     fb_not_shipped = fb_orders.filter(
         status__in=['processing', 'on-hold']
     ).count()
-
-
 
     total_pending_orders = woo_pending_orders + shopify_pending_orders + fb_pending_orders
     total_not_shipped = woo_not_shipped + shopify_not_shipped_orders + fb_not_shipped
