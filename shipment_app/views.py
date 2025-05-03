@@ -2,13 +2,17 @@ from django.shortcuts import render,redirect,HttpResponse
 from shopify_app.models import ShopifyOrder
 from woocommerce_app.models import WooCommerceOrder
 from facebook_app.models import Facebook_orders
-
+from datetime import datetime, timedelta
 
 
 def home(request):
-    shopify = ShopifyOrder.objects.all()
-    woo = WooCommerceOrder.objects.all()
-    fb = Facebook_orders.objects.all()
+    # Get current date and date 30 days ago
+    today = datetime.now()
+    thirty_days_ago = today - timedelta(days=30)
+
+    shopify = ShopifyOrder.objects.filter(created_at_shopify__gte=thirty_days_ago)
+    woo = WooCommerceOrder.objects.filter(date_created_woo__gte=thirty_days_ago)
+    fb = Facebook_orders.objects.filter(date_created__gte=thirty_days_ago)
     
     # ====================== Shopify Orders =======================
     shopify_orders = []
