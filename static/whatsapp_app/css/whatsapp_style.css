@@ -698,6 +698,17 @@ h4.section-title {
     padding: 0.75rem 1.25rem;
     background-color: #f8f9fa;
     border-bottom: 1px solid #e0e0e0;
+    /* Added flex for better alignment */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+/* Adjust header info layout if needed */
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between avatar (if added) and text */
 }
 .chat-header h4 {
     margin: 0;
@@ -707,6 +718,21 @@ h4.section-title {
 .chat-header .contact-wa-id {
     font-size: 0.8rem;
     color: #6c757d;
+}
+/* Added styles for online/offline indicator (also in JS block, move here ideally) */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+.status-online {
+    background-color: #28a745; /* Green */
+}
+.status-offline {
+    background-color: #6c757d; /* Gray */
 }
 
 #message-list {
@@ -777,9 +803,10 @@ h4.section-title {
 }
 .template-indicator i, .media-indicator i { margin-right: 0.3em; }
 .template-text-content { margin-top: 0.25rem; }
-.media-preview-link { display: inline-block; margin-top: 0.25rem; }
+.media-preview-link { display: inline-block; margin-top: 0.25rem; color: #007bff; text-decoration: underline;} /* Added basic link styling */
+.media-preview-link:hover { color: #0056b3; }
 .media-image-preview { max-width: 200px; max-height: 200px; border-radius: 4px; cursor: pointer; }
-.media-download-button { margin-top: 0.5rem; }
+.media-download-button { margin-top: 0.5rem; } /* Uses .custom-button styles */
 .media-caption { margin-top: 0.25rem; margin-bottom: 0; font-size: 0.9em; }
 
 
@@ -793,40 +820,49 @@ h4.section-title {
     padding: 0.75rem 1rem;
     background-color: #f0f0f0; /* Slightly different background */
     border-top: 1px solid #e0e0e0;
+    flex-shrink: 0; /* Prevent input area from shrinking */
 }
-.chat-input-area form {
+/* Ensure the form itself uses flex */
+.chat-input-area form.whatsapp-form {
     display: flex;
     align-items: flex-end; /* Align button bottom with textarea */
     gap: 0.5rem;
 }
+/* Apply chat-specific styles to the textarea */
 .chat-input-area textarea.chat-input {
-    flex-grow: 1;
+    flex-grow: 1; /* Take available space */
     resize: none; /* Disable manual resize */
     min-height: 40px; /* Minimum height */
     max-height: 120px; /* Limit excessive height */
     /* Inherits .form-input styles */
     padding: 0.5rem 0.75rem; /* Adjust padding */
     line-height: 1.4;
+    /* Ensure box-sizing is border-box (should be inherited from .form-input) */
+    box-sizing: border-box;
 }
+/* Style buttons in chat input area */
 .chat-input-area .custom-button {
     flex-shrink: 0; /* Prevent button shrinking */
     /* Ensure button aligns well with textarea */
     height: 40px; /* Match min-height of textarea */
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding-top: 0; /* Reset padding if needed for alignment */
+    padding-bottom: 0;
+    align-self: flex-end; /* Align button to bottom */
 }
 .chat-input-area .custom-button i {
-    font-size: 1.2em; /* Make send icon slightly larger */
+    font-size: 1.2em; /* Make send/attach icon slightly larger */
     margin-right: 0; /* Remove text margin if icon only */
+    line-height: 1; /* Adjust line height for icon centering */
 }
 
 /* Error display area for chat */
 #chat-error-display {
-    padding: 0.5rem 1rem;
-    background-color: #f8d7da;
+    /* Use styles from .message-item.message-error for consistency */
     color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 0.5rem 1rem; /* Adjust padding */
     border-radius: 4px;
     margin-top: 0.5rem;
     font-size: 0.9rem;
 }
-

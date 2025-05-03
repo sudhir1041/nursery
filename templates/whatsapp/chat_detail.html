@@ -4,24 +4,20 @@
 
 {% block whatsapp_content %}
 
-{# --- Main Chat Container ---
-   - Added flex-grow-1 to make it expand vertically if the parent is a flex container.
-   - Added overflow-hidden to manage content flow.
-   - Set a default height (h-full or specific like h-[calc(100vh-100px)]) if needed, depending on base template layout.
---- #}
-<div class="chat-detail-container flex flex-col h-full overflow-hidden"> {# Example using Tailwind for flex layout & height #}
+{# --- Main Chat Container (Uses .chat-detail-container from CSS) --- #}
+<div class="chat-detail-container">
 
-    {# --- Chat Header --- #}
-    <div class="chat-header flex items-center justify-between p-3 border-b border-gray-200 bg-gray-50 shrink-0">
-        <div class="chat-header-info flex items-center">
-            {# Placeholder for profile picture if available #}
-            {# <img src="{{ contact.profile_pic_url|default:'/static/images/default_avatar.png' }}" alt="Avatar" class="w-10 h-10 rounded-full mr-3"> #}
+    {# --- Chat Header (Uses .chat-header from CSS) --- #}
+    <div class="chat-header">
+        <div class="chat-header-info"> {# Assuming CSS handles layout #}
+             {# Placeholder for profile picture if available #}
+            <img src="{{ contact.profile_pic_url|default:'/static/images/default_avatar.png' }}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;"> 
             <div>
-                <div class="flex items-center">
-                    <h4 class="contact-name font-semibold text-lg mr-2">{{ contact.name|default:contact.wa_id }}</h4>
+                <div style="display: flex; align-items: center;"> {# Inline style for simple alignment #}
+                    <h4 class="contact-name">{{ contact.name|default:contact.wa_id }}</h4>
                     {# --- Online/Offline Status Indicator ---
                        - Requires `contact.is_online` (boolean) passed from the view.
-                       - Style .status-indicator, .status-online, .status-offline in your CSS.
+                       - CSS for these classes is added in extra_scripts block below.
                     --- #}
                     {% if contact.is_online is not None %} {# Check if status is available #}
                         <span class="status-indicator {% if contact.is_online %}status-online{% else %}status-offline{% endif %}"
@@ -29,77 +25,80 @@
                         </span>
                     {% endif %}
                 </div>
-                <small class="contact-wa-id text-gray-500 text-sm">{{ contact.wa_id }}</small>
+                <small class="contact-wa-id">{{ contact.wa_id }}</small>
             </div>
         </div>
-        <div class="chat-header-actions">
-             <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-outline-secondary button-sm inline-flex items-center" title="Back to Chat List">
-                 <i class="fas fa-arrow-left mr-1"></i> Back
+        <div class="chat-header-actions"> {# Assuming CSS handles layout #}
+             <a href="{% url 'whatsapp_app:chat_list' %}" class="custom-button button-outline-secondary button-sm" title="Back to Chat List">
+                 <i class="fas fa-arrow-left"></i> Back
              </a>
         </div>
     </div>
 
-    {# --- Message Display Area ---
-       - Added flex-grow to make it take available space.
-       - Added overflow-y-auto for scrolling messages.
-       - Added p-4 for padding.
-    --- #}
-    <div class="chat-messages flex-grow overflow-y-auto p-4 space-y-4 bg-gray-100" id="message-list"
+    {# --- Message Display Area (Uses #message-list from CSS) --- #}
+    <div class="chat-messages" id="message-list"
          data-contact-wa-id="{{ contact.wa_id }}"
          data-last-timestamp="{{ last_message_timestamp }}">
 
         {% for message in messages %}
-        <div class="message flex {% if message.direction == 'OUT' %}justify-end{% else %}justify-start{% endif %}" data-message-id="{{ message.message_id }}">
-            <div class="message-bubble max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-lg shadow {% if message.direction == 'OUT' %}bg-blue-500 text-white rounded-br-none{% else %}bg-white text-gray-800 rounded-bl-none{% endif %}">
-                <div class="message-text break-words">
+        {# Uses .message, .incoming, .outgoing classes from CSS #}
+        <div class="message {% if message.direction == 'OUT' %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ message.message_id }}">
+            {# Uses .message-bubble from CSS #}
+            <div class="message-bubble">
+                {# Uses .message-text from CSS #}
+                <div class="message-text">
                     {# --- Message Type Handling --- #}
                     {% if message.message_type == 'text' %}
                         {{ message.text_content|linebreaksbr }}
                     {% elif message.message_type == 'template' %}
-                        <span class="template-indicator font-semibold block mb-1"><i class="fas fa-file-alt mr-1"></i> Template: {{ message.template_name|default:"Unknown" }}</span>
+                        {# Uses .template-indicator from CSS #}
+                        <span class="template-indicator"><i class="fas fa-file-alt"></i> Template: {{ message.template_name|default:"Unknown" }}</span>
                         {% if message.text_content %}
-                        <div class="template-text-content border-l-2 border-gray-400 pl-2 italic">{{ message.text_content|linebreaksbr }}</div>
+                        {# Uses .template-text-content from CSS #}
+                        <div class="template-text-content">{{ message.text_content|linebreaksbr }}</div>
                         {% endif %}
                     {% elif message.message_type == 'image' %}
-                        <span class="media-indicator block mb-1"><i class="fas fa-image mr-1"></i> [Image Received]</span>
-                         {# Basic image preview - replace with actual image tag if URL is directly accessible #}
+                        {# Uses .media-indicator from CSS #}
+                        <span class="media-indicator"><i class="fas fa-image"></i> [Image Received]</span>
                          {% if message.media_url %}
-                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-300 hover:text-blue-100">View Image (preview not implemented)</a>
+                            {# Basic link, styling handled by browser/CSS #}
+                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">View Image</a>
                          {% else %}
-                            <span class="text-xs {% if message.direction == 'OUT' %}text-blue-200{% else %}text-gray-400{% endif %}">(No media URL)</span>
+                            <span class="text-muted small">(No media URL)</span> {# Generic text style #}
                          {% endif %}
-                        {% if message.text_content %}<p class="media-caption mt-1 text-sm italic">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
                     {% elif message.message_type == 'video' %}
-                        <span class="media-indicator block mb-1"><i class="fas fa-video mr-1"></i> [Video Received]</span>
-                        {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-300 hover:text-blue-100">View Video</a>{% endif %}
-                        {% if message.text_content %}<p class="media-caption mt-1 text-sm italic">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        <span class="media-indicator"><i class="fas fa-video"></i> [Video Received]</span>
+                        {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">View Video</a>{% endif %}
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
                     {% elif message.message_type == 'audio' %}
-                         <span class="media-indicator block mb-1"><i class="fas fa-volume-up mr-1"></i> [Audio Received]</span>
-                         {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-300 hover:text-blue-100">Play Audio</a>{% endif %}
+                         <span class="media-indicator"><i class="fas fa-volume-up"></i> [Audio Received]</span>
+                         {% if message.media_url %}<a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-preview-link">Play Audio</a>{% endif %}
                     {% elif message.message_type == 'document' %}
-                        <span class="media-indicator block mb-1"><i class="fas fa-file-alt mr-1"></i> [Document: {{ message.filename|default:"Received" }}]</span>
+                        <span class="media-indicator"><i class="fas fa-file-alt"></i> [Document: {{ message.filename|default:"Received" }}]</span>
                          {% if message.media_url %}
-                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-300 hover:text-blue-100">Download Document</a>
+                            <a href="{{ message.media_url }}" target="_blank" rel="noopener noreferrer" class="media-download-button custom-button button-sm button-outline-secondary">Download Document</a>
                          {% else %}
-                             <span class="text-xs {% if message.direction == 'OUT' %}text-blue-200{% else %}text-gray-400{% endif %}">(No media URL)</span>
+                             <span class="text-muted small">(No media URL)</span>
                          {% endif %}
-                        {% if message.text_content %}<p class="media-caption mt-1 text-sm italic">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
                     {% else %}
                         {# Fallback for other/unknown types #}
-                        <span class="media-indicator block mb-1"><i class="fas fa-file mr-1"></i> [{{ message.get_message_type_display|default:message.message_type|capfirst }} Received]</span>
-                        {% if message.text_content %}<p class="media-caption mt-1 text-sm italic">{{ message.text_content|linebreaksbr }}</p>{% endif %}
+                        <span class="media-indicator"><i class="fas fa-file"></i> [{{ message.get_message_type_display|default:message.message_type|capfirst }} Received]</span>
+                        {% if message.text_content %}<p class="media-caption">{{ message.text_content|linebreaksbr }}</p>{% endif %}
                     {% endif %}
                 </div>
 
                 {# --- Message Metadata (Time & Status) --- #}
-                <div class="message-meta text-xs mt-1 flex justify-end items-center {% if message.direction == 'OUT' %}text-blue-200{% else %}text-gray-400{% endif %}">
-                    <span class="message-time mr-1">{{ message.timestamp|date:"H:i" }}</span>
+                {# Uses .message-meta from CSS #}
+                <div class="message-meta">
+                    <span class="message-time">{{ message.timestamp|date:"H:i" }}</span>
                     {% if message.direction == 'OUT' %}
+                        {# Uses .message-status-icon and specific status classes from CSS #}
                         <span class="message-status-icon" title="{{ message.get_status_display }}">
-                            {# Using Font Awesome icons for status #}
-                            {% if message.status == 'FAILED' %} <i class="fas fa-exclamation-circle status-icon-failed text-red-400"></i>
-                            {% elif message.status == 'READ' %} <i class="fas fa-check-double status-icon-read text-sky-300"></i>
-                            {% elif message.status == 'DELIVERED' %} <i class="fas fa-check-double status-icon-delivered"></i> {# Same color as sent or slightly different #}
+                            {% if message.status == 'FAILED' %} <i class="fas fa-exclamation-circle status-icon-failed"></i>
+                            {% elif message.status == 'READ' %} <i class="fas fa-check-double status-icon-read"></i>
+                            {% elif message.status == 'DELIVERED' %} <i class="fas fa-check-double status-icon-delivered"></i>
                             {% elif message.status == 'SENT' %} <i class="fas fa-check status-icon-sent"></i>
                             {% elif message.status == 'PENDING' %} <i class="fas fa-clock status-icon-pending"></i>
                             {% else %} <i class="fas fa-question-circle"></i> {# Unknown status #}
@@ -110,40 +109,40 @@
             </div>
         </div>
         {% empty %}
-        <p class="text-center text-gray-500 mt-10" id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
+        {# Uses #no-messages-placeholder from CSS #}
+        <p id="no-messages-placeholder">No messages in this conversation yet. Start by sending a message below.</p>
         {% endfor %}
     </div>
 
-    {# --- Message Input Area ---
-       - Added p-3, border-t, bg-gray-50 for styling.
-       - Added shrink-0 to prevent it from shrinking.
-    --- #}
-    <div class="chat-input-area p-3 border-t border-gray-200 bg-gray-50 shrink-0">
-        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form flex items-center space-x-2">
+    {# --- Message Input Area (Uses .chat-input-area from CSS) --- #}
+    <div class="chat-input-area">
+        {# Uses .whatsapp-form (general form class) #}
+        <form id="manual-message-form" method="post" action="{% url 'whatsapp_app:send_manual_message_ajax' %}" class="whatsapp-form">
             {% csrf_token %}
             <input type="hidden" name="wa_id" value="{{ contact.wa_id }}">
 
-            {# Attach Button #}
-            <button type="button" id="attach-file-button" class="custom-button button-secondary shrink-0 p-2 rounded-full hover:bg-gray-200" title="Attach File">
-                <i class="fas fa-paperclip text-gray-600"></i>
+            {# Attach Button (Uses .custom-button from CSS) #}
+            <button type="button" id="attach-file-button" class="custom-button button-secondary" title="Attach File">
+                <i class="fas fa-paperclip"></i>
             </button>
             <input type="file" id="chat-file-input" style="display: none;" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
 
-            {# Text Input - Assuming 'form.text_content' renders an input/textarea #}
-            {# Add styling classes directly or via a widget in forms.py #}
-            {{ form.text_content }} {# Example: Add class="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" #}
+            {# Text Input - Renders textarea. Add 'chat-input' class for specific styling #}
+            {# Apply 'form-input' from your CSS, and potentially 'chat-input' if defined #}
+            {{ form.text_content }} {# Add widget attrs in forms.py: 'class': 'form-input chat-input' #}
 
-            {# Send Button #}
-            <button type="submit" class="custom-button button-primary shrink-0 p-2 rounded-full bg-blue-500 hover:bg-blue-600 text-white" title="Send Message">
+            {# Send Button (Uses .custom-button from CSS) #}
+            <button type="submit" class="custom-button button-primary" title="Send Message">
                 <i class="fas fa-paper-plane"></i>
             </button>
 
-             {# Spinner (optional) #}
-             <span id="file-upload-spinner" style="display: none;" class="ml-2 text-gray-500">
+             {# Spinner (optional) - Basic inline style #}
+             <span id="file-upload-spinner" style="display: none; margin-left: 10px; color: #6c757d;">
                  <i class="fas fa-spinner fa-spin"></i> Uploading...
              </span>
         </form>
-         <div id="chat-error-display" style="display: none;" class="text-red-500 text-sm mt-1"></div>
+         {# Uses #chat-error-display from CSS #}
+         <div id="chat-error-display" style="display: none;"></div>
     </div>
 
 </div>
@@ -161,7 +160,7 @@
                 messageList.scrollTop = messageList.scrollHeight;
 
                 // --- Add CSS for Status Indicator ---
-                // Ideally, put this in your main CSS file
+                // Ideally, move this to your main whatsapp_style.css file
                 const style = document.createElement('style');
                 style.textContent = `
                     .status-indicator {
@@ -169,7 +168,7 @@
                         width: 10px;
                         height: 10px;
                         border-radius: 50%;
-                        margin-left: 5px;
+                        margin-left: 8px; /* Adjusted margin */
                         vertical-align: middle;
                     }
                     .status-online {
@@ -178,59 +177,14 @@
                     .status-offline {
                         background-color: #6c757d; /* Gray */
                     }
-                    /* Style the text input if not done via Django Widget */
-                    #id_text_content { /* Default Django ID, adjust if needed */
-                        flex-grow: 1;
-                        padding: 0.5rem;
-                        border: 1px solid #ccc;
-                        border-radius: 0.375rem; /* rounded-md */
-                        resize: none; /* Prevent manual resize if it's a textarea */
-                        min-height: 40px; /* Ensure minimum height */
-                    }
-                    #id_text_content:focus {
-                        outline: none;
-                        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* focus:ring-2 focus:ring-blue-500 */
-                        border-color: #3b82f6; /* focus:border-blue-500 */
-                    }
 
-                    /* Add some basic styling for custom buttons if not defined globally */
-                    .custom-button {
-                        /* Add base button styles */
-                        padding: 0.5rem 1rem;
-                        border-radius: 0.375rem;
-                        cursor: pointer;
-                        transition: background-color 0.2s ease;
-                        font-weight: 500;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
+                    /* Ensure the text input gets the correct base styles if not applied via widget */
+                    /* You might need to adjust the selector based on the rendered input ID/name */
+                    textarea[name="text_content"].form-input.chat-input {
+                         /* Styles are primarily from .form-input and .chat-input in whatsapp_style.css */
+                         /* Add any overrides if needed, e.g., specific height/resize behavior */
+                         flex-grow: 1; /* Make textarea take available space in flex container */
                     }
-                    .button-sm {
-                         padding: 0.25rem 0.5rem;
-                         font-size: 0.875rem;
-                    }
-                    .button-primary {
-                        background-color: #3b82f6; /* blue-500 */
-                        color: white;
-                    }
-                    .button-primary:hover {
-                        background-color: #2563eb; /* blue-600 */
-                    }
-                     .button-secondary {
-                        background-color: #e5e7eb; /* gray-200 */
-                        color: #374151; /* gray-700 */
-                    }
-                    .button-secondary:hover {
-                        background-color: #d1d5db; /* gray-300 */
-                    }
-                    .button-outline-secondary {
-                        border: 1px solid #6b7280; /* gray-500 */
-                        color: #374151; /* gray-700 */
-                    }
-                     .button-outline-secondary:hover {
-                        background-color: #f3f4f6; /* gray-100 */
-                    }
-
                 `;
                 document.head.appendChild(style);
             }
@@ -240,20 +194,20 @@
             const fileInput = document.getElementById('chat-file-input');
             if (attachButton && fileInput) {
                 attachButton.addEventListener('click', () => fileInput.click());
-                // Add logic here or in chat.js to handle file selection (e.g., show preview, prepare for upload)
+                // Add logic here or in chat.js to handle file selection
                 fileInput.addEventListener('change', (event) => {
                     const file = event.target.files[0];
                     if (file) {
                         console.log('File selected:', file.name);
                         // TODO: Implement file upload logic (likely via AJAX in chat.js)
-                        // You might want to show the file name or a preview temporarily
-                        // Show spinner if needed: document.getElementById('file-upload-spinner').style.display = 'inline-block';
+                        // document.getElementById('file-upload-spinner').style.display = 'inline-block';
                     }
                 });
             }
 
              // Handle Enter key press in textarea to submit form (optional)
-            const textInput = document.getElementById('id_text_content'); // Adjust ID if needed
+            // Make sure the textarea has the ID 'id_text_content' or adjust selector
+            const textInput = document.querySelector('.chat-input-area textarea'); // More robust selector
             if (textInput) {
                 textInput.addEventListener('keypress', function(event) {
                     // Submit on Enter press, unless Shift+Enter is pressed (for new line)
@@ -262,6 +216,16 @@
                         document.getElementById('manual-message-form').requestSubmit(); // Submit the form
                     }
                 });
+
+                // Auto-resize textarea height (optional but common for chat inputs)
+                function autoResizeTextarea() {
+                    textInput.style.height = 'auto'; // Reset height
+                    // Set height based on scroll height, respecting max-height from CSS
+                    const maxHeight = parseInt(window.getComputedStyle(textInput).maxHeight, 10) || 120; // Default max-height
+                    textInput.style.height = Math.min(textInput.scrollHeight, maxHeight) + 'px';
+                }
+                textInput.addEventListener('input', autoResizeTextarea);
+                autoResizeTextarea(); // Initial resize on load
             }
 
         });
