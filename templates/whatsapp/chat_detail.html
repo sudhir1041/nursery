@@ -15,10 +15,7 @@
             <div>
                 <div style="display: flex; align-items: center;"> {# Inline style for simple alignment #}
                     <h4 class="contact-name">{{ contact.name|default:contact.wa_id }}</h4>
-                    {# --- Online/Offline Status Indicator ---
-                       - Requires `contact.is_online` (boolean) passed from the view.
-                       - CSS for these classes is added in extra_scripts block below.
-                    --- #}
+                    
                     {% if contact.is_online is not None %} {# Check if status is available #}
                         <span class="status-indicator {% if contact.is_online %}status-online{% else %}status-offline{% endif %}"
                               title="{% if contact.is_online %}Online{% else %}Offline{% endif %}">
