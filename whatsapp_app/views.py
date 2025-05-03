@@ -362,13 +362,18 @@ def chat_detail(request, wa_id):
 @user_passes_test(is_staff_user)
 @require_POST
 def send_manual_message_ajax(request):
-    """ AJAX endpoint to send a manual message (triggers Celery Task). """
+    """
+    AJAX endpoint to send a manual message.
+    Queues a Celery task if enabled, otherwise sends synchronously.
+    NOTE: This endpoint might be less relevant if using WebSockets for sending.
+          It primarily serves the AJAX polling version of chat.js or non-JS fallbacks.
+    """
     wa_id = request.POST.get('wa_id')
     if not wa_id:
          return JsonResponse({'status': 'error', 'message': 'Missing wa_id parameter.'}, status=400)
 
     contact = get_object_or_404(Contact, wa_id=wa_id)
-    form = ManualMessageForm(request.POST)
+    form = ManualMessageForm(request.POST) # Assumes form contains 'text_content'
     if form.is_valid():
         message_text = form.cleaned_data['text_content']
         try:
@@ -380,6 +385,7 @@ def send_manual_message_ajax(request):
                     text_content=message_text
                 )
                 # Return success immediately after queuing
+                logger.info(f"AJAX send success (task queued) for wa_id: {wa_id}")
                 return JsonResponse({'status': 'success', 'message': 'Message queued for sending.'})
             else:
                 # Fallback: Send synchronously if Celery is disabled
@@ -390,75 +396,52 @@ def send_manual_message_ajax(request):
                     text_content=message_text
                 )
                 if message_obj:
+                     logger.info(f"AJAX send success (sent sync) for wa_id: {wa_id}. Message ID: {message_obj.message_id}")
                      # Return details of the sent message
-                    return JsonResponse({
-                        'status': 'success',
-                        'message': { # Return the created message object details
-                            'message_id': message_obj.message_id, 'text_content': message_obj.text_content,
-                            'timestamp': message_obj.timestamp.isoformat(), 'direction': 'OUT',
-                            'status': message_obj.status, 'message_type': message_obj.message_type,
-                            'template_name': message_obj.template_name, 'media_url': message_obj.media_url,
-                        }
-                    })
+                     return JsonResponse({
+                         'status': 'success',
+                         'message': { # Return the created message object details
+                             'message_id': message_obj.message_id, 'text_content': message_obj.text_content,
+                             'timestamp': message_obj.timestamp.isoformat(), 'direction': 'OUT',
+                             'status': message_obj.status, 'message_type': message_obj.message_type,
+                             'template_name': message_obj.template_name, 'media_url': message_obj.media_url,
+                         }
+                     })
                 else:
+                    logger.error(f"AJAX send FAILED (sync send utility returned None) for wa_id: {wa_id}")
                     return JsonResponse({'status': 'error', 'message': 'Failed to send message synchronously.'}, status=500)
 
         except Exception as e:
-            logger.exception(f"Error triggering send task for {wa_id}: {e}") # Log full traceback
-            return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred while queueing the message.'}, status=500)
+            logger.exception(f"Error triggering send task or sending synchronously for {wa_id}: {e}")
+            return JsonResponse({'status': 'error', 'message': 'An unexpected server error occurred.'}, status=500)
     else:
         # Form validation failed
         logger.warning(f"Manual message form validation failed for {wa_id}: {form.errors.as_json()}")
-        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
 @user_passes_test(is_staff_user)
 @require_GET
 def get_latest_messages_ajax(request):
-    """ AJAX endpoint for polling new messages (Fallback if WebSockets fail). """
-    wa_id = request.GET.get('wa_id')
-    last_timestamp_str = request.GET.get('last_timestamp')
-
-    if not wa_id or not last_timestamp_str:
-        return JsonResponse({'status': 'error', 'message': 'Missing required parameters (wa_id, last_timestamp)'}, status=400)
-
+    wa_id = request.GET.get('wa_id'); last_timestamp_str = request.GET.get('last_timestamp')
+    if not wa_id or not last_timestamp_str: return JsonResponse({'status': 'error', 'message': 'Missing parameters'}, status=400)
+    logger.debug(f"AJAX poll request received for wa_id: {wa_id} after timestamp: {last_timestamp_str}")
     try:
-        contact = Contact.objects.get(wa_id=wa_id)
-        last_timestamp = parse_datetime(last_timestamp_str)
-        if not last_timestamp:
-            logger.warning(f"Invalid timestamp format received from client: {last_timestamp_str}")
-            return JsonResponse({'status': 'error', 'message': 'Invalid timestamp format'}, status=400)
-        if timezone.is_naive(last_timestamp):
-            last_timestamp = timezone.make_aware(last_timestamp, timezone.get_default_timezone())
-
-        new_messages_qs = ChatMessage.objects.filter(
-            contact=contact,
-            timestamp__gt=last_timestamp
-        ).order_by('timestamp')
-
-        new_messages_data = list(new_messages_qs.values(
-            'message_id', 'text_content', 'timestamp', 'direction', 'status',
-            'media_url', 'message_type', 'template_name'
-        ))
-
-        # Convert datetime objects to ISO strings for JSON serialization
+        contact = Contact.objects.get(wa_id=wa_id); last_timestamp = parse_datetime(last_timestamp_str)
+        if not last_timestamp: logger.warning(f"Invalid timestamp format: {last_timestamp_str}"); return JsonResponse({'status': 'error', 'message': 'Invalid timestamp format'}, status=400)
+        if timezone.is_naive(last_timestamp): last_timestamp = timezone.make_aware(last_timestamp, timezone.get_default_timezone())
+        logger.debug(f"Querying messages for {wa_id} with timestamp > {last_timestamp.isoformat()}")
+        new_messages_qs = ChatMessage.objects.filter(contact=contact, timestamp__gt=last_timestamp).order_by('timestamp')
+        new_message_count = new_messages_qs.count(); logger.debug(f"Found {new_message_count} new messages in DB query.")
+        new_messages_data = list(new_messages_qs.values('message_id', 'text_content', 'timestamp', 'direction', 'status', 'media_url', 'message_type', 'template_name'))
+        latest_ts_in_response = last_timestamp
         for msg_data in new_messages_data:
             if isinstance(msg_data.get('timestamp'), timezone.datetime):
+                if msg_data['timestamp'] > latest_ts_in_response: latest_ts_in_response = msg_data['timestamp']
                 msg_data['timestamp'] = msg_data['timestamp'].isoformat()
-
-        latest_ts_in_response = new_messages_qs.last().timestamp if new_messages_qs.exists() else last_timestamp
         next_poll_timestamp_iso = latest_ts_in_response.isoformat()
-
-        return JsonResponse({
-            'status': 'success',
-            'new_messages': new_messages_data,
-            'next_poll_timestamp': next_poll_timestamp_iso,
-        })
-    except Contact.DoesNotExist:
-        logger.warning(f"Contact not found during latest messages poll: {wa_id}")
-        return JsonResponse({'status': 'error', 'message': 'Contact not found'}, status=404)
-    except Exception as e:
-        logger.exception(f"Error fetching latest messages for {wa_id}: {e}")
-        return JsonResponse({'status': 'error', 'message': 'Server error fetching messages'}, status=500)
+        logger.info(f"AJAX poll returning {len(new_messages_data)} new messages for wa_id: {wa_id}. Next timestamp: {next_poll_timestamp_iso}")
+        return JsonResponse({'status': 'success', 'new_messages': new_messages_data, 'next_poll_timestamp': next_poll_timestamp_iso})
+    except Contact.DoesNotExist: logger.warning(f"Contact not found during poll: {wa_id}"); return JsonResponse({'status': 'error', 'message': 'Contact not found'}, status=404)
+    except Exception as e: logger.exception(f"Error fetching latest messages for {wa_id}: {e}"); return JsonResponse({'status': 'error', 'message': 'Server error'}, status=500)
 
 
 # ==============================================================================
