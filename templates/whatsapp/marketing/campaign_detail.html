@@ -1,39 +1,39 @@
 {# whatsapp_app/templates/whatsapp_app/marketing/campaign_detail.html #}
-{% extends "whatsapp/base_whatsapp.html" %} {# Corrected path assuming base is in app #}
+{% extends "whatsapp/base_whatsapp.html" %} {# Assuming base is in app #}
 {% load static %}
 
 {% block whatsapp_content %}
-<div class="whatsapp-detail-container"> {# Custom container for detail pages #}
+<div class="whatsapp-detail-container"> {# Main container class from CSS #}
 
-    {# Header Section #}
+    {# Header Section - Uses .detail-header, .detail-title-status, .page-title, .detail-actions from CSS #}
     <div class="detail-header">
         <div class="detail-title-status">
             <h3 class="page-title">{{ campaign.name }}</h3>
-            {# Use the status badge partial #}
+            {# Status Badge - Relies on .status-badge and specific status classes from CSS via the partial #}
             {% include "whatsapp/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
         </div>
         <div class="detail-actions">
-            {# --- Action Buttons based on Status --- #}
+            {# --- Action Buttons based on Status (Uses .custom-button classes) --- #}
 
             {% if campaign.status == 'DRAFT' %}
-                {# Schedule Form (requires datetime input) #}
+                {# Schedule Form (Uses .schedule-form, .schedule-label, .schedule-input, .form-input, .custom-button from CSS) #}
                 <form method="post" action="{% url 'whatsapp_app:schedule_campaign' campaign.pk %}" class="schedule-form" id="scheduleForm">
-                     {% csrf_token %}
-                     <label for="id_scheduled_time" class="schedule-label">Schedule for:</label>
-                     {# Use datetime-local input. Ensure browser compatibility or use a JS picker #}
-                     <input type="datetime-local" name="scheduled_time" id="id_scheduled_time" class="form-input schedule-input" required>
-                     <button type="submit" class="custom-button button-success button-sm">
-                         <i class="fas fa-calendar-alt"></i> Schedule
-                     </button>
-                 </form>
-                {# Send Now Form (no time input needed) #}
+                    {% csrf_token %}
+                    <label for="id_scheduled_time" class="schedule-label">Schedule for:</label>
+                    {# Added form-input class for styling consistency #}
+                    <input type="datetime-local" name="scheduled_time" id="id_scheduled_time" class="form-input schedule-input" required>
+                    <button type="submit" class="custom-button button-success button-sm">
+                        <i class="fas fa-calendar-alt"></i> Schedule
+                    </button>
+                </form>
+                {# Send Now Form #}
                 <form method="post" action="{% url 'whatsapp_app:schedule_campaign' campaign.pk %}" style="display: inline-block;">
-                     {% csrf_token %}
-                     {# No scheduled_time input means send now #}
-                     <button type="submit" class="custom-button button-primary button-sm" onclick="return confirm('Send this campaign immediately to all recipients?');">
-                         <i class="fas fa-paper-plane"></i> Send Now
-                     </button>
-                 </form>
+                    {% csrf_token %}
+                    {# No scheduled_time input means send now #}
+                    <button type="submit" class="custom-button button-primary button-sm" onclick="return confirm('Send this campaign immediately to all recipients?');">
+                        <i class="fas fa-paper-plane"></i> Send Now
+                    </button>
+                </form>
 
             {% elif campaign.status == 'SCHEDULED' %}
                  {# Cancel Form #}
@@ -43,42 +43,36 @@
                          <i class="fas fa-ban"></i> Cancel Schedule
                      </button>
                  </form>
-                 {# Placeholder for Edit Schedule - would likely link to a form or use JS #}
+                 {# Placeholder for Edit Schedule #}
                  {# <a href="#" class="custom-button button-secondary button-sm"><i class="fas fa-edit"></i> Edit Schedule</a> #}
 
             {% elif campaign.status == 'SENDING' %}
-                 {# Placeholder for Pause Action - Requires view/logic #}
-                 {# <form method="post" action="{% url 'whatsapp_app:pause_campaign' campaign.pk %}" style="display: inline-block;">
-                     {% csrf_token %}
-                     <button type="submit" class="custom-button button-warning button-sm"><i class="fas fa-pause-circle"></i> Pause</button>
-                 </form> #}
-                 <span class="text-muted">(Sending in progress...)</span>
+                 {# Placeholder for Pause Action #}
+                 {# <form method="post" action="{% url 'whatsapp_app:pause_campaign' campaign.pk %}" style="display: inline-block;"> ... </form> #}
+                 <span class="text-muted">(Sending in progress...)</span> {# Uses .text-muted utility class #}
 
             {% elif campaign.status == 'PAUSED' %}
-                 {# Placeholder for Resume Action - Requires view/logic #}
-                 {# <form method="post" action="{% url 'whatsapp_app:resume_campaign' campaign.pk %}" style="display: inline-block;">
-                     {% csrf_token %}
-                     <button type="submit" class="custom-button button-success button-sm"><i class="fas fa-play-circle"></i> Resume</button>
-                 </form> #}
+                 {# Placeholder for Resume Action #}
+                 {# <form method="post" action="{% url 'whatsapp_app:resume_campaign' campaign.pk %}" style="display: inline-block;"> ... </form> #}
                  <span class="text-muted">(Paused)</span>
             {% endif %}
 
             {# --- Always Available Actions (Optional) --- #}
-            {# Delete Button (only if appropriate, e.g., Draft/Cancelled/Failed?) #}
+            {# Delete Button #}
             {% if campaign.status == 'DRAFT' or campaign.status == 'CANCELLED' or campaign.status == 'FAILED' %}
              <form method="post" action="{% url 'whatsapp_app:campaign_delete' campaign.pk %}" style="display: inline-block; margin-left: 5px;" onsubmit="return confirm('Are you sure you want to delete campaign \'{{ campaign.name|escapejs }}\'? This cannot be undone.');">
                  {% csrf_token %}
-                <button type="submit" class="custom-button button-danger button-sm" title="Delete">
-                    <i class="fas fa-trash-alt"></i> Delete
-                </button>
-            </form>
+                 <button type="submit" class="custom-button button-danger button-sm" title="Delete">
+                     <i class="fas fa-trash-alt"></i> Delete
+                 </button>
+             </form>
             {% endif %}
         </div>
     </div>
-     <p class="page-description">Manage contacts, scheduling, and view performance for this campaign.</p>
-    <hr class="divider">
+     <p class="page-description">Manage contacts, scheduling, and view performance for this campaign.</p> {# Uses .page-description from CSS #}
+    <hr class="divider"> {# Uses .divider from CSS #}
 
-    {# Display general messages #}
+    {# Display general messages (Uses .whatsapp-messages-container, .message-item, etc. from CSS) #}
     {% if messages %}
     <div class="whatsapp-messages-container mb-4">
         {% for message in messages %}
@@ -90,21 +84,20 @@
     </div>
     {% endif %}
 
-    {# --- Campaign Details Section --- #}
+    {# --- Campaign Details Section (Uses .detail-section, .section-header, .section-title, .definition-list from CSS) --- #}
     <div class="detail-section">
-        <div class="section-header"> {# Added header for consistency #}
+        <div class="section-header">
             <h4 class="section-title">Campaign Setup</h4>
-             {# Optional Edit button for Draft campaigns #}
              {% if campaign.status == 'DRAFT' %}
                  {# <a href="{% url 'whatsapp_app:campaign_edit' campaign.pk %}" class="custom-button button-outline-secondary button-sm"><i class="fas fa-edit"></i> Edit Name/Template</a> #}
              {% endif %}
         </div>
-        <dl class="definition-list"> {# Use definition list for details #}
+        <dl class="definition-list">
             <dt>Template Used:</dt>
             <dd>
                 {% if campaign.template %}
                     {{ campaign.template.name }} ({{ campaign.template.category }})
-                    {# Optional: Link to template preview #}
+                    {# Optional: Link to template preview (Uses .action-link-sm from CSS) #}
                     {# <a href="{% url 'whatsapp_app:template_detail' campaign.template.pk %}" class="action-link-sm"><i class="fas fa-eye"></i> Preview</a> #}
                 {% else %}
                     <span class="text-muted">N/A</span>
@@ -122,14 +115,13 @@
     <div class="detail-section">
          <div class="section-header">
             <h4 class="section-title">Recipients ({{ stats.total|default:0 }})</h4>
-            {# Upload form shown only for Draft campaigns #}
             {% if campaign.status == 'DRAFT' %}
                 <button type="button" class="custom-button button-outline-secondary button-sm" onclick="toggleUploadForm()">
                     <i class="fas fa-upload"></i> Upload Contacts
                 </button>
             {% endif %}
          </div>
-         {# Contact Upload Form (hidden by default) #}
+         {# Contact Upload Form (Uses .upload-form-section, .whatsapp-form, .form-group, .form-help-text, .form-actions from CSS) #}
          {% if upload_form %}
          <div id="upload-form-section" class="upload-form-section" style="display: none; padding: 1.5rem; border-bottom: 1px solid #e0e0e0;">
              <h5>Upload Contacts CSV</h5>
@@ -137,15 +129,15 @@
              <form method="post" action="{% url 'whatsapp_app:upload_contacts' campaign.pk %}" enctype="multipart/form-data" class="whatsapp-form">
                  {% csrf_token %}
                  <div class="form-group">
-                     {# Render the ContactUploadForm field #}
+                     {# Ensure the rendered input has .form-input class, usually via widget attrs #}
                      {{ upload_form.contact_file.label_tag }}
-                     {{ upload_form.contact_file }}
+                     {{ upload_form.contact_file }} {# Add 'class': 'form-input' in widget attrs #}
                      {% if upload_form.contact_file.help_text %}
                          <small class="form-help-text">{{ upload_form.contact_file.help_text }}</small>
                      {% endif %}
                      {% if upload_form.contact_file.errors %}
-                         <div class="message-item message-error form-field-error">
-                             {{ upload_form.contact_file.errors }}
+                         <div class="message-item message-error form-field-error"> {# Uses .form-field-error from CSS #}
+                              {{ upload_form.contact_file.errors }}
                          </div>
                      {% endif %}
                  </div>
@@ -166,7 +158,7 @@
          </script>
          {% endif %}
 
-         {# Recipients Table #}
+         {# Recipients Table (Uses .table-container, .custom-table from CSS) #}
          <div class="table-container">
              {% if recipients %}
              <table class="custom-table">
@@ -196,29 +188,28 @@
                  </tbody>
              </table>
              {% else %}
-              <div class="placeholder-content">
-                 <p class="text-muted">No recipients have been added to this campaign yet.</p>
-                 {% if campaign.status == 'DRAFT' %}
-                    <p class="text-muted">Click 'Upload Contacts' above to add recipients.</p>
-                 {% endif %}
+              <div class="placeholder-content"> {# Uses .placeholder-content from CSS #}
+                  <p class="text-muted">No recipients have been added to this campaign yet.</p>
+                  {% if campaign.status == 'DRAFT' %}
+                     <p class="text-muted">Click 'Upload Contacts' above to add recipients.</p>
+                  {% endif %}
               </div>
              {% endif %}
          </div>
          {# Optional: Add pagination for recipients if needed #}
     </div>
 
-     {# Performance Section #}
+     {# Performance Section (Uses .detail-section, .section-header, .performance-summary, .stat-item, .stat-label, .stat-value from CSS) #}
     <div class="detail-section">
          <div class="section-header">
             <h4 class="section-title">Performance Summary</h4>
-             {# Add button only if campaign has run #}
              {% if campaign.status != 'DRAFT' and campaign.status != 'SCHEDULED' %}
-                {# <a href="#" class="custom-button button-outline-secondary button-sm">
-                    <i class="fas fa-chart-bar"></i> View Full Report
-                </a> #}
-            {% endif %}
+                 {# <a href="#" class="custom-button button-outline-secondary button-sm">
+                     <i class="fas fa-chart-bar"></i> View Full Report
+                 </a> #}
+             {% endif %}
          </div>
-         <div class="performance-summary"> {# Custom container for stats #}
+         <div class="performance-summary">
              {% if stats.total > 0 %}
                  <div class="stat-item">
                      <span class="stat-label">Total Recipients:</span>
