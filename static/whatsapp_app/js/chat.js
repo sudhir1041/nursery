@@ -2,7 +2,6 @@
 
 /**
  * Handles chat functionality using AJAX polling with enhanced duplicate checking.
- * Integrates with Django backend views and models for WhatsApp messaging.
  */
 document.addEventListener('DOMContentLoaded', () => {
     // --- Get DOM Elements ---
