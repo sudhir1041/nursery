@@ -185,7 +185,7 @@
                          <td data-label="Name">{{ recipient.contact.name|default:"-" }}</td>
                          <td data-label="WA ID">{{ recipient.contact.wa_id }}</td>
                          <td data-label="Status">
-                             {% include "whatsapp_app/partials/custom_status_badge.html" with status=recipient.status %}
+                             {% include "whatsapp/partials/status_badge.html" with status=recipient.status %}
                          </td>
                          <td data-label="Sent Time">{{ recipient.sent_time|date:"Y-m-d H:i"|default:"-" }}</td>
                          <td data-label="Error" title="{{ recipient.error_message|default:'' }}">
