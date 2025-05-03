@@ -376,6 +376,19 @@ def send_manual_message_ajax(request):
     form = ManualMessageForm(request.POST) # Assumes form contains 'text_content'
     if form.is_valid():
         message_text = form.cleaned_data['text_content']
+        
+        # Check if same message was sent recently to prevent duplicates
+        recent_message = ChatMessage.objects.filter(
+            contact=contact,
+            text_content=message_text,
+            direction='OUT',
+            timestamp__gte=timezone.now() - timezone.timedelta(minutes=1)
+        ).exists()
+        
+        if recent_message:
+            logger.warning(f"Duplicate message detected for wa_id: {wa_id}. Skipping send.")
+            return JsonResponse({'status': 'error', 'message': 'Duplicate message detected. Please wait before sending the same message again.'}, status=400)
+            
         try:
             # --- Trigger Celery task to send message ---
             if CELERY_ENABLED:
@@ -417,6 +430,7 @@ def send_manual_message_ajax(request):
     else:
         # Form validation failed
         logger.warning(f"Manual message form validation failed for {wa_id}: {form.errors.as_json()}")
+        return JsonResponse({'status': 'error', 'message': 'Invalid form data'}, status=400)
 
 @user_passes_test(is_staff_user)
 @require_GET
