@@ -12,3 +12,5 @@ nurseryproject.zip
 
 # Ignore SQLite database
 db.sqlite3
+dev.nix
+.vscode/
