@@ -1,4 +1,4 @@
-{# whatsapp_app/templates/whatsapp_app/bot_list.html #}
+{# whatsapp_app/templates/whatsapp/bot/bot_list.html #}
 {% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
 {% load static %}
 
@@ -10,7 +10,7 @@
         {# Ensure this URL name matches your urls.py #}
         <a href="{% url 'whatsapp_app:bot_response_create' %}" class="custom-button button-primary">
              <i class="fas fa-plus"></i> Add New Response
-        </a>
+         </a>
     </div>
     <p class="page-description">Manage automated responses triggered by specific customer phrases.</p>
     <hr class="divider">
@@ -31,22 +31,22 @@
     {% if bot_responses %} {# Use the context variable name from the view #}
     <div class="table-container"> {# Use existing table container style #}
         <table class="custom-table"> {# Use existing table style #}
-            <thead>
-                <tr>
-                    <th>Trigger Phrase</th>
-                    <th>Response Text (Preview)</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for response in bot_responses %} {# Loop through the context variable #}
-                <tr>
-                    <td data-label="Trigger Phrase"><code>{{ response.trigger_phrase }}</code></td>
-                    <td data-label="Response Preview">{{ response.response_text|truncatewords:15 }}</td>
-                    <td data-label="Status">
-                        {% if response.is_active %}
-                            <span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span>
+           <thead>
+               <tr>
+                   <th>Question</th>
+                   <th>Answer (Preview)</th>
+                   <th>Status</th>
+                   <th>Actions</th>
+               </tr>
+           </thead>
+           <tbody>
+               {% for response in bot_responses %} {# Loop through the context variable #}
+               <tr>
+                   <td data-label="Question"><code>{{ response.question }}</code></td>
+                   <td data-label="Answer Preview">{{ response.answer|truncatewords:15 }}</td>
+                   <td data-label="Status">
+                       {% if response.is_active %}
+                           <span class="status-badge status-active"><i class="fas fa-check-circle"></i> Active</span>
                         {% else %}
                              <span class="status-badge status-inactive"><i class="fas fa-times-circle"></i> Inactive</span>
                         {% endif %}
@@ -56,16 +56,16 @@
                         <a href="{% url 'whatsapp_app:bot_response_edit' response.pk %}" class="custom-button button-outline-secondary button-sm" title="Edit">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        {# Delete Button - Ensure URL name matches urls.py #}
-                        <form method="post" action="{% url 'whatsapp_app:bot_response_delete' response.pk %}" style="display: inline-block; margin-left: 5px;" onsubmit="return confirm('Are you sure you want to delete the response for trigger: \'{{ response.trigger_phrase|escapejs }}\'?');">
-                             {% csrf_token %}
-                            <button type="submit" class="custom-button button-danger button-sm" title="Delete">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
+                       {# Delete Button - Ensure URL name matches urls.py #}
+                       <form method="post" action="{% url 'whatsapp_app:bot_response_delete' response.pk %}" style="display: inline-block; margin-left: 5px;" onsubmit="return confirm('Are you sure you want to delete the response for Question: \'{{ response.question|escapejs }}\'?');">
+                            {% csrf_token %}
+                           <button type="submit" class="custom-button button-danger button-sm" title="Delete">
+                               <i class="fas fa-trash-alt"></i> Delete
+                           </button>
+                       </form>
+                   </td>
+               </tr>
+               {% endfor %}
             </tbody>
         </table>
     </div>

@@ -1,5 +1,8 @@
 {# whatsapp_app/templates/whatsapp_app/settings_form.html #}
 {% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+
+{% block extra_head %}
+    {{ form.media }}
 {% load static %}
 
 {% block whatsapp_content %}
@@ -40,32 +43,29 @@
         {% csrf_token %}
 
         {% for field in form %}
-        <div class="form-group"> {# Custom form group class #}
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label> {# Use the field's label #}
 
             {# Apply custom classes based on widget type #}
             {% if field.widget_type == 'checkbox' %}
                 <div class="form-checkbox-wrapper">
-                     {# Add custom class via widget attrs in forms.py OR rely on input[type=checkbox] selector #}
                     {{ field }}
                     <label for="{{ field.id_for_label }}" class="form-checkbox-label">
                         {% if field.help_text %}
-                            <span class="form-help-text">{{ field.help_text|safe }}</span>
+                            <span class="form-help-text">{{ field.help_text }}</span>
                         {% endif %}
                     </label>
                 </div>
             {% elif field.widget_type == 'password' %}
-                 {# Add custom class via widget attrs in forms.py OR rely on input[type=password] selector #}
-                 {{ field }}
-                 {% if field.help_text %}
-                     <small class="form-help-text">{{ field.help_text|safe }}</small>
-                 {% endif %}
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-help-text">{{ field.help_text }}</small>
+                {% endif %}
             {% else %}
-                 {# Add custom class via widget attrs in forms.py OR rely on input[type=text/url/etc] selector #}
-                 {{ field }}
-                 {% if field.help_text %}
-                     <small class="form-help-text">{{ field.help_text|safe }}</small>
-                 {% endif %}
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-help-text">{{ field.help_text }}</small>
+                {% endif %}
             {% endif %}
 
             {% if field.errors %}
@@ -73,7 +73,7 @@
                 {{ field.errors }}
             </div>
             {% endif %}
-        </div>
+        </div> {# End of form-group #}
         {% endfor %}
 
         <div class="form-actions">
@@ -110,7 +110,7 @@
              <div class="settings-card webhook-card"> {# Custom card class #}
                  <div class="card-content">
                     <h6>Verify Token</h6>
-                    <p class="small-description">Use this token in the Meta Developer Portal.</p>
+                    <p class="small-description">Use this token in the Meta Developer Portal or use this token to configure your Whatsapp Business Platform.</p>
                     <div class="copy-field"> {# Custom copy field structure #}
                         <input type="text" class="form-input" value="{{ settings.webhook_verify_token }}" readonly id="verifyTokenInput" aria-label="Verify Token">
                         <button class="custom-button copy-btn" type="button" onclick="copyToClipboard('verifyTokenInput', this)" title="Copy Token">
@@ -128,7 +128,7 @@
 {% endblock %}
 
 
-{% block extra_scripts %} {# Use the block name from your base.html #}
+{% block extra_scripts %}
     {{ block.super }} {# Include JS from base.html #}
 
     {# copyToClipboard function specific to this page #}
@@ -218,3 +218,4 @@
     }
     </script>
 {% endblock extra_scripts %}
+{% endblock extra_head %}

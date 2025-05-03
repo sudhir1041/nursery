@@ -10,7 +10,7 @@ from django.db import transaction
 from django.db.models import Count, Q, Max
 from django.contrib.auth.decorators import login_required, user_passes_test # Or custom permission decorators
 from django.contrib import messages # Use Django's messaging framework
-from django.conf import settings as django_settings # For project level settings if needed
+from django.conf import settings as django_settings
 from django.urls import reverse
 
 # --- Standard Library Imports ---
@@ -29,9 +29,9 @@ from .models import (
     MarketingTemplate, MarketingCampaign, CampaignContact
 )
 # Forms from this app
-from .forms import (
-    WhatsAppSettingsForm, ManualMessageForm, MarketingCampaignForm,
-    ContactUploadForm , BotResponseForm, AutoReplySettingsForm # Ensure ManualMessageForm is defined
+from .forms import ( ContactForm,
+    WhatsappCredentialsForm, ManualMessageForm, MarketingCampaignForm,
+    ContactUploadForm , BotResponseForm, AutoReplyForm
 )
 # Utilities from this app (Assume these exist and handle API/parsing logic)
 from .utils import (
@@ -108,44 +108,42 @@ def dashboard(request):
 # Settings View
 # ==============================================================================
 @user_passes_test(is_staff_user)
-def whatsapp_settings_view(request):
-    """ Manages WhatsApp Cloud API connection settings. """
-    settings_name = "NurseryProjectDefault"
-    settings_instance, created = WhatsAppSettings.objects.get_or_create(
-        account_name=settings_name,
-        defaults={'webhook_verify_token': str(uuid.uuid4())}
-    )
+def whatsapp_credentials_view(request):
+    """Manages WhatsApp Cloud API connection settings."""
+    try:
+        # Try to get the existing credentials
+        credentials = WhatsAppSettings.objects.get()
+    except WhatsAppSettings.DoesNotExist:
+        # If they don't exist, initialize with defaults
+        credentials = WhatsAppSettings(webhook_verify_token=str(uuid.uuid4()))
+
     if request.method == 'POST':
-        form = WhatsAppSettingsForm(request.POST, instance=settings_instance)
+        form = WhatsappCredentialsForm(request.POST, instance=credentials)
         if form.is_valid():
-            try:
-                settings = form.save()
-                messages.success(request, 'WhatsApp API settings saved successfully.')
-                if form.has_changed() and any(field in form.changed_data for field in ['webhook_url', 'webhook_verify_token']):
-                    messages.info(request, "Remember to update the Webhook URL and Verify Token in the Meta Developer Portal for your WhatsApp App.")
-                return redirect('whatsapp_app:settings')
-            except Exception as e:
-                logger.exception(f"Error saving WhatsApp settings: {e}")
-                messages.error(request, f"Failed to save settings: {e}")
+            form.save()
+            messages.success(request, 'WhatsApp API credentials saved successfully.')
+            return redirect('whatsapp_app:whatsapp_settings')
         else:
             messages.error(request, "Please correct the errors highlighted below.")
     else:
-        form = WhatsAppSettingsForm(instance=settings_instance)
+        form = WhatsappCredentialsForm(instance=credentials)
 
-    full_webhook_url = None
-    if settings_instance:
-        try:
-            webhook_path = reverse('whatsapp_app:webhook_handler')
-            full_webhook_url = request.build_absolute_uri(webhook_path)
-        except Exception as e:
-            logger.warning(f"Could not reverse URL for 'whatsapp_app:webhook_handler'. Check urls.py. Error: {e}")
 
     context = {
         'form': form,
-        'settings': settings_instance,
-        'full_webhook_url': full_webhook_url
     }
     return render(request, 'whatsapp/settings_form.html', context)
+
+
+@user_passes_test(is_staff_user)
+def whatsapp_settings_view(request):
+    """ Redirect to `whatsapp_credentials_view` """
+
+    return redirect('whatsapp_app:whatsapp_credentials')
+
+
+
+
 
 
 # ==============================================================================
@@ -460,10 +458,19 @@ def get_latest_messages_ajax(request):
 
 # ==============================================================================
 # Bot Response CRUD Views
-# ==============================================================================
-@user_passes_test(is_staff_user)
-def bot_response_list(request):
-    """ Lists all configured bot responses. """
+# =============================================================================
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+class BotResponseCreateView(CreateView):
+    model = BotResponse
+    form_class = BotResponseForm
+    template_name = 'whatsapp/bot/bot_response_form.html'
+    success_url = '/whatsapp/bot/list/'  # URL to redirect after successful creation
+    def form_valid(self, form):
+        messages.success(self.request, "Bot Response created successfully.")
+        return super().form_valid(form)
+
+class BotResponseListView(ListView):
+    """Lists all configured bot responses."""
     bot_responses = BotResponse.objects.order_by('trigger_phrase')
     context = {'bot_responses': bot_responses}
     return render(request, 'whatsapp/bot/bot_list.html', context)
@@ -510,7 +517,7 @@ def bot_response_update(request, pk):
     return render(request, 'whatsapp/bot/bot_response_form.html', context)
 
 @user_passes_test(is_staff_user)
-@require_POST
+
 def bot_response_delete(request, pk):
     """ Deletes a specific bot response. """
     bot_response = get_object_or_404(BotResponse, pk=pk)
@@ -525,34 +532,73 @@ def bot_response_delete(request, pk):
     return redirect('whatsapp_app:bot_list')
 
 
-# ==============================================================================
-# Auto-Reply View
-# ==============================================================================
-@user_passes_test(is_staff_user)
-def autoreply_settings_view(request):
-    """ Manages auto-reply settings. """
-    settings, created = AutoReply.objects.get_or_create(pk=1) # Assuming pk=1 for singleton
-    if request.method == 'POST':
-        form = AutoReplySettingsForm(request.POST, instance=settings)
-        if form.is_valid():
-            try:
-                settings = form.save()
-                messages.success(request, "Auto-reply settings updated successfully.")
-                return redirect('whatsapp_app:autoreply_settings')
-            except Exception as e:
-                logger.exception(f"Error saving auto-reply settings: {e}")
-                messages.error(request, "An error occurred while saving auto-reply settings.")
+# Auto Reply Views
+from django.views.generic import CreateView, ListView, UpdateView
+class AutoReplyCreateView(CreateView):
+    model = AutoReply
+    form_class = AutoReplyForm
+    template_name = 'whatsapp/bot/autoreply_settings.html'
+    success_url = '/whatsapp/autoreply/list/'  # URL to redirect after successful creation
+
+    def form_valid(self, form):
+        # Check if an AutoReply already exists
+        existing_reply = AutoReply.objects.first()
+        if existing_reply:
+            # If it exists, update the existing record
+            existing_reply.keywords = form.cleaned_data['keywords']
+            existing_reply.response = form.cleaned_data['response']
+            existing_reply.is_active = form.cleaned_data['is_active']
+            existing_reply.save()
+            messages.success(self.request, "Auto-reply updated successfully.")
+            return redirect(self.success_url)
         else:
-            messages.error(request, "Please correct the errors highlighted below.")
-    else:
-        form = AutoReplySettingsForm(instance=settings)
-    context = {'form': form, 'settings': settings}
-    return render(request, 'whatsapp/bot/autoreply_settings.html', context)
+            # If it doesn't exist, create a new AutoReply
+            self.object = form.save()
+            messages.success(self.request, "Auto-reply created successfully.")
+            return redirect(self.success_url)
+
+class AutoReplyListView(ListView):
+    model = AutoReply
+    template_name = 'whatsapp/bot/autoreply_list.html'
+    context_object_name = 'auto_replies'
+
+
 
 
 # ==============================================================================
 # Marketing Campaign Views
 # ==============================================================================
+from django.views.generic import CreateView
+class ContactCreateView(CreateView):
+    model = Contact
+    form_class = ContactForm
+    template_name = 'whatsapp/marketing/contact_form.html'
+    # success_url = reverse_lazy('whatsapp_app:contact_list') 
+    def form_valid(self, form):
+        try:
+            # Check if a Contact with the given wa_id already exists
+            wa_id = form.cleaned_data['phone']
+            existing_contact = Contact.objects.filter(wa_id=wa_id).first()
+            if existing_contact:
+                # If it exists, update the existing record
+                existing_contact.name = form.cleaned_data['name']
+                existing_contact.save()
+                messages.success(self.request, f"Contact with phone {wa_id} updated successfully.")
+                return redirect('whatsapp_app:contact_list')
+            else:
+                # If it doesn't exist, create a new Contact
+                self.object = form.save()
+                messages.success(self.request, f"Contact {form.cleaned_data['name']} created successfully.")
+                return redirect('whatsapp_app:contact_list')
+        except Exception as e:
+            logger.exception(f"Error saving contact: {e}")
+            messages.error(self.request, "An error occurred while saving the contact.")
+            return self.form_invalid(form)
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors highlighted below.")
+        return super().form_invalid(form)
+
+
 @user_passes_test(is_staff_user)
 def campaign_list(request):
     """ Lists all marketing campaigns. """

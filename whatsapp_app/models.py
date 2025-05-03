@@ -9,44 +9,71 @@ class WhatsAppSettings(models.Model):
     """Stores WhatsApp Cloud API Credentials and settings for the nursery project."""
     account_name = models.CharField(
         max_length=100,
+        verbose_name="Account Name",
         unique=True,
         default="NurseryProjectDefault",
         help_text="A unique name for these settings (e.g., main account)."
     )
     whatsapp_token = models.CharField(
         max_length=500,
+        verbose_name="WhatsApp Token",
         help_text="Your WhatsApp Cloud API Access Token (Permanent or Temporary)."
     )
     phone_number_id = models.CharField(
         max_length=100,
+        verbose_name="Phone Number ID",
         help_text="The Phone Number ID from your WhatsApp App settings in Meta Developer Portal."
     )
     whatsapp_business_account_id = models.CharField(
         max_length=100,
+        verbose_name="WhatsApp Business Account ID",
         help_text="Your WhatsApp Business Account (WABA) ID."
     )
     app_id = models.CharField(
         max_length=100,
+        verbose_name="App ID",
         blank=True,
         null=True,
         help_text="Your Facebook App ID (optional, used for some integrations)."
     )
     webhook_verify_token = models.CharField(
         max_length=100,
+        verbose_name="Webhook Verify Token",
         default=uuid.uuid4,
         help_text="Auto-generated string used to verify webhook setup with Meta."
     )
     webhook_url = models.URLField(
         max_length=255,
+        verbose_name="Webhook URL",
         blank=True,
         null=True,
         help_text="The public URL where WhatsApp will send incoming messages (e.g., https://yournursery.com/whatsapp/webhook/)."
     )
+    MODE_CHOICES = [
+        (False, 'Development Mode'),
+        (True, 'Live Mode'),
+    ]
     is_live_mode = models.BooleanField(
         default=False,
-        help_text="Check this box if these credentials are for the live production environment."
+        choices=MODE_CHOICES,
+        verbose_name="Live Mode",
+        help_text="Check this box if these credentials are for the live production environment.",
+    )
+
+    is_active = models.BooleanField(
+        default=False,
+        verbose_name="Active",
+        help_text="Check if these settings should be used for sending messages",
+    )
+
+    is_primary = models.BooleanField(
+        default=False,
+        verbose_name="Primary",
+        help_text="Check if this is the main account.",
+
     )
     last_validated = models.DateTimeField(
+        verbose_name="Last Validated",
         null=True,
         blank=True,
         help_text="Timestamp when these credentials were last known to be working."
@@ -66,11 +93,22 @@ class WhatsAppSettings(models.Model):
 # --- Contact Information ---
 class Contact(models.Model):
     """Represents a WhatsApp contact, potentially linked to a nursery customer."""
-    wa_id = models.CharField(
-        max_length=50,
+    phone = models.CharField(
+        max_length=20,
         unique=True,
-        primary_key=True,
-        help_text="WhatsApp ID (Phone Number including country code, e.g., 919876543210)."
+        verbose_name="WhatsApp Number",
+        help_text="Phone Number including country code, e.g., 919876543210."
+    )
+
+    # To mark if this is a real or dummy contact
+    IS_REAL_CHOICES = [
+        (True, 'Real'),
+        (False, 'Dummy'),
+    ]
+    is_real = models.BooleanField(
+        default=True,
+        choices=IS_REAL_CHOICES,
+        help_text="Is this contact a real person or dummy one?"
     )
     name = models.CharField(
         max_length=100,
@@ -104,7 +142,7 @@ class Contact(models.Model):
     # )
 
     def __str__(self):
-        display_name = self.name or self.wa_id
+        display_name = self.name or self.phone
         # Add identifier from linked model if exists
         # if hasattr(self, 'customer') and self.customer:
         #     display_name += f" (Customer ID: {self.customer.pk})" # Adjust based on your Customer model
@@ -115,6 +153,14 @@ class Contact(models.Model):
     class Meta:
         verbose_name = "WhatsApp Contact"
         verbose_name_plural = "WhatsApp Contacts"
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to validate phone format if provided
+        """
+        if self.phone and not self.phone.isdigit():
+            raise ValueError("Phone number should only contain digits.")
+        super(Contact, self).save(*args, **kwargs)
 
 # --- Chat Message Log ---
 class ChatMessage(models.Model):
@@ -209,13 +255,6 @@ class ChatMessage(models.Model):
 
     def __str__(self):
         return f"{self.get_direction_display()} message {self.message_id} ({self.contact.wa_id})"
-
-    class Meta:
-        ordering = ['-timestamp'] # Show newest messages first in admin/queries
-        verbose_name = "WhatsApp Message"
-        verbose_name_plural = "WhatsApp Messages"
-
-# --- Marketing & Templates (Optional, if needed) ---
 class MarketingTemplate(models.Model):
     """Stores details about approved WhatsApp message templates relevant to the nursery."""
     name = models.CharField(
@@ -249,16 +288,18 @@ class MarketingTemplate(models.Model):
         verbose_name_plural = "WhatsApp Templates"
         ordering = ['name', 'language']
 
+
 class MarketingCampaign(models.Model):
     """Represents a bulk messaging campaign for the nursery (e.g., promotions, new arrivals)."""
     STATUS_CHOICES = [
-        ('DRAFT', 'Draft'),             # Campaign created, contacts being added
-        ('SCHEDULED', 'Scheduled'),     # Ready to send at a specific time
-        ('SENDING', 'Sending'),         # Celery task is actively processing recipients
-        ('COMPLETED', 'Completed'),     # All messages processed (might include failures)
-        ('FAILED', 'Failed'),           # Major issue prevented sending (e.g., API error, task crash)
-        ('CANCELLED', 'Cancelled'),     # Manually cancelled before sending
+        ('DRAFT', 'Draft'),  # Campaign created, contacts being added
+        ('SCHEDULED', 'Scheduled'),  # Ready to send at a specific time
+        ('SENDING', 'Sending'),  # Celery task is actively processing recipients
+        ('COMPLETED', 'Completed'),  # All messages processed (might include failures)
+        ('FAILED', 'Failed'),  # Major issue prevented sending (e.g., API error, task crash)
+        ('CANCELLED', 'Cancelled'),  # Manually cancelled before sending
     ]
+    
     name = models.CharField(
         max_length=150,
         help_text="Internal name for this campaign (e.g., 'Spring Sale 2025')."
@@ -273,6 +314,11 @@ class MarketingCampaign(models.Model):
         null=True,
         blank=True,
         db_index=True,
+        verbose_name='Scheduled Time',
+        help_text="If set, the campaign will start sending at this time (uses Celery Beat or scheduler)."
+    )
+    is_sent = models.BooleanField(
+        default=False,
         help_text="If set, the campaign will start sending at this time (uses Celery Beat or scheduler)."
     )
     status = models.CharField(
@@ -282,9 +328,15 @@ class MarketingCampaign(models.Model):
         db_index=True,
         help_text="Current status of the campaign."
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(null=True, blank=True, help_text="Timestamp when sending actually began.")
-    completed_at = models.DateTimeField(null=True, blank=True, help_text="Timestamp when all messages were processed.")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+    started_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="Started At", help_text="Timestamp when sending actually began.")
+    completed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="Completed At", help_text="Timestamp when all messages were processed.")
+
     # Optional: Track who created the campaign
     # created_by = models.ForeignKey(
     #    settings.AUTH_USER_MODEL,
@@ -298,11 +350,12 @@ class MarketingCampaign(models.Model):
         return f"Campaign: {self.name} ({self.get_status_display()})"
 
     class Meta:
-        verbose_name = "Marketing Campaign"
-        verbose_name_plural = "Marketing Campaigns"
-        ordering = ['-created_at']
+        verbose_name = "Marketing Campaign",
+        verbose_name_plural = "Marketing Campaigns",
+        ordering = ['-created_at'],
 
-class CampaignContact(models.Model):
+
+class CampaignContact(models.Model): 
     """Associates contacts with a campaign and tracks individual message status and variables."""
     STATUS_CHOICES = ChatMessage.MESSAGE_STATUS_CHOICES # Reuse status choices from ChatMessage for consistency
     campaign = models.ForeignKey(
@@ -311,7 +364,7 @@ class CampaignContact(models.Model):
         related_name='recipients'
     )
     contact = models.ForeignKey(
-        Contact,
+        Contact, 
         on_delete=models.CASCADE, # Or PROTECT if you want to prevent contact deletion if part of campaign
         related_name='marketing_messages'
     )
@@ -331,7 +384,7 @@ class CampaignContact(models.Model):
     # Store the WAMID of the message sent for this campaign contact
     message_id = models.CharField(
         max_length=100,
-        blank=True,
+        blank=True, 
         null=True,
         db_index=True, # Index for faster lookups based on status webhooks
         help_text="WhatsApp Message ID (wamid) of the sent message."
@@ -347,20 +400,27 @@ class CampaignContact(models.Model):
 
 # --- Bots & Automation (Optional) ---
 class BotResponse(models.Model):
-    """Stores predefined answers for common nursery questions triggered by keywords."""
-    trigger_phrase = models.CharField(
-        max_length=255,
-        unique=True, # Ensure trigger phrases are unique
-        help_text="Keyword or phrase that triggers this response (case-insensitive exact match)."
+    """
+    Stores predefined answers for common nursery questions.
+    """
+    question = models.TextField(
+        verbose_name="Question",
+        help_text="The question or phrase that triggers this response.",
     )
-    response_text = models.TextField(help_text="The message text to send back.")
-    is_active = models.BooleanField(default=True, help_text="Whether this bot response is currently enabled.")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    answer = models.TextField(
+        verbose_name="Answer",
+        help_text="The message text to send back as an answer.",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Is Active",
+        help_text="Whether this bot response is currently enabled.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     def __str__(self):
-        return self.trigger_phrase
-
+        return self.question
     class Meta:
         verbose_name = "Bot Response"
         verbose_name_plural = "Bot Responses"
@@ -368,18 +428,27 @@ class BotResponse(models.Model):
 
 class AutoReply(models.Model):
     """Settings for the single auto-reply message sent when staff are unavailable."""
-    message_text = models.TextField(
-        default="Thank you for contacting our nursery! We're currently closed or assisting other customers. We'll get back to you as soon as possible during business hours.",
-        help_text="The message sent automatically when no staff responds quickly (logic defined elsewhere)."
+    keywords = models.TextField(
+        help_text="Keywords that trigger this auto-reply (comma-separated)."
+    )
+    response = models.TextField(
+        help_text="The message sent automatically in response to matching keywords."
     )
     is_active = models.BooleanField(
         default=False,
+        verbose_name="Is Active",
+        help_text="Enable or disable the auto-reply feature."
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
+    is_enable = models.BooleanField(
         help_text="Enable or disable the auto-reply feature."
     )
     # Optional: Add fields for time-based rules (e.g., start_time, end_time, active_days)
 
     def __str__(self):
         return "Auto-Reply Settings"
+
 
     class Meta:
         verbose_name = "Auto Reply Setting"

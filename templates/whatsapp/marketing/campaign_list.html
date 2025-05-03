@@ -33,25 +33,24 @@
             <thead>
                 <tr>
                     <th>Campaign Name</th>
-                    <th>Template</th>
+                    <th>Template Id</th>
                     <th>Status</th>
                     <th>Created</th>
-                    <th>Scheduled/Sent</th> {# Combined column #}
+                    <th>Scheduled Time</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for campaign in campaigns %} {# Loop through the context variable #}
                 <tr>
-                    <td data-label="Campaign Name">{{ campaign.name }}</td>
-                    <td data-label="Template">{{ campaign.template.name|default:"N/A" }}</td>
-                    <td data-label="Status">
-                         {# Use the status badge partial #}
-                         {% include "whatsapp/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
-                    </td>
-                    <td data-label="Created">{{ campaign.created_at|date:"Y-m-d H:i" }}</td>
-                    <td data-label="Scheduled/Sent">
-                         {% if campaign.status == 'SENT' or campaign.status == 'COMPLETED' %}
+                    <td data-label="Campaign Name">{{ campaign.campaign_name }}</td>
+                    <td data-label="Template Id">{{ campaign.template_id|default:"N/A" }}</td>
+                    <td data-label="Status">                          
+                        {% include "whatsapp/partials/status_badge.html" with status=campaign.status scheduled_time=campaign.scheduled_time %}
+                       </td>
+                    <td data-label="Created">{{ campaign.created_at|date:"Y-m-d H:i" }}</td>                                           
+                    <td data-label="Scheduled Time">
+                         {% if campaign.is_sent %}
                              {{ campaign.started_at|date:"Y-m-d H:i"|default:"N/A" }}
                          {% elif campaign.scheduled_time %}
                              {{ campaign.scheduled_time|date:"Y-m-d H:i" }}
@@ -66,7 +65,7 @@
                         </a>
                         {# Add Edit/Delete later if needed #}
                         <form method="post" action="{% url 'whatsapp_app:campaign_delete' campaign.pk %}" style="display: inline-block; margin-left: 5px;" onsubmit="return confirm('Are you sure you want to delete campaign \'{{ campaign.name|escapejs }}\'?');">
-                             {% csrf_token %}
+                            {% csrf_token %}
                             <button type="submit" class="custom-button button-danger button-sm" title="Delete">
                                 <i class="fas fa-trash-alt"></i>
                             </button>

@@ -1,5 +1,7 @@
-{# whatsapp_app/templates/whatsapp_app/bot_response_form.html #}
+{# whatsapp_app/templates/whatsapp/bot/bot_response_form.html #}
 {% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
+{% block head %}
+    {{ form.media }}
 {% load static %}
 
 {% block whatsapp_content %}
@@ -32,40 +34,40 @@
                     </div>
                 {% endif %}
 
-                {# Trigger Phrase Field #}
+                {# Question Field #}
                 <div class="form-group">
-                    <label for="{{ form.trigger_phrase.id_for_label }}" class="form-label">{{ form.trigger_phrase.label }}:</label>
+                    <label for="{{ form.question.id_for_label }}" class="form-label">{{ form.question.label }}:</label>
                     {# Apply form-input class via widget or CSS selector #}
-                    {{ form.trigger_phrase }}
-                    {% if form.trigger_phrase.help_text %}
-                        <small class="form-help-text">{{ form.trigger_phrase.help_text|safe }}</small>
+                    {{ form.question }}
+                    {% if form.question.help_text %}
+                        <small class="form-help-text">{{ form.question.help_text|safe }}</small>
                     {% endif %}
-                    {% if form.trigger_phrase.errors %}
+                    {% if form.question.errors %}
                         {# Use custom message-item for errors #}
                         <div class="message-item message-error form-field-error">
-                            {{ form.trigger_phrase.errors }}
+                            {{ form.question.errors }}
                         </div>
                     {% endif %}
                 </div>
 
-                {# Response Text Field #}
+                {# Answer Field #}
                 <div class="form-group">
-                    <label for="{{ form.response_text.id_for_label }}" class="form-label">{{ form.response_text.label }}:</label>
+                    <label for="{{ form.answer.id_for_label }}" class="form-label">{{ form.answer.label }}:</label>
                      {# Apply form-input class via widget or CSS selector #}
                      {# Textarea might need specific styling #}
-                    {{ form.response_text }}
-                     {% if form.response_text.help_text %}
-                        <small class="form-help-text">{{ form.response_text.help_text|safe }}</small>
+                    {{ form.answer }}
+                     {% if form.answer.help_text %}
+                        <small class="form-help-text">{{ form.answer.help_text|safe }}</small>
                     {% endif %}
-                    {% if form.response_text.errors %}
+                    {% if form.answer.errors %}
                          {# Use custom message-item for errors #}
                         <div class="message-item message-error form-field-error">
-                            {{ form.response_text.errors }}
+                            {{ form.answer.errors }}
                         </div>
                     {% endif %}
                 </div>
 
-                 {# Is Active Field #}
+                {# Is Active Field #}
                 <div class="form-group">
                      <div class="form-checkbox-wrapper">
                          {# Apply form-checkbox-input via widget or CSS selector #}
@@ -99,5 +101,6 @@
         </div>
     </div>
 </div>
+{% endblock %}
 {% endblock %}
 

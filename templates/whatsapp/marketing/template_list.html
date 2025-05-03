@@ -46,6 +46,7 @@
                 <button class="accordion-button-custom" type="button" aria-expanded="false" aria-controls="collapseCustom{{ template.pk }}">
                     {# Template Name, Language, Category #}
                     <span class="template-name">{{ template.name }}</span>
+                    <span class="template-id">{{ template.id }}</span>
                     <span class="template-lang">({{ template.language }})</span>
                      {# Use status-badge or create category-badge #}
                     <span class="status-badge template-category-{{ template.category|lower|default:'unknown' }}">{{ template.category }}</span>
