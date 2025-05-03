@@ -383,6 +383,27 @@
       background-color: #f8f9fa;
       font-weight: 600;
     }
+    .card {
+      width: calc(33.333% - 1.25rem); /* 3 cards per row with gap */
+      min-width: 18rem; /* Minimum width before wrapping */
+      max-width: 22rem;
+      background: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 0.625rem 1.25rem rgba(0,0,0,0.12);
+      padding: 1rem;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease;
+      cursor: pointer; /* Add cursor pointer */
+    }
+    
+    .card:hover {
+      transform: translateY(-0.3125rem);
+      box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.15); /* Enhanced shadow on hover */
+    }
+    
   </style>
 
   <script>
@@ -509,6 +530,14 @@
     // Handle form submission
     closeShipPopup();
   });
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Only trigger if not clicking a button
+      if (!e.target.closest('.button')) {
+        showPopup(card);
+      }
+    });
+    });
 </script>
 
 
