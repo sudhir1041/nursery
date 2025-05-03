@@ -112,7 +112,7 @@ animation: blink 1s infinite;
                         <tr {% if order.is_overdue_highlight %} style="background-color:rgb(223, 124, 124);color:white;" {% endif %}>
                         {# Display 'name' field which is like #1001 #}
                             <td><a class="order-details-view" href="{% url 'shopify_order_detail' order.shopify_id %}"><i class="fas fa-eye"></i>{{ order.name|default:order.shopify_id }}</a></td>
-                            <td>{{ order.created_at_shopify|date:"H:i d-m-Y"|default:"N/A" }}</td>
+                            <td>{{ order.created_at_shopify|date:"d-m-Y H:i"|default:"N/A" }}</td>
                             <td>
                                 {# Fulfillment Status Badge Example #}
                                 <span class="badge status-{{ order.fulfillment_status|lower|default:'unfulfilled' }}"
