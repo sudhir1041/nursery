@@ -75,8 +75,7 @@
                             <td>
                                 <a class="order-details-view" href="{% url 'order_details_view' order.order_id %}"><i class="fas fa-eye"></i>{{ order.order_id }}</a>
                             </td>
-                            <td>{{ order.date |date:"Y-m-d H:i"|default:"N/A" }}</td>
-                            <td>
+                            <td>{{ order.date |date:"d-m-Y H:i"|default:"N/A" }}</td>                            <td>
                                 <span class="badge status-{{ order.status|lower|default:'unknown' }}">{{ order.status|capfirst }}</span>
                             </td>
                             <td>INR {{ order.amount|floatformat:2 }}</td>
