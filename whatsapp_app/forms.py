@@ -1,9 +1,8 @@
 # whatsapp_app/forms.py
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
 from .models import (
-    WhatsAppSettings, MarketingCampaign, MarketingTemplate, WhatsAppCredentials, Contact,
+    WhatsAppSettings, MarketingCampaign, MarketingTemplate,
     BotResponse, AutoReply
 )
 
@@ -35,17 +34,6 @@ class WhatsAppSettingsForm(forms.ModelForm):
             'is_live_mode': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         help_texts = {
-            'account_name': _('Internal identifier for these settings.'),
-            'whatsapp_token': _('Your WhatsApp Cloud API access token. Keep this confidential.'),
-            'phone_number_id': _('The ID associated with the phone number you are using via the API.'),
-            'whatsapp_business_account_id': _('Your main WhatsApp Business Account (WABA) ID.'),
-            'app_id': _('The ID of your Meta App.'),
-            'webhook_verify_token': _('Auto-generated. Use this value when setting up the webhook in the Meta Developer Portal.'),
-            'webhook_url': _('The full, public HTTPS URL where WhatsApp will send notifications. Must match the URL configured in Meta.'),
-            'is_live_mode': _('Indicates if these credentials are for production use.'),
-        }
-        labels = {
-            'app_id': _('App ID'),
             'account_name': 'Internal identifier for these settings.',
             'webhook_verify_token': 'Auto-generated. Use this value when setting up the webhook in the Meta Developer Portal.',
             'webhook_url': 'The full, public HTTPS URL where WhatsApp will send notifications. Must match the URL configured in Meta.',
@@ -55,7 +43,6 @@ class WhatsAppSettingsForm(forms.ModelForm):
             'is_live_mode': 'Indicates if these credentials are for production use.',
         }
 
-
     # Example clean method for validation
     def clean_webhook_url(self):
         """Validate webhook URL format."""
@@ -64,39 +51,6 @@ class WhatsAppSettingsForm(forms.ModelForm):
             raise ValidationError("Webhook URL must start with 'https://'.")
         # Add more specific URL validation if needed
         return url
-
-
-class WhatsappCredentialsForm(forms.ModelForm):
-    class Meta:
-        model = WhatsAppCredentials
-        fields = [
-            'account_name',
-            'whatsapp_token',
-            'phone_number_id',
-            'whatsapp_business_account_id',
-            'app_id',
-            'webhook_verify_token',
-            'webhook_url',
-            'is_live_mode',
-        ]
-        widgets = {
-            'whatsapp_token': forms.PasswordInput(render_value=False, attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
-            'webhook_verify_token': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control'}),
-            'account_name': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
-            'phone_number_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'whatsapp_business_account_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'app_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'webhook_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://yourdomain.com/whatsapp/webhook/'}),
-            'is_live_mode': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-        labels = {
-             field: model._meta.get_field(field).verbose_name for field in fields
-         }
-        help_texts = {
-             field: model._meta.get_field(field).help_text for field in fields
-         }
-
-
 
 # --- Manual Message Form (for Chat Detail page) ---
 class ManualMessageForm(forms.Form):
@@ -119,17 +73,33 @@ class ManualMessageForm(forms.Form):
 class MarketingCampaignForm(forms.ModelForm):
     """Form for creating or editing a marketing campaign using custom CSS classes."""
     # Fetch only templates relevant for marketing/utility
+    template = forms.ModelChoiceField(
+        # CORRECTED: Removed the non-existent 'status' filter
+        queryset=MarketingTemplate.objects.filter(category__in=['MARKETING', 'UTILITY']),
+        # Use custom 'form-select' class (needs styling in CSS)
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="-- Select an Approved Template --",
+        required=True,
+        help_text="Choose the pre-approved WhatsApp template for this campaign."
+        # Note: If you need to filter by approval status,
+        # you'll need to ensure your MarketingTemplate model HAS a status field
+        # (e.g., status = models.CharField(max_length=20, choices=TEMPLATE_STATUS_CHOICES, default='PENDING'))
+        # and then you could add status='APPROVED' back to the filter.
+    )
 
     class Meta:
         model = MarketingCampaign
-        fields = ['name', 'template_id', 'recipients']
+        fields = ['name', 'template'] # Only allow setting name and template initially
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Spring Plant Sale Promotion'}),
-            'template_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'recipients': forms.SelectMultiple(attrs={'class': 'form-control'}),
+             # Use custom 'form-input' class
+            'name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g., Spring Plant Sale Promotion'}),
         }
-        labels = {field: model._meta.get_field(field).verbose_name for field in fields}
-        help_texts = {field: model._meta.get_field(field).help_text for field in fields}
+        labels = {
+            'name': 'Campaign Name',
+        }
+        help_texts = {
+            'name': 'Give this campaign a descriptive internal name.',
+        }
 
     # Optional: Add validation if needed
     # def clean_name(self):
@@ -140,21 +110,6 @@ class MarketingCampaignForm(forms.ModelForm):
     #     # if MarketingCampaign.objects.filter(name=name).exists():
     #     #     raise forms.ValidationError("A campaign with this name already exists.")
     #     return name
-
-
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-        fields = ['name', 'phone', 'marketing_campaign']
-
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'marketing_campaign': forms.SelectMultiple(attrs={'class': 'form-control'}),
-        }
-
-        labels = {field: model._meta.get_field(field).verbose_name for field in fields}
-        help_texts = {field: model._meta.get_field(field).help_text for field in fields}
 
 
 
@@ -186,16 +141,20 @@ class BotResponseForm(forms.ModelForm):
     """Form for creating/editing chatbot responses using custom CSS classes."""
     class Meta:
         model = BotResponse
-        fields = ['question', 'answer', 'is_active']
+        fields = ['trigger_phrase', 'response_text', 'is_active']
         widgets = {
-           'question': forms.TextInput(attrs={'class': 'form-control'}),
-           'answer': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-           'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            # Use custom 'form-input' class
+            'trigger_phrase': forms.TextInput(attrs={'class': 'form-input'}),
+            # Use custom 'form-input' class for textarea
+            'response_text': forms.Textarea(attrs={'rows': 4, 'class': 'form-input'}),
+            # Use custom 'form-checkbox-input' class
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox-input'}),
         }
-
-        labels = {field: model._meta.get_field(field).verbose_name for field in fields}
-        help_texts = {field: model._meta.get_field(field).help_text for field in fields}
-
+        help_texts = {
+            'trigger_phrase': 'The exact phrase (case-insensitive) the user must type to trigger this response.',
+            'response_text': 'The message that will be sent back automatically.',
+            'is_active': 'Enable this response.',
+        }
 
     # Optional: Add custom validation if needed
     # def clean_trigger_phrase(self):
@@ -210,21 +169,22 @@ class BotResponseForm(forms.ModelForm):
 class AutoReplySettingsForm(forms.ModelForm):
     """Form for managing the out-of-office auto-reply message using custom CSS classes."""
     class Meta:
-        model = AutoReply
-        fields = ['keywords', 'response', 'is_active']
+        model = AutoReply # Ensure this model exists and is imported
+        fields = ['message_text', 'is_active']
         widgets = {
-            'keywords': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'response': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+             # Use custom 'form-input' class for textarea
+            'message_text': forms.Textarea(attrs={'rows': 4, 'class': 'form-input'}),
+             # Use custom 'form-checkbox-input' class
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-checkbox-input'}),
         }
-        labels = {field: model._meta.get_field(field).verbose_name for field in fields}
-        help_texts = {field: model._meta.get_field(field).help_text for field in fields}
+        help_texts = {
+            'message_text': 'The message sent when staff are unavailable (availability logic defined elsewhere).',
+            'is_active': 'Enable the auto-reply feature.',
+        }
 
     # Override save method or use signals if implementing singleton pattern
     # def save(self, commit=True):
     #     # Ensure only one instance exists
     #     # self.instance.pk = 1 # Assuming singleton with pk=1
     #     # return super().save(commit=commit)
-class AutoReplyForm(AutoReplySettingsForm):
-    class Meta(AutoReplySettingsForm.Meta):
-        pass
+

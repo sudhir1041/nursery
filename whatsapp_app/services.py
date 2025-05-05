@@ -1,65 +1,37 @@
 import requests
 import json
 import logging
-import os  # Needed for upload_media
+import os # Needed for upload_media
 
 from django.conf import settings
-from .models import WhatsappCredentials
 
 # Get a logger instance for this module
 logger = logging.getLogger(__name__)
 
 # --- Configuration ---
+# It's good practice to ensure these settings are actually configured
+# You might want to add checks here or in your app's ready() method
+if not all([
+    hasattr(settings, 'WHATSAPP_ACCESS_TOKEN'),
+    hasattr(settings, 'WHATSAPP_PHONE_NUMBER_ID'),
+    settings.WHATSAPP_ACCESS_TOKEN,
+    settings.WHATSAPP_PHONE_NUMBER_ID
+]):
+    # Raise an error or log a critical warning if settings are missing
+    # raise ImproperlyConfigured("WhatsApp API settings (Token, Phone Number ID) are missing.")
+    logger.critical("WhatsApp API settings (WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID) are missing or empty in Django settings!")
+    # Depending on your setup, you might want to prevent the app from fully loading.
+    # For this example, we'll allow it to continue but log the critical issue.
 
-
-def get_whatsapp_credentials():
-    try:
-        return WhatsappCredentials.objects.get(is_live_mode=True)
-    except WhatsappCredentials.DoesNotExist:
-        logger.error("No live WhatsApp credentials found.")
-        return None
-
-
-
+API_VERSION = "v19.0" # Consider making this configurable in settings too
+BASE_API_URL = f"https://graph.facebook.com/{API_VERSION}"
+PHONE_NUMBER_BASE_URL = f"{BASE_API_URL}/{settings.WHATSAPP_PHONE_NUMBER_ID}"
 
 # Standard headers for JSON API calls
 JSON_HEADERS = {
     "Authorization": f"Bearer {settings.WHATSAPP_ACCESS_TOKEN}",
     "Content-Type": "application/json",
 }
-
-
-def send_whatsapp_message(sender_number, recipient_number, message_body):
-    """
-    Sends a WhatsApp message using the provided sender number, recipient number, and message body.
-
-    Args:
-        sender_number: The WhatsApp number from which the message will be sent.
-        recipient_number: The WhatsApp number to which the message will be sent.
-        message_body: The text content of the message.
-
-    Returns:
-        A dictionary containing the API response on success, or None on failure.
-    """
-    credentials = get_whatsapp_credentials()
-    if not credentials:
-        return None
-
-    API_VERSION = "v19.0"
-    BASE_API_URL = f"https://graph.facebook.com/{API_VERSION}"
-    PHONE_NUMBER_BASE_URL = f"{BASE_API_URL}/{credentials.phone_number_id}"
-
-    if sender_number != credentials.phone_number:
-        logger.error(
-            f"Sender number {sender_number} does not match live credentials {credentials.phone_number}."
-        )
-        return None
-
-    response = send_text_message(
-        recipient_wa_id=recipient_number, message_body=message_body,PHONE_NUMBER_BASE_URL=PHONE_NUMBER_BASE_URL
-    )
-    return response
-
 
 # --- Service Functions ---
 
@@ -75,14 +47,7 @@ def send_text_message(recipient_wa_id: str, message_body: str) -> dict | None:
         A dictionary containing the API response (usually includes message ID)
         on success, or None on failure.
     """
-    credentials = get_whatsapp_credentials()
-    if not credentials:
-        return None
-
-    API_VERSION = "v19.0"
-    BASE_API_URL = f"https://graph.facebook.com/{API_VERSION}"
-    PHONE_NUMBER_BASE_URL = f"{BASE_API_URL}/{credentials.phone_number_id}"
-    url = f"{PHONE_NUMBER_BASE_URL}/messages"  
+    url = f"{PHONE_NUMBER_BASE_URL}/messages"
     payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
@@ -137,14 +102,7 @@ def upload_media(file_path: str, mime_type: str) -> str | None:
         The WhatsApp media ID string on success, or None on failure.
     """
     url = f"{PHONE_NUMBER_BASE_URL}/media"
-    
-    credentials = get_whatsapp_credentials()
-    if not credentials:
-        return None
-    
-    API_VERSION = "v19.0"
-    BASE_API_URL = f"https://graph.facebook.com/{API_VERSION}"
-    PHONE_NUMBER_BASE_URL = f"{BASE_API_URL}/{credentials.phone_number_id}"    data = {
+    data = {
         'messaging_product': 'whatsapp'
     }
     # Headers for multipart/form-data - only Authorization is strictly needed,
@@ -215,12 +173,6 @@ def send_media_message(recipient_wa_id: str, media_type: str, media_id_or_url: s
         logger.error(f"Invalid media_type '{media_type}' provided. Must be one of {ALLOWED_MEDIA_TYPES}")
         return None
 
-    credentials = get_whatsapp_credentials()
-    if not credentials:
-        return None
-    API_VERSION = "v19.0"
-    BASE_API_URL = f"https://graph.facebook.com/{API_VERSION}"
-    PHONE_NUMBER_BASE_URL = f"{BASE_API_URL}/{credentials.phone_number_id}"
     url = f"{PHONE_NUMBER_BASE_URL}/messages"
     payload = {
         "messaging_product": "whatsapp",
@@ -343,13 +295,6 @@ def send_template_message(recipient_wa_id: str, template_name: str, language_cod
     except Exception as e:
         logger.exception(f"An unexpected error occurred sending template '{template_name}' to {recipient_wa_id}: {e}")
         return None
-
-
-
-
-
-
-
 
 # --- You can continue adding more functions like: ---
 # def mark_message_as_read(message_id): ...
