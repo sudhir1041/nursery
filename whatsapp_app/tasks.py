@@ -188,4 +188,3 @@ def send_bulk_campaign_messages_task(self, campaign_id):
         try: MarketingCampaign.objects.filter(pk=campaign_id).update(status='FAILED')
         except Exception as update_e: logger.error(f"Celery task [ID: {self.request.id}]: Also failed to update campaign {campaign_id} status to FAILED: {update_e}")
         raise self.retry(exc=exc)
-
