@@ -1,6 +1,5 @@
 # whatsapp_app/models.py
 import uuid
-from django.db import models
 from django.utils import timezone
 from django.conf import settings # To potentially link to your project's User model
 
@@ -93,7 +92,7 @@ class WhatsAppSettings(models.Model):
 # --- Contact Information ---
 class Contact(models.Model):
     """Represents a WhatsApp contact, potentially linked to a nursery customer."""
-    phone = models.CharField(
+    wa_id = models.CharField(
         max_length=20,
         unique=True,
         verbose_name="WhatsApp Number",
@@ -150,15 +149,11 @@ class Contact(models.Model):
         #      display_name += f" (User: {self.user.username})"
         return display_name
 
-    class Meta:
-        verbose_name = "WhatsApp Contact"
-        verbose_name_plural = "WhatsApp Contacts"
-
     def save(self, *args, **kwargs):
         """
         Override the save method to validate phone format if provided
         """
-        if self.phone and not self.phone.isdigit():
+        if self.wa_id and not self.wa_id.isdigit():
             raise ValueError("Phone number should only contain digits.")
         super(Contact, self).save(*args, **kwargs)
 
@@ -408,9 +403,9 @@ class BotResponse(models.Model):
         help_text="The question or phrase that triggers this response.",
     )
     answer = models.TextField(
-        verbose_name="Answer",
-        help_text="The message text to send back as an answer.",
-    )
+        verbose_name="Response",
+        help_text="The message text to send back as a response.",
+    )    
     is_active = models.BooleanField(
         default=True,
         verbose_name="Is Active",
@@ -418,6 +413,10 @@ class BotResponse(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
+
+    trigger_phrase = models.CharField(
+        max_length=200, 
+        help_text="Keyword or phrase that triggers this response (case-insensitive).",)
 
     def __str__(self):
         return self.question
@@ -428,11 +427,10 @@ class BotResponse(models.Model):
 
 class AutoReply(models.Model):
     """Settings for the single auto-reply message sent when staff are unavailable."""
-    keywords = models.TextField(
-        help_text="Keywords that trigger this auto-reply (comma-separated)."
-    )
-    response = models.TextField(
-        help_text="The message sent automatically in response to matching keywords."
+    message_text = models.TextField(
+        verbose_name="Message Text",
+        help_text="The message sent automatically to the contact.",
+        
     )
     is_active = models.BooleanField(
         default=False,
@@ -441,9 +439,7 @@ class AutoReply(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
-    is_enable = models.BooleanField(
-        help_text="Enable or disable the auto-reply feature."
-    )
+    
     # Optional: Add fields for time-based rules (e.g., start_time, end_time, active_days)
 
     def __str__(self):

@@ -6,7 +6,7 @@ from django.utils import timezone # Import timezone for actions
 from .models import (
     WhatsAppSettings, Contact, ChatMessage, MarketingTemplate,
     MarketingCampaign, CampaignContact, BotResponse, AutoReply
-    ,WhatsappCredentials
+
 )
 
 # --- Inline Admin for related models ---
@@ -60,18 +60,6 @@ class WhatsAppSettingsAdmin(admin.ModelAdmin):
         # Allow add only if no settings exist yet with the default name (or adjust logic)
         return not WhatsAppSettings.objects.filter(account_name="NurseryProjectDefault").exists()
 
-
-@admin.register(WhatsappCredentials)
-class WhatsappCredentialsAdmin(admin.ModelAdmin):
-    """Admin configuration for WhatsApp Credentials."""
-    list_display = ('account_name', 'whatsapp_phone_number_id', 'whatsapp_business_account_id', 'is_live_mode', 'last_validated')
-    list_filter = ('is_live_mode',)
-    search_fields = ('account_name', 'whatsapp_phone_number_id', 'whatsapp_business_account_id')
-    readonly_fields = ('last_validated',)
-    # Prevent adding more than one settings object if it's intended as a singleton
-    def has_add_permission(self, request):
-        # Allow add only if no settings exist yet with the default name (or adjust logic)
-        return not WhatsappCredentials.objects.filter(account_name="NurseryProjectDefault").exists()
 
 
 
