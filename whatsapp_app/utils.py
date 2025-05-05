@@ -43,9 +43,6 @@ def get_active_whatsapp_settings() -> WhatsAppSettings:
 # --- Sending Messages ---
 def send_whatsapp_message(recipient_wa_id: str, message_type: str, **kwargs) -> ChatMessage | None:
     """ Sends a message via the WhatsApp Cloud API and logs it in ChatMessage. """
-    # Validate recipient_wa_id
-    if not recipient_wa_id:
-        raise ValueError("Recipient wa_id is required")
     # --- (Code for send_whatsapp_message remains the same) ---
     if ChatMessage is None or Contact is None: logger.error("Cannot send message: Contact or ChatMessage model not imported."); return None
     try:

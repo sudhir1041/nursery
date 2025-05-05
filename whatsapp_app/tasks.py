@@ -15,9 +15,8 @@ from .models import Contact, ChatMessage, BotResponse, AutoReply, MarketingCampa
 # Assume utils handle the actual API calls and DB saving correctly
 # --- CORRECTED IMPORT PATH ---
 from .utils import (
-    parse_incoming_whatsapp_message, download_whatsapp_media, handle_bot_or_autoreply
-)
-from .services import send_whatsapp_message
+    parse_incoming_whatsapp_message, send_whatsapp_message,
+    download_whatsapp_media, handle_bot_or_autoreply # Import helper from utils
 )
 
 logger = logging.getLogger(__name__)
@@ -128,36 +127,6 @@ def send_whatsapp_message_task(self, recipient_wa_id, message_type, text_content
     logger.info(f"Celery task [ID: {task_id}]: Finished send_whatsapp_message_task for {recipient_wa_id}. Final status: {final_status}")
     return message_obj.message_id if message_obj else None
 
-@shared_task(bind=True)
-def send_campaign_message(self, campaign_id):
-    """
-    Sends a campaign message to all recipients.
-    Retrieves the message template from template_id and uses send_whatsapp_message
-    to send the message.
-    If the message is sent correctly, marks MarketingCampaign.is_sent to True.
-    """
-    logger.info(f"Starting send_campaign_message for campaign ID: {campaign_id}")
-    try:
-        campaign = MarketingCampaign.objects.get(pk=campaign_id)
-        template_id = campaign.template_id
-        recipients = campaign.recipients.all()
-
-        for recipient in recipients:
-            send_whatsapp_message(
-                recipient_wa_id=recipient.wa_id,
-                message_type="template",
-                template_name=template_id,
-                
-            )
-
-        # Mark the campaign as sent
-        campaign.is_sent = True
-        campaign.save()
-
-        logger.info(f"Successfully sent campaign message for campaign ID: {campaign_id}")
-    except MarketingCampaign.DoesNotExist:
-        logger.error(f"Campaign with ID {campaign_id} not found.")
-
 
 # --- Task for Sending Bulk Campaign Messages ---
 @shared_task(bind=True)
@@ -176,7 +145,7 @@ def send_bulk_campaign_messages_task(self, campaign_id):
             try:
                 # --- TODO: Implement proper component formatting ---
                 formatted_components = campaign.template.components # Placeholder
-                send_whatsapp_message_task.delay(recipient_wa_id=recipient.contact.wa_id, message_type='template', template_name=campaign.template.name, components=formatted_components, campaign_contact_id=recipient.id, )
+                send_whatsapp_message_task.delay(recipient_wa_id=recipient.contact.wa_id, message_type='template', template_name=campaign.template.name, components=formatted_components, campaign_contact_id=recipient.id)
                 queued_count += 1
             except Exception as e: logger.error(f"Celery task [ID: {self.request.id}]: Failed to queue message for recipient {recipient.contact.wa_id} (CC ID: {recipient.id}) in campaign {campaign_id}: {e}"); recipient.status = 'FAILED'; recipient.error_message = f"Failed to queue send task: {e}"; recipient.save(update_fields=['status', 'error_message'])
         logger.info(f"Celery task [ID: {self.request.id}]: Queued {queued_count} send tasks for campaign {campaign_id}.")
@@ -188,3 +157,4 @@ def send_bulk_campaign_messages_task(self, campaign_id):
         try: MarketingCampaign.objects.filter(pk=campaign_id).update(status='FAILED')
         except Exception as update_e: logger.error(f"Celery task [ID: {self.request.id}]: Also failed to update campaign {campaign_id} status to FAILED: {update_e}")
         raise self.retry(exc=exc)
+

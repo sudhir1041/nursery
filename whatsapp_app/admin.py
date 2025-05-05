@@ -6,7 +6,6 @@ from django.utils import timezone # Import timezone for actions
 from .models import (
     WhatsAppSettings, Contact, ChatMessage, MarketingTemplate,
     MarketingCampaign, CampaignContact, BotResponse, AutoReply
-
 )
 
 # --- Inline Admin for related models ---
@@ -60,17 +59,14 @@ class WhatsAppSettingsAdmin(admin.ModelAdmin):
         # Allow add only if no settings exist yet with the default name (or adjust logic)
         return not WhatsAppSettings.objects.filter(account_name="NurseryProjectDefault").exists()
 
-
-
-
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     """Admin configuration for WhatsApp Contacts."""
-    list_display = ('phone', 'name', 'created_at', 'updated_at')
-    search_fields = ('phone', 'name')
+    list_display = ('wa_id', 'name', 'created_at', 'updated_at') # Add linked customer/user field if exists
+    search_fields = ('wa_id', 'name') # Add linked customer/user field if exists
     list_filter = ('created_at',)
-    readonly_fields = ('created_at', 'updated_at')
-    inlines = [ChatMessageInline]
+    readonly_fields = ('wa_id', 'created_at', 'updated_at') # wa_id is PK, shouldn't be changed
+    inlines = [ChatMessageInline] # Show recent messages directly on contact page
     list_per_page = 25
 
 @admin.register(ChatMessage)
@@ -122,11 +118,11 @@ class MarketingTemplateAdmin(admin.ModelAdmin):
 @admin.register(MarketingCampaign)
 class MarketingCampaignAdmin(admin.ModelAdmin):
     """Admin configuration for Marketing Campaigns."""
-    list_display = ('name', 'template_id', 'status', 'recipient_count', 'scheduled_time', 'started_at', 'completed_at', 'is_sent')
-    list_filter = ('status', 'created_at', 'scheduled_time','is_sent')
-    search_fields = ('name', 'template_id')
+    list_display = ('name', 'template', 'status', 'recipient_count', 'scheduled_time', 'started_at', 'completed_at')
+    list_filter = ('status', 'created_at', 'scheduled_time', 'template')
+    search_fields = ('name', 'template__name')
     # Make fields managed by the system read-only in admin
-
+    # *** CORRECTED: Removed 'created_by' as it's not in the model ***
     readonly_fields = ('status', 'started_at', 'completed_at', 'created_at')
     list_per_page = 30
     inlines = [CampaignContactInline]
@@ -135,7 +131,7 @@ class MarketingCampaignAdmin(admin.ModelAdmin):
 
     @admin.display(description='Recipients', ordering='recipient_count') # Add ordering
     def recipient_count(self, obj):
-        """Calculate recipient count."""
+        """Calculate recipient count. Annotated in get_queryset for efficiency."""
         # This value comes from the annotation in get_queryset
         return obj.recipient_count if hasattr(obj, 'recipient_count') else 'N/A'
 
@@ -219,30 +215,28 @@ class CampaignContactAdmin(admin.ModelAdmin):
 @admin.register(BotResponse)
 class BotResponseAdmin(admin.ModelAdmin):
     """Admin configuration for Chatbot Responses."""
-    list_display = ('question', 'answer_preview', 'is_active', 'updated_at')
-    list_filter = ('is_active', 'updated_at')
-    search_fields = ('question', 'answer')
+    list_display = ('trigger_phrase', 'response_preview', 'is_active', 'updated_at')
+    list_filter = ('is_active',)
+    search_fields = ('trigger_phrase', 'response_text')
     list_editable = ('is_active',) # Allow toggling active status directly in list view
     list_per_page = 25
 
-    @admin.display(description='Answer Preview')
-    def answer_preview(self, obj):
-        """Show a truncated preview of the answer text."""
+    @admin.display(description='Response Preview')
+    def response_preview(self, obj):
+        """Show a truncated preview of the response text."""
         from django.utils.text import Truncator
-        return Truncator(obj.answer).chars(80)
+        return Truncator(obj.response_text).chars(80)
 
 @admin.register(AutoReply)
 class AutoReplyAdmin(admin.ModelAdmin):
     """Admin configuration for Auto-Reply Settings."""
-    list_display = ('name', 'is_active', 'keywords_preview','response_preview')  # Use __str__ for identification
-    list_filter = ('is_active',)
-    search_fields = ('name', 'keywords', 'response')
-    
-    @admin.display(description='Keywords Preview')
-    def keywords_preview(self, obj):
+    list_display = ('__str__', 'is_active', 'message_preview') # Use __str__ for identification
+
+    @admin.display(description='Message Preview')
+    def message_preview(self, obj):
         from django.utils.text import Truncator
-        return Truncator(obj.keywords).chars(80)
-    
+        return Truncator(obj.message_text).chars(100)
+
     # Prevent adding more than one settings object if it's intended as a singleton
     def has_add_permission(self, request):
         return not AutoReply.objects.exists()
