@@ -704,27 +704,66 @@ def schedule_campaign(request, pk):
     scheduled_time_str = request.POST.get('scheduled_time')
     if not scheduled_time_str: # Send immediately
         try:
+            # Validate recipient contacts before sending
+            invalid_contacts = []
+            for contact in CampaignContact.objects.filter(campaign=campaign):
+                if not contact.contact.wa_id or len(contact.contact.wa_id) < 10:
+                    invalid_contacts.append(contact.contact.wa_id)
+            
+            if invalid_contacts:
+                messages.error(request, f"Campaign contains invalid recipient numbers: {', '.join(invalid_contacts)}")
+                return redirect('whatsapp_app:campaign_detail', pk=pk)
+                
             with transaction.atomic():
-                campaign.scheduled_time = None; campaign.status = 'SENDING'; campaign.started_at = timezone.now(); campaign.completed_at = None
+                campaign.scheduled_time = None
+                campaign.status = 'SENDING'
+                campaign.started_at = timezone.now()
+                campaign.completed_at = None
                 campaign.save(update_fields=['scheduled_time', 'status', 'started_at', 'completed_at'])
                 send_bulk_campaign_messages_task.delay(campaign.id)
             logger.info(f"Campaign '{campaign.name}' (ID: {pk}) queued for immediate sending.")
             messages.success(request, f"Campaign '{campaign.name}' sending started.")
-        except Exception as e: logger.error(f"Error initiating immediate send for campaign {pk}: {e}"); messages.error(request, "An error occurred while trying to start the campaign.")
+        except Exception as e:
+            logger.error(f"Error initiating immediate send for campaign {pk}: {e}")
+            messages.error(request, "An error occurred while trying to start the campaign.")
     else: # Schedule for later
         try:
-            scheduled_time = parse_datetime(scheduled_time_str); default_tz = timezone.get_default_timezone()
-            if not scheduled_time: raise ValueError("Invalid format")
-            if timezone.is_naive(scheduled_time): scheduled_time = timezone.make_aware(scheduled_time, default_tz)
-            else: scheduled_time = scheduled_time.astimezone(default_tz)
-            if scheduled_time <= timezone.now(): messages.error(request, "Scheduled time must be in the future."); return redirect('whatsapp_app:campaign_detail', pk=pk)
+            scheduled_time = parse_datetime(scheduled_time_str)
+            default_tz = timezone.get_default_timezone()
+            if not scheduled_time:
+                raise ValueError("Invalid format")
+            if timezone.is_naive(scheduled_time):
+                scheduled_time = timezone.make_aware(scheduled_time, default_tz)
+            else:
+                scheduled_time = scheduled_time.astimezone(default_tz)
+            if scheduled_time <= timezone.now():
+                messages.error(request, "Scheduled time must be in the future.")
+                return redirect('whatsapp_app:campaign_detail', pk=pk)
+                
+            # Validate recipient contacts before scheduling
+            invalid_contacts = []
+            for contact in CampaignContact.objects.filter(campaign=campaign):
+                if not contact.contact.wa_id or len(contact.contact.wa_id) < 10:
+                    invalid_contacts.append(contact.contact.wa_id)
+                    
+            if invalid_contacts:
+                messages.error(request, f"Campaign contains invalid recipient numbers: {', '.join(invalid_contacts)}")
+                return redirect('whatsapp_app:campaign_detail', pk=pk)
+                
             with transaction.atomic():
-                campaign.scheduled_time = scheduled_time; campaign.status = 'SCHEDULED'; campaign.started_at = None; campaign.completed_at = None
+                campaign.scheduled_time = scheduled_time
+                campaign.status = 'SCHEDULED'
+                campaign.started_at = None
+                campaign.completed_at = None
                 campaign.save(update_fields=['scheduled_time', 'status', 'started_at', 'completed_at'])
             logger.info(f"Campaign '{campaign.name}' (ID: {pk}) scheduled for {scheduled_time}.")
             messages.success(request, f"Campaign '{campaign.name}' scheduled successfully for {scheduled_time.strftime('%Y-%m-%d %H:%M %Z')}.")
-        except (ValueError, TypeError) as e: logger.warning(f"Invalid schedule time format for campaign {pk}: '{scheduled_time_str}' - {e}"); messages.error(request, "Invalid date/time format provided.")
-        except Exception as e: logger.error(f"Error scheduling campaign {pk}: {e}"); messages.error(request, "An error occurred while trying to schedule the campaign.")
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Invalid schedule time format for campaign {pk}: '{scheduled_time_str}' - {e}")
+            messages.error(request, "Invalid date/time format provided.")
+        except Exception as e:
+            logger.error(f"Error scheduling campaign {pk}: {e}")
+            messages.error(request, "An error occurred while trying to schedule the campaign.")
     return redirect('whatsapp_app:campaign_detail', pk=campaign.pk)
 
 @user_passes_test(is_staff_user)
