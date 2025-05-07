@@ -690,11 +690,19 @@ def upload_contacts_for_campaign(request, pk):
 @require_POST
 @user_passes_test(is_staff_user)
 @require_POST 
-@user_passes_test(is_staff_user)
-@require_POST
 def schedule_campaign(request, pk):
     """ Schedules or starts sending a campaign immediately via Celery. """
-    # Remove Celery check since it's already running
+    try:
+        # Check if Celery is enabled by attempting to ping the broker
+        from celery.task.control import inspect
+        insp = inspect()
+        if not insp.ping():
+            messages.error(request, "Background task processing (Celery) is not enabled. Cannot schedule or send campaigns.")
+            return redirect('whatsapp_app:campaign_detail', pk=pk)
+    except Exception:
+        messages.error(request, "Background task processing (Celery) is not enabled. Cannot schedule or send campaigns.")
+        return redirect('whatsapp_app:campaign_detail', pk=pk)
+
     campaign = get_object_or_404(MarketingCampaign, pk=pk)
     if campaign.status not in ['DRAFT', 'SCHEDULED', 'CANCELLED']:
         messages.error(request, "Campaign cannot be scheduled or sent in its current state.")
