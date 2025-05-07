@@ -355,7 +355,7 @@ def all_orders_view(request):
             'tracking': fb_tracking_url, # Specific tracking URL format
             'platform': 'Facebook',
             'shipment_status': getattr(o, 'shipment_status', 'N/A'), # Use specific shipment status field
-            'is_overdue_highlight': highlight, 
+            'is_overdue_highlight': highlight, # <<< ADDED HIGHLIGHT FLAG
         })
 
 

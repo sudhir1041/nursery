@@ -85,3 +85,4 @@ def home(request):
     }
 
     return render(request, 'shipment/shipment.html', context)
+

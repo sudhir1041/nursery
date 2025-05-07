@@ -1,9 +1,6 @@
-
 {# whatsapp_app/templates/whatsapp_app/marketing/campaign_form.html #}
 {% extends "whatsapp/base_whatsapp.html" %} {# Extend the non-Bootstrap WhatsApp base #}
 {% load static %}
-{% block head %}
-{{ form.media }}
 
 {% block whatsapp_content %}
 <div class="whatsapp-form-container"> {# Custom container for the form area #}
@@ -37,23 +34,35 @@
                     </div>
                 {% endif %}
 
-                 {% for field in form.visible_fields %}
+                {# Campaign Name Field #}
                 <div class="form-group">
-                    <label for="{{ field.id_for_label }}" class="form-label">
-                        {{ field.label }}:
-                    </label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="form-help-text">{{ field.help_text|safe }}</small>
+                    <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}:</label>
+                    {# Apply form-input class via widget #}
+                    {{ form.name }}
+                    {% if form.name.help_text %}
+                        <small class="form-help-text">{{ form.name.help_text|safe }}</small>
                     {% endif %}
-                    {% if field.errors %}
+                    {% if form.name.errors %}
                         <div class="message-item message-error form-field-error">
-                            {{ field.errors }}
+                            {{ form.name.errors }}
                         </div>
                     {% endif %}
                 </div>
-                {% endfor %}
 
+                {# Template Selection Field #}
+                <div class="form-group">
+                    <label for="{{ form.template.id_for_label }}" class="form-label">{{ form.template.label }}:</label>
+                     {# Apply form-select class via widget #}
+                    {{ form.template }}
+                     {% if form.template.help_text %}
+                        <small class="form-help-text">{{ form.template.help_text|safe }}</small>
+                    {% endif %}
+                    {% if form.template.errors %}
+                        <div class="message-item message-error form-field-error">
+                            {{ form.template.errors }}
+                        </div>
+                    {% endif %}
+                </div>
 
                 {# Action Buttons #}
                 <div class="form-actions">
@@ -69,5 +78,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
 {% endblock %}
