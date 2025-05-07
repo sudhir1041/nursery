@@ -1662,3 +1662,39 @@ INFO 2025-05-07 10:15:22,605 cli 399533 130057774747776 Starting server at tcp:p
 INFO 2025-05-07 10:15:22,606 server 399533 130057774747776 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
 INFO 2025-05-07 10:15:22,606 server 399533 130057774747776 Configuring endpoint tcp:port=8001:interface=127.0.0.1
 CRITICAL 2025-05-07 10:15:22,606 server 399533 130057774747776 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:15:28,797 cli 399536 125075299602560 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:15:28,799 server 399536 125075299602560 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:15:28,799 server 399536 125075299602560 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:15:28,800 server 399536 125075299602560 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:15:34,968 cli 399538 135708640071808 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:15:34,969 server 399538 135708640071808 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:15:34,969 server 399538 135708640071808 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:15:34,970 server 399538 135708640071808 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:15:41,168 cli 399540 125880178598016 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:15:41,169 server 399540 125880178598016 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:15:41,169 server 399540 125880178598016 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:15:41,169 server 399540 125880178598016 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:15:47,183 cli 399544 137124560494720 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:15:47,184 server 399544 137124560494720 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:15:47,184 server 399544 137124560494720 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:15:47,185 server 399544 137124560494720 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:15:53,169 cli 399552 137253569020032 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:15:53,170 server 399552 137253569020032 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:15:53,171 server 399552 137253569020032 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:15:53,171 server 399552 137253569020032 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:15:59,145 cli 399565 129344935325824 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:15:59,146 server 399565 129344935325824 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:15:59,146 server 399565 129344935325824 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:15:59,147 server 399565 129344935325824 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:16:05,188 cli 399567 132657482473600 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:16:05,189 server 399567 132657482473600 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:16:05,190 server 399567 132657482473600 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:16:05,190 server 399567 132657482473600 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:16:11,116 cli 399569 129394477387904 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:16:11,117 server 399569 129394477387904 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:16:11,117 server 399569 129394477387904 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:16:11,118 server 399569 129394477387904 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
+INFO 2025-05-07 10:16:17,163 cli 399572 132825729118336 Starting server at tcp:port=8001:interface=127.0.0.1
+INFO 2025-05-07 10:16:17,164 server 399572 132825729118336 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+INFO 2025-05-07 10:16:17,164 server 399572 132825729118336 Configuring endpoint tcp:port=8001:interface=127.0.0.1
+CRITICAL 2025-05-07 10:16:17,165 server 399572 132825729118336 Listen failure: Couldn't listen on 127.0.0.1:8001: [Errno 98] Address already in use.
