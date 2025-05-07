@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import (
     WhatsAppSettings, MarketingCampaign, MarketingTemplate,
-    BotResponse, AutoReply
+    BotResponse, AutoReply,Contact
 )
 
 # --- Settings Form ---
@@ -187,4 +187,16 @@ class AutoReplySettingsForm(forms.ModelForm):
     #     # Ensure only one instance exists
     #     # self.instance.pk = 1 # Assuming singleton with pk=1
     #     # return super().save(commit=commit)
+# Add new Conatct form
+class AddContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = ['wa_id', 'name']
+        widgets = {
+            'wa_id': forms.TextInput(attrs={'placeholder': 'e.g., 919876543210'}),
+            'name': forms.TextInput(attrs={'required': False, 'placeholder': 'Optional profile name'}),
+        }
+        help_texts = {
+            'wa_id': 'WhatsApp ID (Phone number with country code). Must be unique.',
+        }
 

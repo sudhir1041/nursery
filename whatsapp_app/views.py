@@ -26,12 +26,12 @@ import hashlib # For signature verification
 # Models from this app
 from .models import (
     Contact, ChatMessage, WhatsAppSettings, BotResponse, AutoReply,
-    MarketingTemplate, MarketingCampaign, CampaignContact
+    MarketingTemplate, MarketingCampaign, CampaignContact,
 )
 # Forms from this app
 from .forms import (
     WhatsAppSettingsForm, ManualMessageForm, MarketingCampaignForm,
-    ContactUploadForm , BotResponseForm, AutoReplySettingsForm # Ensure ManualMessageForm is defined
+    ContactUploadForm , BotResponseForm, AutoReplySettingsForm,AddContactForm # Ensure ManualMessageForm is defined
 )
 # Utilities from this app (Assume these exist and handle API/parsing logic)
 from .utils import (
@@ -808,6 +808,27 @@ def sync_whatsapp_templates(request):
     except ValueError as e: logger.error(f"Configuration error during template sync: {e}"); messages.error(request, f"Configuration Error: {e}")
     except Exception as e: logger.exception(f"Unexpected error during WhatsApp template sync: {e}"); messages.error(request, f"An unexpected error occurred during sync: {e}")
     return redirect('whatsapp_app:template_list')
+
+# Added new contact save 
+@user_passes_test(is_staff_user)
+def add_new_contact(request):
+    """Allows staff users to manually add a new WhatsApp contact."""
+    if request.method == 'POST':
+        form = AddContactForm(request.POST)
+        if form.is_valid():
+            try:
+                contact = form.save()
+                messages.success(request, f"Contact '{contact.wa_id}' added successfully.")
+                return redirect('whatsapp_app:contact_list')  # Redirect to a contact list view (you might need to create this)
+            except Exception as e:
+                messages.error(request, f"Error adding contact: {e}")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = AddContactForm()
+
+    context = {'form': form, 'action': 'Add New Contact'}
+    return render(request, 'whatsapp/contact_form.html', context)
 
 # --- Placeholder views removed as actual views are now implemented above ---
 # def whatsapp_index(request): ...

@@ -4,7 +4,12 @@
 
 {% block whatsapp_content %} {# Override the whatsapp_content block #}
 <div class="whatsapp-chat-list-container"> {# Custom container #}
-    <h3 class="page-title">Chats</h3> {# Custom title class #}
+    <div class="list-header"> {# New container for title and button #}
+        <h3 class="page-title">Chats</h3> {# Custom title class #}
+        <a href="{% url 'whatsapp_app:add_contact' %}" class="custom-button button-primary add-new-contact-button">
+            <i class="fas fa-plus"></i> Add New Contact
+        </a>
+    </div>
     <hr class="divider">
 
     {# --- Search Bar --- #}
