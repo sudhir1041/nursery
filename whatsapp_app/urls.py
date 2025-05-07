@@ -10,6 +10,7 @@ urlpatterns = [
     path('settings/', views.whatsapp_settings_view, name='settings'),
     path('chats/', views.chat_list, name='chat_list'),
     path('chats/<str:wa_id>/', views.chat_detail, name='chat_detail'),
+    path('contacts/add/', views.add_new_contact, name='add_contact'),
 
     # Bot URLs
     path('bots/', views.bot_response_list, name='bot_list'),
