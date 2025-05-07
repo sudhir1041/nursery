@@ -1,5 +1,3 @@
-
-# --- Django Imports ---
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, Http404
 from django.views.decorators.csrf import csrf_exempt
@@ -859,11 +857,4 @@ def add_new_contact(request):
 
     context = {'form': form, 'action': 'Add New Contact'}
     return render(request, 'whatsapp/contact_form.html', context)
-
-# --- Placeholder views removed as actual views are now implemented above ---
-# def whatsapp_index(request): ...
-# def chat_list(request): ... # Defined above
-# def chat_detail(request, wa_id): ... # Defined above
-# def template_list(request): ... # Defined above
-# def webhook_handler(request): ... # Defined above
 

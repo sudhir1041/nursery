@@ -43,7 +43,6 @@ def get_active_whatsapp_settings() -> WhatsAppSettings:
 # --- Sending Messages ---
 def send_whatsapp_message(recipient_wa_id: str, message_type: str, **kwargs) -> ChatMessage | None:
     """ Sends a message via the WhatsApp Cloud API and logs it in ChatMessage. """
-    # --- (Code for send_whatsapp_message remains the same) ---
     if ChatMessage is None or Contact is None: logger.error("Cannot send message: Contact or ChatMessage model not imported."); return None
     try:
         settings = get_active_whatsapp_settings(); api_url = f"{GRAPH_API_URL}/{settings.phone_number_id}/messages"
@@ -82,7 +81,6 @@ def send_whatsapp_message(recipient_wa_id: str, message_type: str, **kwargs) -> 
 def log_failed_message(recipient_wa_id: str, message_type: str, error_details: str,
                        log_content: str | None = None, media_url: str | None = None, **kwargs):
     """ Creates a ChatMessage entry with FAILED status. """
-    # --- (Code for log_failed_message remains the same) ---
     if ChatMessage is None or Contact is None: logger.error("Cannot log failed message: Models not imported."); return
     try:
         contact, _ = Contact.objects.get_or_create(wa_id=recipient_wa_id)
@@ -133,7 +131,6 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
                             elif msg_type == 'unsupported': text_content = "Received an unsupported message type."
                             else: text_content = f"Received unhandled message type: {msg_type}"; logger.warning(f"Unhandled type '{msg_type}': {msg_data}")
 
-                            # --- CORRECTED: Try/Except block for timestamp parsing ---
                             whatsapp_dt = None
                             try:
                                 # Use datetime.timezone.utc (imported as dt_timezone.utc)
@@ -180,7 +177,6 @@ def parse_incoming_whatsapp_message(payload: dict) -> dict | None:
 # --- Fetching Templates ---
 def fetch_whatsapp_templates_from_api(settings: WhatsAppSettings) -> list | None:
     """ Fetches approved message templates from the WhatsApp Cloud API. """
-    # --- (Code for fetch_whatsapp_templates_from_api remains the same) ---
     if not settings.whatsapp_business_account_id: raise ValueError("WhatsApp Business Account ID not configured.")
     api_url = f"{GRAPH_API_URL}/{settings.whatsapp_business_account_id}/message_templates"
     headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
@@ -205,7 +201,6 @@ def fetch_whatsapp_templates_from_api(settings: WhatsAppSettings) -> list | None
 # --- Optional: Webhook Signature Verification ---
 def verify_whatsapp_signature(payload: bytes, signature: str | None, secret: str | None) -> bool:
     """ Verifies the X-Hub-Signature-256 header from WhatsApp webhooks. """
-    # --- (Code for verify_whatsapp_signature remains the same) ---
     if not signature or not secret: logger.warning("Cannot verify webhook signature: Missing signature header or App Secret."); return False
     try:
         if not signature.startswith('sha256='): logger.warning(f"Invalid signature format: {signature}"); return False
@@ -221,7 +216,6 @@ def verify_whatsapp_signature(payload: bytes, signature: str | None, secret: str
 # --- Media Download Utility ---
 def download_whatsapp_media(media_id: str) -> Optional[Tuple[bytes, str]]:
     """ Downloads media file associated with the given media ID from WhatsApp. """
-    # --- (Code for download_whatsapp_media remains the same) ---
     if not media_id: logger.warning("Download attempted with no media ID."); return None
     try:
         settings = get_active_whatsapp_settings(); headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
@@ -242,7 +236,6 @@ def download_whatsapp_media(media_id: str) -> Optional[Tuple[bytes, str]]:
 # --- Media Upload Utility ---
 def upload_media_to_whatsapp(media_file: UploadedFile) -> dict | None:
     """ Uploads a media file to WhatsApp using the /media endpoint to get a reusable ID. """
-    # --- (Code for upload_media_to_whatsapp remains the same) ---
     try:
         settings = get_active_whatsapp_settings(); api_url = f"{GRAPH_API_URL}/{settings.phone_number_id}/media"
         headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
@@ -267,7 +260,6 @@ def upload_media_to_whatsapp(media_file: UploadedFile) -> dict | None:
 # --- Helper Function for Bots/Auto-Replies (Moved from views.py) ---
 def handle_bot_or_autoreply(incoming_message: ChatMessage):
     """ Checks and sends bot responses or auto-replies based on incoming message. """
-    # --- (Code for handle_bot_or_autoreply remains the same) ---
     if BotResponse is None or AutoReply is None: logger.error("Cannot handle bot/autoreply: Models not imported."); return
     if not incoming_message or not incoming_message.text_content or incoming_message.direction != 'IN': return
     contact = incoming_message.contact; message_text_lower = incoming_message.text_content.lower().strip(); bot_responded = False
@@ -281,7 +273,18 @@ def handle_bot_or_autoreply(incoming_message: ChatMessage):
             else: logger.info(f"Skipping bot response loop for '{bot_response.trigger_phrase}' to {contact.wa_id}"); bot_responded = True
     except Exception as e: logger.exception(f"Error checking/sending bot response for {contact.wa_id}: {e}")
     if not bot_responded: # Check Auto-Reply
-        agent_available = False # <<<--- IMPLEMENT YOUR AVAILABILITY LOGIC HERE --- >>>
+        # Check if current time is within business hours (9 AM to 5 PM)
+        current_time = timezone.localtime()
+        start_time = current_time.replace(hour=10, minute=0, second=0, microsecond=0)
+        end_time = current_time.replace(hour=18, minute=0, second=0, microsecond=0)
+        is_business_hours = start_time <= current_time <= end_time
+        
+        # Check if it's a weekday (Monday = 0, Sunday = 6)
+        is_weekday = current_time.weekday() < 5
+        
+        # Agent is available during business hours on weekdays
+        agent_available = is_business_hours and is_weekday
+        
         if not agent_available:
             try:
                 auto_reply_settings = AutoReply.objects.get(pk=1, is_active=True)
