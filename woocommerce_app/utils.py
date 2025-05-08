@@ -66,3 +66,27 @@ def fetch_orders_from_woo(params=None):
     except Exception as e:
         logger.error(f"Failed to fetch orders from WooCommerce API with params {params}: {e}", exc_info=True)
         return [], 0, 0
+    
+# Fetch product from woocommrec
+def fetch_products_from_woo(params=None):
+    """
+    Fetches products from the WooCommerce API, potentially with pagination.
+    Returns a tuple: (list_of_products, total_pages, total_products)
+    """
+    if params is None:
+        params = {'per_page': 10}  # You can adjust default parameters as needed.
+
+    logger.debug(f"Attempting to fetch products from WooCommerce API with params: {params}")
+    try:
+        wcapi = get_woocommerce_api_client()
+        response = wcapi.get("products", params=params)
+        response.raise_for_status()
+        total_pages = int(response.headers.get('X-WP-TotalPages', 0))
+        total_products = int(response.headers.get('X-WP-Total', 0))
+        products_data = response.json()
+        logger.info(
+            f"Successfully fetched {len(products_data)} products (page {params.get('page', 1)}) from WooCommerce API. Total Products: {total_products}, Total Pages: {total_pages}")
+        return products_data, total_pages, total_products
+    except Exception as e:
+        logger.error(f"Failed to fetch products from WooCommerce API with params {params}: {e}", exc_info=True)
+        return [], 0, 0

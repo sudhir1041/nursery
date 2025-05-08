@@ -24,11 +24,10 @@ def facebook_order_list_view(request):
     with searching and overdue highlighting based on order status.
     NOTE: Pagination is recommended for large datasets.
     """
-    # Initial queryset. Ordering is handled by Meta class, but explicit doesn't hurt.
     queryset = Facebook_orders.objects.all()
 
     search_query = request.GET.get('search_query', '').strip()
-    active_filter = False # Track if search filter is applied
+    active_filter = False 
 
     # --- Apply Search Filter ---
     if search_query:
@@ -39,13 +38,12 @@ def facebook_order_list_view(request):
                        Q(alternet_number__icontains=search_query) | \
                        Q(billing_first_name__icontains=search_query) | \
                        Q(billing_last_name__icontains=search_query) | \
-                       Q(order_id__iexact=search_query) # case-insensitive exact match for order ID
+                       Q(order_id__iexact=search_query) 
         queryset = queryset.filter(query_filter)
         active_filter = True
 
     # --- Calculate Overdue Highlight Flag for Facebook Orders ---
     # WARNING: This processes the *entire* filtered queryset.
-    # Consider adding pagination for performance if the list can be long.
     now = timezone.now()
     two_days_ago = now - timedelta(days=2) # Highlight orders older than 2 days
 
@@ -57,8 +55,8 @@ def facebook_order_list_view(request):
     date_field_name = 'date_created'      # Correct field name from model
     # --- End Configuration ---
 
-    processed_orders = [] # Build a list to hold orders with the added flag
-    for order in queryset: # Iterate through the entire filtered queryset
+    processed_orders = [] 
+    for order in queryset: 
         # Set a default value first
         order.is_overdue_highlight = False
         try:
@@ -66,11 +64,9 @@ def facebook_order_list_view(request):
             current_status = getattr(order, status_field_name, None)
             creation_date = getattr(order, date_field_name, None)
 
-            if creation_date: # Ensure date is not None
-                # Check if status indicates action needed (using lowercase from choices)
+            if creation_date: 
                 status_needs_action = (
-                    current_status and # Check status is not None/empty
-                    # No need for isinstance or .lower() if using choices directly
+                    current_status and 
                     current_status in actionable_statuses
                 )
 
@@ -83,20 +79,18 @@ def facebook_order_list_view(request):
 
         except Exception as e:
             # Log unexpected errors during highlight calculation
-            order_id_str = getattr(order, 'order_id', getattr(order, 'id', 'N/A')) # Get ID safely
+            order_id_str = getattr(order, 'order_id', getattr(order, 'id', 'N/A')) 
             logger.error(f"Error calculating highlight for Facebook Order ID {order_id_str}: {e}", exc_info=True)
-            order.is_overdue_highlight = False # Ensure flag is false on any error for this order
+            order.is_overdue_highlight = False 
 
-        processed_orders.append(order) # Add the (potentially modified) order to the list
+        processed_orders.append(order) 
 
     # --- Prepare Context ---
     context = {
-        # Pass the list of processed orders (with the flag)
-        # If you add pagination, this would be the Page object instead.
         'orders': processed_orders,
         'page_title': 'Facebook Orders',
-        'current_search_query': search_query, # Pass search query back
-        'active_filter': active_filter, # Pass filter status for UI
+        'current_search_query': search_query, 
+        'active_filter': active_filter,
     }
 
     # Ensure this template path matches your project structure

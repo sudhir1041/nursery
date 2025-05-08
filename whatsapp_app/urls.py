@@ -1,12 +1,11 @@
-# whatsapp_app/urls.py
 from django.urls import path
-from . import views # Import views from the current app
+from . import views 
 
-app_name = 'whatsapp_app' # Make sure app_name is defined
+app_name = 'whatsapp_app' 
 
 urlpatterns = [
     # Existing URLs...
-    path('', views.dashboard, name='whatsapp_index'), # Changed view to dashboard
+    path('', views.dashboard, name='whatsapp_index'), 
     path('settings/', views.whatsapp_settings_view, name='settings'),
     path('chats/', views.chat_list, name='chat_list'),
     path('chats/<str:wa_id>/', views.chat_detail, name='chat_detail'),

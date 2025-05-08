@@ -290,6 +290,8 @@ class Command(BaseCommand):
             # Optionally print to stderr as well if you want immediate console feedback
             # self.stderr.write(self.style.WARNING(f"Could not parse date string '{date_string}': {e}"))
             return None
+# This is for product migrate 
+
 
 # Instructions for running the command (as comments)
 # ==================================================

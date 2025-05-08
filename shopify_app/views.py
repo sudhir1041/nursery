@@ -1,7 +1,6 @@
 import json
 import logging
 
-# Django Imports
 from django.conf import settings
 from django.http import (
     HttpResponse,
@@ -18,14 +17,14 @@ from django.contrib import messages
 from django.utils.dateparse import parse_datetime,parse_date
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
-from django.views import View # Needed if using Class-Based Views elsewhere, but not for functions below
-from django.utils.decorators import method_decorator # Needed if using CBVs
+from django.views import View 
+from django.utils.decorators import method_decorator 
 from django.db.models import Q
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from .forms import ShopifyOrderEditForm
 from django.contrib.auth.decorators import login_required
-from .forms import ShopifyOrderEditForm # Make sure your form is imported
+from .forms import ShopifyOrderEditForm 
 import logging
 
 logger = logging.getLogger(__name__)
@@ -189,8 +188,8 @@ def shopify_order_list_view(request):
 
     # --- Apply Filters (Date/Days) ---
     # Prioritize specific date filter if provided
-    active_filter = False # Flag to check if any filter applied
-    selected_date = None # Initialize
+    active_filter = False 
+    selected_date = None 
     if date_filter_str:
         selected_date = parse_date(date_filter_str)
         if selected_date:
@@ -229,15 +228,12 @@ def shopify_order_list_view(request):
             Q(financial_status__icontains=search_query) |
             Q(fulfillment_status__icontains=search_query) |
             # Assuming billing_address_json is a JSONField and you want to search within it
-            # Adjust keys ('phone', 'city', 'zip') if your JSON structure differs
             Q(billing_address_json__phone__icontains=search_query) |
             Q(billing_address_json__city__icontains=search_query) |
             Q(billing_address_json__zip__icontains=search_query)
         )
         queryset = queryset.filter(query_filter)
         active_filter = True # Search counts as an active filter
-
-    # Apply ordering *after* all filtering
     ordered_queryset = queryset.order_by('-created_at_shopify', '-shopify_id')
 
     # --- Pagination ---
@@ -246,7 +242,6 @@ def shopify_order_list_view(request):
     try:
         orders = paginator.page(page_number)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
         orders = paginator.page(1)
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
@@ -256,7 +251,6 @@ def shopify_order_list_view(request):
     now = timezone.now()
     two_days_ago = now - timedelta(days=2)
     # Define which fulfillment statuses indicate the order needs action
-    # Adjust this list based on your specific needs and data possibilities
     actionable_fulfillment_statuses = ['unfulfilled', 'partially_fulfilled', 'scheduled', 'on_hold']
 
     for order in orders: # Iterate through the orders ON THE CURRENT PAGE
@@ -277,7 +271,6 @@ def shopify_order_list_view(request):
 
                 # Check if it's older than 3 days
                 is_old = order.created_at_shopify < two_days_ago
-                # ^^ IMPORTANT: Assumes created_at_shopify is timezone-aware,
                 # matching timezone.now(). Adjust if it's naive.
 
                 # Highlight if both conditions are met
@@ -288,17 +281,17 @@ def shopify_order_list_view(request):
             # Log unexpected errors during highlight calculation for a specific order
             shopify_order_id = getattr(order, 'shopify_id', getattr(order, 'id', 'N/A')) # Get ID safely
             logger.error(f"Error calculating highlight for Shopify Order ID {shopify_order_id}: {e}", exc_info=True)
-            order.is_overdue_highlight = False # Ensure flag is false on any error for this order
+            order.is_overdue_highlight = False 
 
     # --- Prepare Context ---
     context = {
-        'orders': orders, # Pass the paginated orders (now with the flag) to the template
+        'orders': orders, 
         'page_title': 'Synced Shopify Orders',
         # Pass current filter/search values back to keep forms populated/indicate current view
         'current_date_filter': date_filter_str if date_filter_str else '',
         'current_days_filter': days_filter_str if days_filter_str else '',
         'current_search_query': search_query,
-        'active_filter': active_filter, # Pass filter status for UI (e.g., show "clear filters")
+        'active_filter': active_filter, 
     }
 
     # Ensure this template path matches your project structure
@@ -342,7 +335,7 @@ def shopify_order_edit_view(request, shopify_id):
         form = ShopifyOrderEditForm(request.POST, instance=order)
         if form.is_valid():
             try:
-                form.save() # Save changes to the local database instance
+                form.save() 
                 logger.info(f"Locally updated Shopify order {shopify_id} via form.")
 
                 if is_ajax:
@@ -351,11 +344,10 @@ def shopify_order_edit_view(request, shopify_id):
                         'status': 'success',
                         'message': 'Shopify order updated successfully!',
                         # Optionally include updated data if JS needs it
-                        # 'internal_notes': order.internal_notes,
+                        'internal_notes': order.internal_notes,
                         })
                 else:
                     # Standard POST: Redirect to detail view after saving
-                    # Use the correct Shopify detail URL name
                     return redirect('shopify_order_detail', shopify_id=order.shopify_id)
             except Exception as e:
                  logger.exception(f"Error saving updated Shopify order {shopify_id}: {e}")
@@ -367,7 +359,7 @@ def shopify_order_edit_view(request, shopify_id):
                      # For now, just fall through to re-render the form with general error
                      messagesDiv.innerHTML = f'<div class="alert alert-danger">{error_message}</div>' # This won't work directly, need context processor or Django messages framework
 
-        else: # Form is invalid
+        else: 
             logger.warning(f"Shopify order edit form invalid for {shopify_id}: {form.errors.as_json()}")
             if is_ajax:
                 # Return validation errors as JSON for AJAX request

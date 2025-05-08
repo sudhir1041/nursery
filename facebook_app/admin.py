@@ -3,4 +3,3 @@ from .models import *
 
 admin.site.register(Facebook_orders)
 
-# Register your models here.

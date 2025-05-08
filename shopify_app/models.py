@@ -65,6 +65,7 @@ class ShopifyOrder(models.Model):
     django_date_created = models.DateTimeField(default=timezone.now)
     django_date_modified = models.DateTimeField(auto_now=True)
 
+
     def __str__(self):
         return f"Shopify Order {self.name or self.shopify_id} ({self.financial_status})"
 

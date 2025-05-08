@@ -1,7 +1,7 @@
 import requests
 import json
 import logging
-import os # Needed for upload_media
+import os 
 
 from django.conf import settings
 

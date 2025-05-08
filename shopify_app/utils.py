@@ -61,12 +61,12 @@ def make_shopify_request(method, endpoint, params=None, json_data=None, retries=
     for attempt in range(retries):
         try:
             response = requests.request(
-                method.upper(), # Ensure method is uppercase
+                method.upper(), 
                 url,
                 headers=headers,
                 params=params,
                 json=json_data,
-                timeout=30 # Set a reasonable timeout
+                timeout=30 
             )
 
             logger.debug(f"Shopify API Response Status: {response.status_code} for {method.upper()} {url}")
@@ -77,8 +77,7 @@ def make_shopify_request(method, endpoint, params=None, json_data=None, retries=
                 retry_after = int(response.headers.get('Retry-After', base_delay * (2 ** attempt)))
                 logger.warning(f"Rate limit hit for {method.upper()} {url}. Retrying after {retry_after}s (Attempt {attempt + 1}/{retries}).")
                 time.sleep(retry_after)
-                continue # Retry the request
-
+                continue 
             # Raise HTTPError for other bad responses (4xx client errors, 5xx server errors)
             response.raise_for_status()
 

@@ -9,12 +9,8 @@ from django.conf import settings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Uncomment below if using Django Channels
-# from channels.layers import get_channel_layer
-# channel_layer = get_channel_layer()
 
 # --- Load Environment Variables ---
-# Create a .env file in the same directory as manage.py for sensitive data
 load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
@@ -34,8 +30,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://admin.nurserynisarga.in',
-    'http://127.0.0.1:8000',
-    # 'http://localhost:8000',
+    #'http://127.0.0.1:8000',
 ]
 
 
@@ -190,8 +185,8 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
-        'simple': { # Used by your original 'django' and 'woocommerce_app'
-            'format': '{levelname} {asctime} {module}: {message}', # Matched your original simple format
+        'simple': { 
+            'format': '{levelname} {asctime} {module}: {message}',
             'style': '{',
         },
         'celery_format': {
@@ -205,23 +200,23 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'app_file': { # This will be the handler you named 'file'
+        'app_file': { 
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'application.log',  # Main application log file
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'filename': LOGS_DIR / 'application.log',  
+            'maxBytes': 1024 * 1024 * 10,  
             'backupCount': 5,
-            'formatter': 'verbose', # Using 'verbose' for more details in file
+            'formatter': 'verbose', 
         },
-        'shopify_file': { # This will be the handler you named 'file_info'
+        'shopify_file': { 
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'shopify.log', # Log file for shopify_app
+            'filename': LOGS_DIR / 'shopify.log', 
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 3,
             'formatter': 'verbose',
         },
-        'celery_task_file': { # Separate log file for Celery tasks
+        'celery_task_file': { 
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': LOGS_DIR / 'celery_tasks.log',
@@ -231,31 +226,31 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['console', 'app_file'], # Default handlers
+        'handlers': ['console', 'app_file'], 
         'level': 'INFO',
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'app_file'], # Uses the defined 'app_file' handler
+            'handlers': ['console', 'app_file'], 
             'level': 'INFO',
-            'propagate': True, # As you had it
+            'propagate': True, 
         },
         'woocommerce_app': {
-            'handlers': ['console', 'app_file'], # Uses the defined 'app_file' handler
+            'handlers': ['console', 'app_file'], 
             'level': 'INFO',
-            'propagate': False, # As you had it
+            'propagate': False, 
         },
-        'shopify_app': { # Correctly placed now
-            'handlers': ['console', 'shopify_file'], # Uses the defined 'shopify_file' handler
+        'shopify_app': { 
+            'handlers': ['console', 'shopify_file'], 
             'level': 'INFO',
-            'propagate': False, # As you had it
+            'propagate': False,
         },
-        'celery': { # Logger for general Celery messages
+        'celery': { 
             'handlers': ['console', 'celery_task_file'],
             'level': 'INFO',
             'propagate': False,
         },
-        'celery.task': { # Logger specifically for Celery task events
+        'celery.task': { 
             'handlers': ['console', 'celery_task_file'],
             'level': 'INFO',
             'propagate': False,

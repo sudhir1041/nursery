@@ -1,5 +1,3 @@
-# whatsapp_app/admin.py
-
 from django.contrib import admin
 from django.db.models import Count # Import Count for annotation
 from django.utils import timezone # Import timezone for actions

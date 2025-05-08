@@ -1,5 +1,5 @@
 import os
-import django # Import django
+import django 
 from django.core.asgi import get_asgi_application
 # Import Channels routing and middleware AFTER django.setup()
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -13,7 +13,7 @@ django.setup()
 # ---------------------------------------------
 
 # Now import things that might depend on Django apps being ready
-import whatsapp_app.routing # Import your app's routing configuration
+import whatsapp_app.routing 
 
 # Get the standard Django ASGI application AFTER setup
 django_asgi_app = get_asgi_application()
@@ -24,9 +24,8 @@ application = ProtocolTypeRouter({
     "http": django_asgi_app,
 
     # WebSocket handler
-    "websocket": AuthMiddlewareStack( # Handles user authentication
+    "websocket": AuthMiddlewareStack( 
         URLRouter(
-            # Point to your app's WebSocket URL patterns
             whatsapp_app.routing.websocket_urlpatterns
         )
     ),

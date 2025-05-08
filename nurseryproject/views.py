@@ -102,14 +102,14 @@ def dashboard_view(request):
         'woo_shipped_orders': woo_shipped_orders,
         'woo_not_shipped':woo_not_shipped,
         # 'woo_not_count_status_orders': woo_not_count,
-        # 'woo_products': 0, # Placeholder for future product counts
+        # 'woo_products': 0, 
 
         # Shopify specific
         'shopify_orders': shopify_total,
         'shopify_pending_orders': shopify_pending_orders,
         'shopify_shipped_orders': shopify_shipped_orders,
         'shopify_not_shipped_orders': shopify_not_shipped_orders,
-        # 'shopify_products': 0, # Placeholder for future product counts
+        # 'shopify_products': 0, 
 
         # Facebook specific
         'fb_orders': fb_total,
@@ -129,33 +129,33 @@ def all_orders_view(request):
     with filtering, searching, and overdue highlighting.
     """
     # --- Get filter parameters ---
-    search_query = request.GET.get('search_query', '').strip() # Strip whitespace
-    date_filter_str = request.GET.get('date_filter', None)     # Use None default
-    days_filter_str = request.GET.get('days_filter', None)     # Use None default
+    search_query = request.GET.get('search_query', '').strip() 
+    date_filter_str = request.GET.get('date_filter', None)     
+    days_filter_str = request.GET.get('days_filter', None)     
     not_shpped_filter_str = request.GET.get('not_shipped', None)
     page_number = request.GET.get('page')
-    items_per_page = 15 # Or get from settings/request
+    items_per_page = 15 
 
     # --- Time calculations (do once) ---
     now = timezone.now()
-    two_days_ago = now - timedelta(days=2) # Define the 'overdue' threshold
+    two_days_ago = now - timedelta(days=2) 
 
     # --- Initialize Filter Variables ---
     selected_date = None
     num_days = None
     start_date = None
-    active_filter = bool(search_query) # Search counts as active filter
+    active_filter = bool(search_query) 
 
     # --- Parse Date/Days Filters (prioritize specific date) ---
     if date_filter_str:
-        selected_date = parse_date(date_filter_str) # Returns date object or None
+        selected_date = parse_date(date_filter_str) 
         if selected_date:
             logger.debug(f"All Orders: Filtering by specific date: {selected_date}")
             active_filter = True
         else:
             logger.warning(f"All Orders: Invalid date format received: {date_filter_str}")
             # Keep date_filter_str for context, but don't use for filtering
-    elif days_filter_str: # Only apply days if specific date wasn't validly provided
+    elif days_filter_str: 
         try:
             num_days = int(days_filter_str)
             if num_days > 0:
@@ -163,10 +163,10 @@ def all_orders_view(request):
                 logger.debug(f"All Orders: Filtering by last {num_days} days (since {start_date})")
                 active_filter = True
             else:
-                num_days = None # Ignore non-positive days
+                num_days = None 
         except (ValueError, TypeError):
             logger.warning(f"All Orders: Invalid days filter value received: {days_filter_str}")
-            num_days = None # Reset if invalid
+            num_days = None 
     elif not_shpped_filter_str:
             not_shipped = ['processing', 'on-hold', 'partial-paid']
             two_days_ago = timezone.now() - timedelta(days=2)
@@ -176,12 +176,12 @@ def all_orders_view(request):
 
 
     # =================== WooCommerce Orders ===================
-    woo_queryset = WooCommerceOrder.objects.all() # Start with all
+    woo_queryset = WooCommerceOrder.objects.all()
 
     # Apply Filters to WooCommerce Queryset
     if search_query:
         woo_queryset = woo_queryset.filter(
-            Q(woo_id__icontains=search_query) | # Use icontains for flexibility if needed
+            Q(woo_id__icontains=search_query) | 
             Q(billing_first_name__icontains=search_query) |
             Q(billing_last_name__icontains=search_query) |
             Q(billing_phone__icontains=search_query) |
@@ -191,7 +191,7 @@ def all_orders_view(request):
         )
     if selected_date:
         woo_queryset = woo_queryset.filter(date_created_woo__date=selected_date)
-    elif start_date: # Apply relative days only if specific date wasn't used
+    elif start_date: 
          woo_queryset = woo_queryset.filter(date_created_woo__gte=start_date)
 
     # Define highlight criteria for WooCommerce
@@ -200,12 +200,11 @@ def all_orders_view(request):
     # Process data and add highlight flag
     woo_data = []
     for o in woo_queryset:
-        highlight = False # Default highlight state
+        highlight = False 
         try:
             # Check status and date validity before comparing
             if o.status and o.date_created_woo:
                  status_needs_action = o.status.lower() in woo_actionable_statuses
-                 # Ensure date comparison is valid (e.g., both timezone-aware)
                  is_old = o.date_created_woo < two_days_ago
                  if status_needs_action and is_old:
                      highlight = True
@@ -225,8 +224,8 @@ def all_orders_view(request):
             'note': o.customer_note,
             'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}', # Specific tracking URL
             'platform': 'WooCommerce',
-            'shipment_status': getattr(o, 'shipment_status', 'N/A'), # Safely get shipment status
-            'is_overdue_highlight': highlight, # <<< ADDED HIGHLIGHT FLAG
+            'shipment_status': getattr(o, 'shipment_status', 'N/A'), 
+            'is_overdue_highlight': highlight, 
         })
 
 
@@ -237,8 +236,8 @@ def all_orders_view(request):
     if search_query:
          shopify_queryset = shopify_queryset.filter(
              Q(email__icontains=search_query) |
-             Q(name__icontains=search_query) | # 'name' is like #1001
-             Q(billing_address_json__phone__icontains=search_query) | # Assuming JSONField structure
+             Q(name__icontains=search_query) | 
+             Q(billing_address_json__phone__icontains=search_query) | 
              Q(billing_address_json__city__icontains=search_query) |
              Q(billing_address_json__zip__icontains=search_query)
          )
@@ -248,54 +247,54 @@ def all_orders_view(request):
          shopify_queryset = shopify_queryset.filter(created_at_shopify__gte=start_date)
 
     # Define highlight criteria for Shopify
-    shopify_actionable_statuses = ['unfulfilled', 'partially_fulfilled', 'scheduled', 'on_hold'] # Review this list
+    shopify_actionable_statuses = ['unfulfilled', 'partially_fulfilled', 'scheduled', 'on_hold'] 
 
     # Process data and add highlight flag
     shopify_data = []
     for o in shopify_queryset:
-        highlight = False # Default
+        highlight = False 
         try:
             # Check if required fields exist and date is valid
             if hasattr(o, 'fulfillment_status') and hasattr(o, 'created_at_shopify') and o.created_at_shopify:
                 current_status = o.fulfillment_status
                 needs_action = (
-                    current_status is None or # Check if status is None
-                    (isinstance(current_status, str) and # Check if it's a string before lower()
+                    current_status is None or 
+                    (isinstance(current_status, str) and 
                      current_status.lower() in shopify_actionable_statuses)
                 )
-                is_old = o.created_at_shopify < two_days_ago # Assumes timezone compatibility
+                is_old = o.created_at_shopify < two_days_ago 
                 if needs_action and is_old:
                     highlight = True
         except Exception as e:
             logger.error(f"Error calculating highlight for Shopify Order {getattr(o, 'name', 'N/A')}: {e}", exc_info=False)
 
         # Extract other data safely
-        shipping = o.shipping_address_json or {} # Handle case where address might be None
+        shipping = o.shipping_address_json or {} 
         tracking_url = 'N/A'
         # Safer access to potentially nested tracking URL in raw_data
         try:
             # Check raw_data type and structure before accessing
             if isinstance(o.raw_data, dict) and isinstance(o.raw_data.get("fulfillments"), list) and o.raw_data["fulfillments"]:
-                fulfillment = o.raw_data["fulfillments"][0] # Assuming first fulfillment
+                fulfillment = o.raw_data["fulfillments"][0] 
                 if isinstance(fulfillment, dict):
                      tracking_url = fulfillment.get("tracking_url", 'N/A')
-        except Exception: # Catch any error during complex dictionary access
-             pass # Ignore errors getting tracking URL, keep 'N/A'
+        except Exception: 
+             pass 
 
         shopify_data.append({
-            'order_id': o.name, # Like '#1001'
+            'order_id': o.name, 
             'date': o.created_at_shopify,
-            'status': o.fulfillment_status, # Primary status display
+            'status': o.fulfillment_status, 
             'amount': o.total_price,
             'customer': shipping.get('name', ''),
             'phone': shipping.get('phone', ''),
             'pincode': shipping.get('zip', ''),
             'city': shipping.get('city', ''),
-            'note': getattr(o, 'note', getattr(o, 'internal_notes', '')), # Try 'note' then 'internal_notes'
+            'note': getattr(o, 'note', getattr(o, 'internal_notes', '')), 
             'tracking': tracking_url,
             'platform': 'Shopify',
-            'shipment_status': getattr(o, 'shipment_status', o.fulfillment_status), # Use fulfillment if shipment_status missing/not applicable
-            'is_overdue_highlight': highlight, # <<< ADDED HIGHLIGHT FLAG
+            'shipment_status': getattr(o, 'shipment_status', o.fulfillment_status), 
+            'is_overdue_highlight': highlight,
         })
 
     # =================== Facebook Orders ===================
@@ -304,10 +303,9 @@ def all_orders_view(request):
     # Apply Filters to Facebook Queryset
     if search_query:
          fb_queryset = fb_queryset.filter(
-             Q(order_id__icontains=search_query) | # Changed to icontains
+             Q(order_id__icontains=search_query) | 
              Q(billing_first_name__icontains=search_query) |
              Q(billing_last_name__icontains=search_query) |
-             # Add other relevant FB search fields if needed
              Q(billing_phone__icontains=search_query) |
              Q(billing_email__icontains=search_query) |
              Q(alternet_number__icontains=search_query)
@@ -325,14 +323,14 @@ def all_orders_view(request):
     # Process data and add highlight flag
     fb_data = []
     for o in fb_queryset:
-        highlight = False # Default
+        highlight = False 
         try:
              current_status = getattr(o, fb_status_field, None)
              creation_date = getattr(o, fb_date_field, None)
-             if creation_date: # Ensure date exists
+             if creation_date: 
                  # Status check (already lowercase from choices)
                  status_needs_action = current_status in fb_actionable_statuses
-                 is_old = creation_date < two_days_ago # Assumes timezone compatibility
+                 is_old = creation_date < two_days_ago
                  if status_needs_action and is_old:
                      highlight = True
         except Exception as e:
@@ -345,17 +343,17 @@ def all_orders_view(request):
         fb_data.append({
             'order_id': o.order_id,
             'date': o.date_created,
-            'status': o.status, # Main status field from model
+            'status': o.status, 
             'amount': o.total_amount,
             'customer': f"{o.billing_first_name or ''} {o.billing_last_name or ''}".strip(),
             'phone': o.billing_phone,
             'pincode': o.billing_postcode,
             'city': o.billing_city,
             'note': o.customer_note,
-            'tracking': fb_tracking_url, # Specific tracking URL format
+            'tracking': fb_tracking_url, 
             'platform': 'Facebook',
-            'shipment_status': getattr(o, 'shipment_status', 'N/A'), # Use specific shipment status field
-            'is_overdue_highlight': highlight, # <<< ADDED HIGHLIGHT FLAG
+            'shipment_status': getattr(o, 'shipment_status', 'N/A'), 
+            'is_overdue_highlight': highlight, 
         })
 
 
@@ -363,16 +361,15 @@ def all_orders_view(request):
     combined_orders = woo_data + shopify_data + fb_data
 
     # Sort by date (descending) - ensure date objects are valid and comparable
-    # Add error handling for sorting if dates might be None (though filtered earlier)
     try:
         combined_orders_sorted = sorted(
-            [order for order in combined_orders if order.get('date')], # Filter out orders with None date just in case
+            [order for order in combined_orders if order.get('date')], 
             key=itemgetter('date'),
             reverse=True
         )
     except TypeError as e:
         logger.error(f"Error sorting combined orders by date: {e}. Check date types.")
-        combined_orders_sorted = combined_orders # Fallback to unsorted if error
+        combined_orders_sorted = combined_orders 
 
     # Pagination
     paginator = Paginator(combined_orders_sorted, items_per_page)
@@ -381,16 +378,16 @@ def all_orders_view(request):
     except PageNotAnInteger:
         orders_page = paginator.page(1)
     except EmptyPage:
-        orders_page = paginator.page(paginator.num_pages) # Deliver last page
+        orders_page = paginator.page(paginator.num_pages) 
 
     # ================= Context =================
     context = {
-        'orders': orders_page, # Pass the Page object to the template
+        'orders': orders_page, 
         'current_search_query': search_query,
         # Pass back original filter strings (or empty) for form repopulation
         'current_date_filter': date_filter_str if date_filter_str else '',
         'current_days_filter': days_filter_str if days_filter_str else '',
-        'active_filter': active_filter, # Flag to indicate if filters are applied
+        'active_filter': active_filter, 
     }
 
     return render(request, 'orders/orders.html', context)

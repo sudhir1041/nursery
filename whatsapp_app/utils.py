@@ -1,5 +1,3 @@
-# whatsapp_app/utils.py
-
 import requests
 import json
 import logging
