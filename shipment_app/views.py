@@ -16,7 +16,7 @@ def home(request):
     
     # ====================== Shopify Orders =======================
     shopify_orders = []
-    not_shipped = ['unfulfilled','fulfilled','partially_fulfilled', 'scheduled', 'on_hold','null']
+    not_shipped = ['unfulfilled','partially_fulfilled', 'scheduled', 'on_hold','null']
     for o in shopify:
         if o.fulfillment_status in not_shipped:                        
             shopify_orders.append({
