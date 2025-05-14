@@ -123,7 +123,6 @@ def dashboard_view(request):
     }
     return render(request, 'dashboard.html', context)
 @login_required
-@login_required
 def all_orders_view(request):
     """
     Displays a combined, paginated list of orders from WooCommerce, Shopify, and Facebook,
@@ -150,13 +149,22 @@ def all_orders_view(request):
 
     # --- Parse Date/Days Filters (prioritize specific date) ---
     if date_filter_str:
-        selected_date = parse_date(date_filter_str)
-        if selected_date:
-            logger.debug(f"All Orders: Filtering by specific date: {selected_date}")
-            active_filter = True
-        else:
-            logger.warning(f"All Orders: Invalid date format received: {date_filter_str}")
-            # Keep date_filter_str for context, but don't use for filtering
+        try:
+            selected_date = parse_date(date_filter_str)
+            if selected_date:
+                logger.debug(f"All Orders: Filtering by specific date: {selected_date}")
+                active_filter = True
+                # Add one day to include orders from entire selected date
+                end_date = selected_date + timedelta(days=1)
+            else:
+                logger.warning(f"All Orders: Invalid date format received: {date_filter_str}")
+                selected_date = None
+                end_date = None
+        except Exception as e:
+            logger.error(f"Error parsing date filter: {e}")
+            selected_date = None
+            end_date = None
+            
     elif days_filter_str:
         try:
             num_days = int(days_filter_str)
@@ -172,9 +180,7 @@ def all_orders_view(request):
     elif not_shpped_filter_str:
         not_shipped = ['processing', 'on-hold', 'partial-paid']
         query_filter = Q(status__in=not_shipped) & Q(date_created_woo__lt=two_days_ago)
-        # Apply this filter to all querysets later
         active_filter = True
-    # --- Default to 35 days if no other filters are active ---
     elif not active_filter:
         start_date = thirty_five_days_ago
         logger.debug(f"All Orders: Defaulting to orders from the last 35 days (since {start_date})")
@@ -194,7 +200,10 @@ def all_orders_view(request):
             Q(billing_email__icontains=search_query)
         )
     if selected_date:
-        woo_queryset = woo_queryset.filter(date_created_woo__date=selected_date)
+        woo_queryset = woo_queryset.filter(
+            date_created_woo__gte=selected_date,
+            date_created_woo__lt=end_date
+        )
     elif start_date:
         woo_queryset = woo_queryset.filter(date_created_woo__gte=start_date)
     if not_shpped_filter_str:
@@ -247,7 +256,10 @@ def all_orders_view(request):
             Q(billing_address_json__zip__icontains=search_query)
         )
     if selected_date:
-        shopify_queryset = shopify_queryset.filter(created_at_shopify__date=selected_date)
+        shopify_queryset = shopify_queryset.filter(
+            created_at_shopify__gte=selected_date,
+            created_at_shopify__lt=end_date
+        )
     elif start_date:
         shopify_queryset = shopify_queryset.filter(created_at_shopify__gte=start_date)
 
@@ -276,9 +288,7 @@ def all_orders_view(request):
         # Extract other data safely
         shipping = o.shipping_address_json or {}
         tracking_url = 'N/A'
-        # Safer access to potentially nested tracking URL in raw_data
         try:
-            # Check raw_data type and structure before accessing
             if isinstance(o.raw_data, dict) and isinstance(o.raw_data.get("fulfillments"), list) and o.raw_data["fulfillments"]:
                 fulfillment = o.raw_data["fulfillments"][0]
                 if isinstance(fulfillment, dict):
@@ -316,7 +326,10 @@ def all_orders_view(request):
             Q(alternet_number__icontains=search_query)
         )
     if selected_date:
-        fb_queryset = fb_queryset.filter(date_created__date=selected_date)
+        fb_queryset = fb_queryset.filter(
+            date_created__gte=selected_date,
+            date_created__lt=end_date
+        )
     elif start_date:
         fb_queryset = fb_queryset.filter(date_created__gte=start_date)
 
@@ -388,10 +401,11 @@ def all_orders_view(request):
     context = {
         'orders': orders_page,
         'current_search_query': search_query,
-        # Pass back original filter strings (or empty) for form repopulation
         'current_date_filter': date_filter_str if date_filter_str else '',
         'current_days_filter': days_filter_str if days_filter_str else '',
         'active_filter': active_filter,
+        'has_orders': bool(combined_orders_sorted),  # Add flag to check if orders exist
+        'selected_date': selected_date,  # Pass selected date to template
     }
 
     return render(request, 'orders/orders.html', context)
