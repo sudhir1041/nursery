@@ -17,25 +17,22 @@ def home(request):
     # ====================== Shopify Orders =======================
     shopify_orders = []
     for o in shopify:
-        if o.fulfillment_status == 'unfulfilled' or o.fulfillment_status == 'null':                        
-            try:
-                shopify_orders.append({
-                    'order_id': o.name,
-                    'date': o.created_at_shopify,
-                    'status': o.fulfillment_status,
-                    'amount': o.total_price,
-                    'customer': o.shipping_address_json.get('name', '') if o.shipping_address_json else '',
-                    'phone': o.shipping_address_json.get('phone', '') if o.shipping_address_json else '',
-                    'pincode': o.shipping_address_json.get('zip', '') if o.shipping_address_json else '',
-                    'city': o.shipping_address_json.get('city', '') if o.shipping_address_json else '',
-                    'note': o.internal_notes or '',
-                    'tracking': o.tracking_details_json or '',
-                    'platform': 'Shopify',
-                    'shipment_status': o.shipment_status or '',
-                    'items': o.line_items_json or []
-                })
-            except AttributeError:
-                continue
+        if o.fulfillment_status == 'fulfilled' or o.fulfillment_status == 'null':                        
+            shopify_orders.append({
+                'order_id': o.name,
+                'date': o.created_at_shopify,
+                'status': o.fulfillment_status,
+                'amount': o.total_price,
+                'customer': o.shipping_address_json.get('name', ''),
+                'phone': o.shipping_address_json.get('phone', ''),
+                'pincode': o.shipping_address_json.get('zip', ''),
+                'city': o.shipping_address_json.get('city', ''),
+                'note': o.internal_notes,
+                'tracking': o.tracking_details_json,
+                'platform': 'Shopify',
+                'shipment_status': o.shipment_status,
+                'items': o.line_items_json
+            })
 
     # ======================== WooCommerce orders ======================
     woo_orders = []
