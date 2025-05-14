@@ -16,22 +16,22 @@ def home(request):
     
     # ====================== Shopify Orders =======================
     shopify_orders = []
-    for sf in shopify:
-        if sf.fulfillment_status == 'unfulfilled' or sf.fulfillment_status == 'none':
+    for o in shopify:
+        
             shopify_orders.append({
-                'order_id': sf.name,
-                'date': sf.created_at_shopify,
-                'status': sf.fulfillment_status,
-                'amount': sf.total_price,
-                'customer': sf.shipping_address_json.get('name', ''),
-                'phone': sf.shipping_address_json.get('phone', ''),
-                'pincode': sf.shipping_address_json.get('zip', ''),
-                'city': sf.shipping_address_json.get('city', ''),
-                'note': sf.internal_notes,
-                'tracking': sf.tracking_details_json,
+                'order_id': o.name,
+                'date': o.created_at_shopify,
+                'status': o.fulfillment_status,
+                'amount': o.total_price,
+                'customer': o.shipping_address_json.get('name', ''),
+                'phone': o.shipping_address_json.get('phone', ''),
+                'pincode': o.shipping_address_json.get('zip', ''),
+                'city': o.shipping_address_json.get('city', ''),
+                'note': o.internal_notes,
+                'tracking': o.tracking_details_json,
                 'platform': 'Shopify',
-                'shipment_status': sf.shipment_status,
-                'items': sf.line_items_json
+                'shipment_status': o.shipment_status,
+                'items': o.line_items_json
             })
 
     # ======================== WooCommerce orders ======================
