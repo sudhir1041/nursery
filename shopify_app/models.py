@@ -23,7 +23,7 @@ class ShopifyOrder(models.Model):
     )
     email = models.EmailField(blank=True, null=True, db_index=True)
     financial_status = models.CharField(max_length=50, blank=True, null=True, db_index=True)
-    fulfillment_status = models.CharField(max_length=50, blank=True, default="unfulfilled", null=True, db_index=True)
+    fulfillment_status = models.CharField(max_length=50, default="unfulfilled", null=True, db_index=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     currency = models.CharField(max_length=10, blank=True, null=True)
     shipment_status = models.CharField(
