@@ -17,7 +17,7 @@ def home(request):
     # ====================== Shopify Orders =======================
     shopify_orders = []
     for o in shopify:
-        if o.fulfillment_status == 'NULL' or o.fulfillment_status == 'none':                        
+        if o.fulfillment_status == 'NULL' or o.fulfillment_status == '':                        
             shopify_orders.append({
                 'order_id': o.name,
                 'date': o.created_at_shopify,
