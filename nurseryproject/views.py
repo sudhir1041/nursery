@@ -123,6 +123,7 @@ def dashboard_view(request):
     }
     return render(request, 'dashboard.html', context)
 @login_required
+@login_required
 def all_orders_view(request):
     """
     Displays a combined, paginated list of orders from WooCommerce, Shopify, and Facebook,
@@ -130,11 +131,11 @@ def all_orders_view(request):
     """
     # --- Get filter parameters ---
     search_query = request.GET.get('search_query', '').strip()
-    date_filter_str = request.GET.get('date_filter', None)
-    days_filter_str = request.GET.get('days_filter', None)
+    date_filter_str = request.GET.get('date_filter', None)     
+    days_filter_str = request.GET.get('days_filter', None)     
     not_shpped_filter_str = request.GET.get('not_shipped', None)
     page_number = request.GET.get('page')
-    items_per_page = 15
+    items_per_page = 15 
 
     # --- Time calculations (do once) ---
     now = timezone.now()
@@ -215,7 +216,6 @@ def all_orders_view(request):
                 if status_needs_action and is_old:
                     highlight = True
         except Exception as e:
-            # Log error but don't break the loop, keep highlight=False
             logger.error(f"Error calculating highlight for Woo Order {getattr(o, 'woo_id', 'N/A')}: {e}", exc_info=False)
 
         woo_data.append({
@@ -228,12 +228,11 @@ def all_orders_view(request):
             'pincode': o.billing_postcode,
             'city': o.billing_city,
             'note': o.customer_note,
-            'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}', # Specific tracking URL
+            'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
             'platform': 'WooCommerce',
             'shipment_status': getattr(o, 'shipment_status', 'N/A'),
             'is_overdue_highlight': highlight,
         })
-
 
     # =================== Shopify Orders ===================
     shopify_queryset = ShopifyOrder.objects.all()
@@ -251,9 +250,6 @@ def all_orders_view(request):
         shopify_queryset = shopify_queryset.filter(created_at_shopify__date=selected_date)
     elif start_date:
         shopify_queryset = shopify_queryset.filter(created_at_shopify__gte=start_date)
-    if not_shpped_filter_str:
-        # Shopify doesn't have a direct equivalent, might need to adjust logic or skip
-        logger.warning("The 'not_shipped' filter is not directly applicable to Shopify orders.")
 
     # Define highlight criteria for Shopify
     shopify_actionable_statuses = ['unfulfilled', 'partially_fulfilled', 'scheduled', 'on_hold']
@@ -323,9 +319,6 @@ def all_orders_view(request):
         fb_queryset = fb_queryset.filter(date_created__date=selected_date)
     elif start_date:
         fb_queryset = fb_queryset.filter(date_created__gte=start_date)
-    if not_shpped_filter_str:
-        not_shipped = ['pending', 'processing', 'on-hold']
-        fb_queryset = fb_queryset.filter(Q(status__in=not_shipped) & Q(date_created__lt=two_days_ago))
 
     # Define highlight criteria for Facebook (based on model analysis)
     fb_actionable_statuses = ['pending', 'processing', 'on-hold']
@@ -368,7 +361,6 @@ def all_orders_view(request):
             'is_overdue_highlight': highlight,
         })
 
-
     # ================= Combine, Sort, Paginate =================
     combined_orders = woo_data + shopify_data + fb_data
 
@@ -403,6 +395,7 @@ def all_orders_view(request):
     }
 
     return render(request, 'orders/orders.html', context)
+
 @login_required
 def order_details_view(request,order_id):
     if '#' in str(order_id):
