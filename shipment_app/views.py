@@ -18,7 +18,7 @@ def home(request):
     shopify_orders = []
     not_shipped = ['unfulfilled','partially_fulfilled', 'scheduled', 'on_hold','null','none']
     for o in shopify:
-        if o.fulfillment_status == 'None':                        
+        if o.fulfillment_status == 'None' or o.fulfillment_status == 'unfulfilled' or o.fulfillment_status == 'null':                        
             shopify_orders.append({
                 'order_id': o.name,
                 'date': o.created_at_shopify,
