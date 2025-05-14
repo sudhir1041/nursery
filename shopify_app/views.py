@@ -194,7 +194,10 @@ def shopify_order_list_view(request):
         selected_date = parse_date(date_filter_str)
         if selected_date:
             logger.debug(f"Shopify Filtering by specific date: {selected_date}")
-            queryset = queryset.filter(created_at_shopify__date=selected_date)
+            # Convert selected_date to datetime range for that full day
+            start_datetime = timezone.make_aware(timezone.datetime.combine(selected_date, timezone.datetime.min.time()))
+            end_datetime = timezone.make_aware(timezone.datetime.combine(selected_date, timezone.datetime.max.time()))
+            queryset = queryset.filter(created_at_shopify__range=(start_datetime, end_datetime))
             active_filter = True
         else:
             logger.warning(f"Shopify Invalid date format received: {date_filter_str}")
@@ -297,6 +300,7 @@ def shopify_order_list_view(request):
     # Ensure this template path matches your project structure
     template_name = 'shopify/order_list.html'
     return render(request, template_name, context)
+
 
 @login_required
 @require_GET
