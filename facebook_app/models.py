@@ -72,7 +72,12 @@ class Facebook_orders(models.Model):
         blank=True,
         help_text='Store product line items as a JSON list, e.g., [{"name": "Plant A", "qty": 2, "price": "150.00"}, ...]'
     )
-
+    
+    clone_orders = models.JSONField(
+        default=default_empty_list,
+        blank=True,
+        help_text='Store clone orders as a JSON list, e.g., [{"order_id": "XXX", "platform": "facebook"}, ...]'
+    )
     def __str__(self):
         return f"FB Order {self.order_id} ({self.billing_first_name or self.billing_email or ''})"
 

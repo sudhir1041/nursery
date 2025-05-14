@@ -61,6 +61,9 @@ class ShopifyOrder(models.Model):
     # Store the full raw data for reference or if fields are missed
     raw_data = models.JSONField(blank=True, null=True, help_text="Raw JSON data from API or webhook")
 
+    clone_orders = models.JSONField(default=list, blank=True, 
+        help_text="Store clone orders as a JSON list, e.g., [{'order_id': 'XXX', 'platform': 'Shopify'}, ...]")
+
     # Django Timestamps
     django_date_created = models.DateTimeField(default=timezone.now)
     django_date_modified = models.DateTimeField(auto_now=True)

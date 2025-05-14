@@ -57,7 +57,9 @@ class WooCommerceOrder(models.Model):
     shipping_lines_json = models.JSONField(blank=True, null=True, help_text="Raw JSON data for shipping lines")
     raw_data = models.JSONField(blank=True, null=True, help_text="Full webhook payload or API response")
 
-    clone_orders = models.JSONField(blank=True, null=True, help_text="Full cloned orders data ")
+    # Clone orders save here
+    clone_orders = models.JSONField(default=list, blank=True, 
+        help_text="Store clone orders as a JSON list, e.g., [{'order_id': 'XXX', 'platform': 'WooCommerce'}, ...]")
 
     # Django Timestamps
     django_date_created = models.DateTimeField(auto_now_add=True)
