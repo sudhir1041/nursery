@@ -203,7 +203,11 @@ def order_list_view(request):
         if selected_date:
             logger.debug(f"WC Filtering by specific date: {selected_date}")
             queryset = queryset.filter(date_created_woo__date=selected_date)
-            active_filter = True
+            if queryset.exists():
+                active_filter = True
+            else:
+                queryset = WooCommerceOrder.objects.all()
+                logger.warning(f"No orders found for date {selected_date}")
         else:
             logger.warning(f"WC Invalid date format received: {date_filter_str}")
             # Keep date_filter_str for context, but don't mark active_filter=True
@@ -214,8 +218,13 @@ def order_list_view(request):
                 start_date = timezone.now() - timedelta(days=num_days)
                 logger.debug(f"WC Filtering by last {num_days} days (since {start_date})")
                 # Use __gte for "greater than or equal to" start_date (within the last num_days)
-                queryset = queryset.filter(date_created_woo__gte=start_date)
-                active_filter = True
+                filtered_queryset = queryset.filter(date_created_woo__gte=start_date)
+                if filtered_queryset.exists():
+                    queryset = filtered_queryset
+                    active_filter = True
+                else:
+                    queryset = WooCommerceOrder.objects.all()
+                    logger.warning(f"No orders found in last {num_days} days")
         except ValueError:
             logger.warning(f"WC Invalid days filter value received: {days_filter_str}")
             # Keep days_filter_str for context, but don't mark active_filter=True
@@ -223,9 +232,13 @@ def order_list_view(request):
             not_shipped = ['processing', 'on-hold', 'partial-paid']
             two_days_ago = timezone.now() - timedelta(days=2)
             query_filter = Q(status__in=not_shipped) & Q(date_created_woo__lt=two_days_ago)
-            queryset = queryset.filter(query_filter)
-            active_filter = True 
-
+            filtered_queryset = queryset.filter(query_filter)
+            if filtered_queryset.exists():
+                queryset = filtered_queryset
+                active_filter = True
+            else:
+                queryset = WooCommerceOrder.objects.all()
+                logger.warning("No unshipped orders found")
 
     # --- Apply Search Filter ---
     if search_query:
@@ -244,8 +257,13 @@ def order_list_view(request):
             query_filter |= Q(woo_id=int(search_query))
             query_filter |= Q(number__icontains=search_query)
         
-        queryset = queryset.filter(query_filter)
-        active_filter = True # A search counts as an active filter
+        filtered_queryset = queryset.filter(query_filter)
+        if filtered_queryset.exists():
+            queryset = filtered_queryset
+            active_filter = True
+        else:
+            queryset = WooCommerceOrder.objects.all()
+            logger.warning(f"No orders found matching search: {search_query}")
 
     # Apply ordering (Important: order *before* pagination)
     ordered_queryset = queryset.order_by('-date_created_woo', '-woo_id')
