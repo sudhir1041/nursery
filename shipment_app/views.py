@@ -19,13 +19,14 @@ def home(request):
     
     # ====================== Shopify Orders =======================
     shopify_orders = []
+    status = 'unfulfilled'
     for o in shopify:
         unfulfilled = o.fulfillment_status is None
         if unfulfilled:                                    
             shopify_orders.append({
                 'order_id': o.name,
                 'date': o.created_at_shopify,
-                'status': o.fulfillment_status,
+                'status': status,
                 'amount': o.total_price,
                 'customer': o.shipping_address_json.get('name', ''),
                 'phone': o.shipping_address_json.get('phone', ''),
