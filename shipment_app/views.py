@@ -51,7 +51,7 @@ def home(request):
                 'customer': f"{o.billing_first_name or ''} {o.billing_last_name or ''}".strip(),
                 'phone': o.billing_phone,
                 'pincode': o.billing_postcode,
-                'city': o.billing_city,
+                'city': o.billing_state,
                 'note': o.customer_note,
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
                 'platform': 'Wordpress',
