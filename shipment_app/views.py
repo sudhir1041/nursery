@@ -31,7 +31,7 @@ def home(request):
                 'customer': o.shipping_address_json.get('name', ''),
                 'phone': o.shipping_address_json.get('phone', ''),
                 'pincode': o.shipping_address_json.get('zip', ''),
-                'city': o.shipping_address_json.get('city', ''),
+                'city': o.shipping_address_json.get('state', ''),
                 'note': o.internal_notes,
                 'tracking': o.tracking_details_json,
                 'platform': 'Shopify',
