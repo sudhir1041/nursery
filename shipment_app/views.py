@@ -25,7 +25,7 @@ def home(request):
             shopify_orders.append({
                 'order_id': o.name,
                 'date': o.created_at_shopify,
-                'status': unfulfilled,
+                'status': o.fulfillment_status,
                 'amount': o.total_price,
                 'customer': o.shipping_address_json.get('name', ''),
                 'phone': o.shipping_address_json.get('phone', ''),
