@@ -34,8 +34,6 @@ from .models import ShopifyOrder
 # --- Import helper functions from your utils.py ---
 from .utils import verify_shopify_webhook, fetch_shopify_order
 
-logger = logging.getLogger(__name__) # Use logger defined in settings.py for shopify_app
-
 # --- Helper Functions ---
 
 def _parse_iso_datetime(datetime_str):

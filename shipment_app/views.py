@@ -3,7 +3,10 @@ from shopify_app.models import ShopifyOrder
 from woocommerce_app.models import WooCommerceOrder
 from facebook_app.models import Facebook_orders
 from datetime import datetime, timedelta
+import logging
 
+
+logger = logging.getLogger(__name__)
 
 def home(request):
     # Get current date and date 30 days ago
@@ -16,8 +19,8 @@ def home(request):
     
     # ====================== Shopify Orders =======================
     shopify_orders = []
-    not_shipped = ['unfulfilled','partially_fulfilled', 'scheduled', 'on_hold','null','none']
     for o in shopify:
+        logger.warning(f"Shopify order fulfillment status: {o.fulfillment_status}")
         if o.fulfillment_status in ['unfulfilled', 'none', 'null'] :                        
             shopify_orders.append({
                 'order_id': o.name,
