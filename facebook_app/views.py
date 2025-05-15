@@ -139,7 +139,15 @@ def facebook_order_create_view(request):
     })
 # --- Order Edit View ---
 @login_required
+@login_required
 def facebook_order_edit_view(request, order_id):
+    # Convert string order_id to integer if needed
+    try:
+        if isinstance(order_id, str):
+            order_id = int(order_id.lstrip('0'))
+    except ValueError:
+        raise Http404(f"Invalid order ID format: {order_id}")
+
     order_instance = get_object_or_404(Facebook_orders, order_id=order_id)
 
     if request.method == 'POST':
