@@ -263,13 +263,14 @@
     <div class="card__info">
       <span class="card__source card__source--{{ order.platform|lower }}">{{ order.platform }}</span>
       <span class="card__id">{{ order.order_id }}</span>
-      <span class="card__location">{{ order.city }}</span>
+      <span class="card__location">{{ order.state }}</span>
     </div>
     <div class="card__status">{{ order.status }}</div>
   </div>
 
   <div class="card__content">
     <h3 class="card__title">{{ order.customer }}</h3>
+    <h3 class="card__title">{{ order.date }}</h3>
     <p class="card__contact"><strong>Phone:</strong> {{ order.phone }}</p>
 
     <div class="card__products">
