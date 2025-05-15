@@ -28,9 +28,9 @@ def home(request):
             
             # Set highlight status based on days
             if days_since_order >= 3:
-                highlight = '3days_old'
+                highlight = 'three_days_old'
             elif days_since_order >= 2:
-                highlight = '2days_old'
+                highlight = 'two_days_old'
             else:
                 highlight = 'normal'
                                     
@@ -60,9 +60,9 @@ def home(request):
             
             # Set highlight status based on days
             if days_since_order >= 3:
-                highlight = '3days_old'
+                highlight = 'three_days_old'
             elif days_since_order >= 2:
-                highlight = '2days_old'
+                highlight = 'two_days_old'
             else:
                 highlight = 'normal'
                 
@@ -92,9 +92,9 @@ def home(request):
             
             # Set highlight status based on days
             if days_since_order >= 3:
-                highlight = '3days_old'
+                highlight = 'three_days_old'
             elif days_since_order >= 2:
-                highlight = '2days_old'
+                highlight = 'two_days_old'
             else:
                 highlight = 'normal'
                 
