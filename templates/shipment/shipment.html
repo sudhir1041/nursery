@@ -84,6 +84,13 @@
     color: #111827;
   }
 
+  .card__date{
+    margin: 0.625rem 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
   .card__contact {
     margin-bottom: 0.625rem;
     font-size: 0.8125rem;
@@ -270,7 +277,7 @@
 
   <div class="card__content">
     <h3 class="card__title">{{ order.customer }}</h3>
-    <h4 class="card__title">{{ order.date }}</h4>
+    <h5 class="card__date">{{ order.date }}</h5>
     <p class="card__contact"><strong>Phone:</strong> {{ order.phone }}</p>
 
     <div class="card__products">
