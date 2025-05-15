@@ -9,8 +9,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 def home(request):
-    # Get current date and date 30 days ago
-    today = datetime.now()
+    # Get current date and date 30 days ago with timezone awareness
+    today = datetime.now().astimezone()
     thirty_days_ago = today - timedelta(days=30)
 
     shopify = ShopifyOrder.objects.filter(created_at_shopify__gte=thirty_days_ago)
@@ -24,7 +24,7 @@ def home(request):
         unfulfilled = o.fulfillment_status is None
         if unfulfilled:
             # Calculate days since order creation
-            days_since_order = (today - o.created_at_shopify).days
+            days_since_order = (today - o.created_at_shopify.astimezone()).days
             
             # Set highlight status based on days
             if days_since_order >= 3:
@@ -56,7 +56,7 @@ def home(request):
     for o in woo:
         if o.status == 'processing' or o.status == 'partial-paid' :
             # Calculate days since order creation
-            days_since_order = (today - o.date_created_woo).days
+            days_since_order = (today - o.date_created_woo.astimezone()).days
             
             # Set highlight status based on days
             if days_since_order >= 3:
@@ -88,7 +88,7 @@ def home(request):
     for f in fb:
         if f.status == 'processing' :
             # Calculate days since order creation
-            days_since_order = (today - f.date_created).days
+            days_since_order = (today - f.date_created.astimezone()).days
             
             # Set highlight status based on days
             if days_since_order >= 3:
