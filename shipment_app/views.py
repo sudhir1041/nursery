@@ -68,8 +68,8 @@ def home(request):
             product_details = []
             for product in products:
                 product_details.append({
-                    'name': product.get('name', ''),
-                    'quantity': product.get('qty', 0),
+                    'name': product.get('product_name', ''),
+                    'quantity': product.get('quantity', 0),
                     'price': product.get('price', '0.00')
                 })
                 
