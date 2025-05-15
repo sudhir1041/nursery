@@ -63,6 +63,16 @@ def home(request):
     fb_orders = []
     for f in fb:
         if f.status == 'processing' :
+            # Extract product details from products_json
+            products = f.products_json if f.products_json else []
+            product_details = []
+            for product in products:
+                product_details.append({
+                    'name': product.get('name', ''),
+                    'quantity': product.get('qty', 0),
+                    'price': product.get('price', '0.00')
+                })
+                
             fb_orders.append({
                 'order_id': f.order_id,
                 'date': f.date_created,
@@ -76,7 +86,7 @@ def home(request):
                 'tracking': f.tracking_info,
                 'platform': 'Facebook',
                 'shipment_status': f.shipment_status,
-                'items': f.products_json
+                'items': product_details
             })
 
     # Combine all orders
