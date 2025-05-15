@@ -21,7 +21,6 @@
     max-width: 22rem;
     background: #ffffff;
     border-radius: 1rem;
-    border:green 3px solid;
     box-shadow: 0 0.625rem 1.25rem rgba(0,0,0,0.12);
     padding: 1rem;
     box-sizing: border-box;
@@ -31,17 +30,18 @@
     transition: transform 0.2s ease;
     border: 3px solid transparent;
   }
+
   .card.normal {
-    border-color: green;
-  }
+    border-color: green;
+  }
 
-  .card.two_days_old {
-    border-color: yellow;
-  }
+  .card.two_days_old {
+    border-color: yellow;
+  }
 
-  .card.three_days_old {
-    border-color: red;
-  }
+  .card.three_days_old {
+    border-color: red;
+  }  
   @media (max-width: 1200px) {
     .card {
       width: calc(50% - 1.25rem); /* 2 cards per row */
