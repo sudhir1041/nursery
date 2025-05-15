@@ -139,7 +139,6 @@ def facebook_order_create_view(request):
     })
 # --- Order Edit View ---
 @login_required
-@login_required
 def facebook_order_edit_view(request, order_id):
     # Convert string order_id to integer if needed
     try:

@@ -16,19 +16,33 @@
   }
 
   .card {
-    width: calc(33.333% - 1.25rem); /* 3 cards per row with gap */
-    min-width: 18rem; /* Minimum width before wrapping */
-    max-width: 22rem;
-    background: #ffffff;
-    border-radius: 1rem;
-    box-shadow: 0 0.625rem 1.25rem rgba(0,0,0,0.12);
-    padding: 1rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s ease;
-  }
+    width: calc(33.333% - 1.25rem); /* 3 cards per row with gap */
+    min-width: 18rem; /* Minimum width before wrapping */
+    max-width: 22rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 0.625rem 1.25rem rgba(0,0,0,0.12);
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease;
+    border: 3px solid transparent; /* Default transparent border */
+  }
+
+  .card.normal {
+    border-color: green;
+  }
+
+  .card.2days_old {
+    border-color: yellow;
+  }
+
+  .card.3days_old {
+    border-color: red;
+  }
+
 
   @media (max-width: 1200px) {
     .card {
@@ -262,13 +276,13 @@
 
 <div class="card__container">
 {% for order in orders %}
-<div class="card" 
-  data-amount="{{ order.amount }}"
-  data-date="{{ order.date }}"
-  data-pincode="{{ order.pincode }}"
-  data-note="{{ order.note }}"
-  data-tracking="{{ order.tracking }}"
-  data-shipment-status="{{ order.shipment_status }}"
+<div class="card {{ order.is_overdue_highlight }}"
+  data-amount="{{ order.amount }}"
+  data-date="{{ order.date }}"
+  data-pincode="{{ order.pincode }}"
+  data-note="{{ order.note }}"
+  data-tracking="{{ order.tracking }}"
+  data-shipment-status="{{ order.shipment_status }}"
 >
   <div class="card__header">
     <div class="card__info">

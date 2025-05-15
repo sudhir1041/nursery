@@ -22,7 +22,18 @@ def home(request):
     status = 'unfulfilled'
     for o in shopify:
         unfulfilled = o.fulfillment_status is None
-        if unfulfilled:                                    
+        if unfulfilled:
+            # Calculate days since order creation
+            days_since_order = (today - o.created_at_shopify).days
+            
+            # Set highlight status based on days
+            if days_since_order >= 3:
+                highlight = '3days_old'
+            elif days_since_order >= 2:
+                highlight = '2days_old'
+            else:
+                highlight = 'normal'
+                                    
             shopify_orders.append({
                 'order_id': o.name,
                 'date': o.created_at_shopify,
@@ -36,13 +47,25 @@ def home(request):
                 'tracking': o.tracking_details_json,
                 'platform': 'Shopify',
                 'shipment_status': o.shipment_status,
-                'items': o.line_items_json
+                'items': o.line_items_json,
+                'is_overdue_highlight': highlight
             })
 
     # ======================== WooCommerce orders ======================
     woo_orders = []
     for o in woo:
         if o.status == 'processing' or o.status == 'partial-paid' :
+            # Calculate days since order creation
+            days_since_order = (today - o.date_created_woo).days
+            
+            # Set highlight status based on days
+            if days_since_order >= 3:
+                highlight = '3days_old'
+            elif days_since_order >= 2:
+                highlight = '2days_old'
+            else:
+                highlight = 'normal'
+                
             woo_orders.append({
                 'order_id': o.woo_id,
                 'date': o.date_created_woo,
@@ -56,13 +79,25 @@ def home(request):
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
                 'platform': 'Wordpress',
                 'shipment_status': o.shipment_status,
-                'items': o.line_items_json
+                'items': o.line_items_json,
+                'is_overdue_highlight': highlight
             })
 
     # ======================== Facebook orders ======================
     fb_orders = []
     for f in fb:
         if f.status == 'processing' :
+            # Calculate days since order creation
+            days_since_order = (today - f.date_created).days
+            
+            # Set highlight status based on days
+            if days_since_order >= 3:
+                highlight = '3days_old'
+            elif days_since_order >= 2:
+                highlight = '2days_old'
+            else:
+                highlight = 'normal'
+                
             # Extract product details from products_json
             products = f.products_json if f.products_json else []
             product_details = []
@@ -86,7 +121,8 @@ def home(request):
                 'tracking': f.tracking_info,
                 'platform': 'Facebook',
                 'shipment_status': f.shipment_status,
-                'items': product_details
+                'items': product_details,
+                'is_overdue_highlight': highlight
             })
 
     # Combine all orders
