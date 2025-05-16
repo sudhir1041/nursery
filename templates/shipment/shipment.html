@@ -392,7 +392,6 @@
     </div>
 </div>
 
-
 <div class="popup-overlay" id="cardPopup">
     <div class="popup-content">
         <button class="popup-close" onclick="closePopup()">&times;</button>
@@ -432,7 +431,7 @@
                             <th>Property 1</th>
                             <th>Property 2</th>
                             <th>Property 3</th>
-                            </tr>
+                        </tr>
                     </thead>
                     <tbody id="popupItems">
                     </tbody>
@@ -453,14 +452,14 @@
             status: cardElement.querySelector('.card__status').textContent,
             customer: cardElement.querySelector('.card__title').textContent,
             phone: cardElement.querySelector('.card__contact').textContent,
-            amount: cardElement.dataset.amount || 'N/A',
-            advance_amount: cardElement.dataset.advance_amount || 'N/A',
-            balance_amount: cardElement.dataset.balance_amount || 'N/A',
-            date: cardElement.dataset.date || 'N/A',
-            pincode: cardElement.dataset.pincode || 'N/A',
-            note: cardElement.dataset.note || 'N/A',
-            tracking: cardElement.dataset.tracking || 'N/A',
-            shipmentStatus: cardElement.dataset.shipmentStatus || 'N/A',
+            amount: cardElement.dataset.amount,
+            advance_amount: cardElement.dataset.advance_amount,
+            balance_amount: cardElement.dataset.balance_amount,
+            date: cardElement.dataset.date,
+            pincode: cardElement.dataset.pincode,
+            note: cardElement.dataset.note,
+            tracking: cardElement.dataset.tracking,
+            shipmentStatus: cardElement.dataset.shipmentStatus,
             items: cardElement.querySelectorAll('.card__list-item')
         };
 
@@ -486,25 +485,24 @@
             const tdSno = document.createElement('td');
             const tdName = document.createElement('td');
             const tdQuantity = document.createElement('td');
-            const tdPrice = document.createElement('td');  // Example
-            const tdTotal = document.createElement('td');  // Example
-            const tdSku = document.createElement('td');    //Example
+            const tdPrice = document.createElement('td');
+            const tdTotal = document.createElement('td');
+            const tdSku = document.createElement('td');
             const tdVariant = document.createElement('td');
             const tdProp1 = document.createElement('td');
             const tdProp2 = document.createElement('td');
             const tdProp3 = document.createElement('td');
 
-
             tdSno.textContent = index + 1;
             tdName.textContent = item.textContent;
-            tdQuantity.textContent = '1'; // Default quantity, update this based on your data
-            tdPrice.textContent = '10.00';
-            tdTotal.textContent = '10.00';
-            tdSku.textContent = 'SKU123';
-            tdVariant.textContent = 'Red';
-            tdProp1.textContent = 'Size: M';
-            tdProp2.textContent = 'Color: Red';
-            tdProp3.textContent = 'Material: Cotton';
+            tdQuantity.textContent = item.dataset.quantity;
+            tdPrice.textContent = item.dataset.price;
+            tdTotal.textContent = item.dataset.total;
+            tdSku.textContent = item.dataset.sku;
+            tdVariant.textContent = item.dataset.variant;
+            tdProp1.textContent = item.dataset.prop1;
+            tdProp2.textContent = item.dataset.prop2;
+            tdProp3.textContent = item.dataset.prop3;
 
             tr.appendChild(tdSno);
             tr.appendChild(tdName);
@@ -589,12 +587,11 @@
     document.getElementById('shipForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const status = document.getElementById('shipStatus').value;
-        // Handle form submission
         closeShipPopup();
     });
+
     document.querySelectorAll('.card').forEach(card => {
         card.addEventListener('click', (e) => {
-            // Only trigger if not clicking a button
             if (!e.target.closest('.button')) {
                 showPopup(card);
             }
