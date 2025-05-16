@@ -282,9 +282,9 @@
     margin-top: 0.75rem;
     font-size: 0.8rem;
     display: block;
-    max-height: 200px; /* Set max height for vertical scroll */
-    overflow-y: auto; /* Enable vertical scroll */
-    overflow-x: auto; /* Enable horizontal scroll */
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: auto;
 }
 
 .items-table thead,
@@ -299,35 +299,42 @@
     padding: 0.4rem;
     text-align: left;
     border-bottom: 1px solid #eee;
-    min-width: 100px; /* Set minimum width for columns */
-    max-width: 200px; /* Set maximum width for columns */
-    white-space: nowrap; /* Prevent text wrapping */
-    overflow: hidden; /* Hide overflow content */
-    text-overflow: ellipsis; /* Show ellipsis for overflow text */
+    min-width: 100px;
+    max-width: 200px;
 }
 
 .items-table th {
     background-color: #f8f9fa;
     font-weight: 600;
-    position: sticky; /* Make header sticky */
-    top: 0; /* Stick to top */
-    z-index: 1; /* Ensure header stays on top */
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.items-table td {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-wrap: break-word;
 }
 
 /* Set specific column widths */
 .items-table th:nth-child(1), 
 .items-table td:nth-child(1) {
-    width: 15%; /* S.No column */
+    width: 15%;
 }
 
 .items-table th:nth-child(2),
 .items-table td:nth-child(2) {
-    width: 60%; /* Item Name column */
+    width: 60%;
 }
 
 .items-table th:nth-child(3),
 .items-table td:nth-child(3) {
-    width: 25%; /* Quantity column */
+    width: 25%;
 }
 
 </style>
