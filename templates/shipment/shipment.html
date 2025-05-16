@@ -295,6 +295,44 @@
         background-color: #f8f9fa;
         font-weight: 600;
     }
+
+    /* Responsive table styles */
+    .card__products {
+        overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    }
+
+    .items-table {
+        min-width: 300px; /* Ensure table doesn't collapse too much */
+    }
+
+    @media (max-width: 600px) {
+        .items-table thead {
+            display: none; /* Hide table headers on small screens */
+        }
+
+        .items-table tr {
+            display: block;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+        }
+
+        .items-table td {
+            display: flex;
+            padding-left: 1rem;
+            text-align: left;
+            border-bottom: none;
+            position: relative;
+        }
+
+        .items-table td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0.25rem;
+            font-weight: bold;
+            color: #333;
+        }
+    }
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -404,22 +442,23 @@
 
             <div class="card__products">
                 <strong>Items:</strong>
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th>S.No</th>
-                            <th>Item Name</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody id="popupItems">
-                    </tbody>
-                </table>
+                <div style="overflow-x: auto;">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="popupItems">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
-  
 
   <script>
   function showPopup(cardElement) {
