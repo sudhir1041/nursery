@@ -67,8 +67,7 @@ def home(request):
             days_since_order = (today - o.date_created_woo.astimezone()).days
 
             # Load raw_data JSON
-            raw_data = json.loads(o.raw_data) if o.raw_data else {}
-
+            raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data) if o.raw_data else {}
             # Extract partial payment details
             original_total = None
             advance_amount = None
