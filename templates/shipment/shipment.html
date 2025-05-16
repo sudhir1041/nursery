@@ -507,9 +507,13 @@
       const tdPotsize = document.createElement('td');
       const tdQuantity = document.createElement('td');
       
+      const itemText = item.textContent;
+      const potSizeMatch = itemText.match(/\((.*?)\)/); // Extract text between parentheses
+      
       tdSno.textContent = index + 1;
-      tdName.textContent = item.textContent;
-      tdQuantity.textContent = '1'; // Default quantity, update this based on your data
+      tdName.textContent = itemText.replace(/\(.*?\)/, '').trim(); // Remove pot size from name
+      tdPotsize.textContent = potSizeMatch ? potSizeMatch[1] : 'N/A';
+      tdQuantity.textContent = '1';
       
       tr.appendChild(tdSno);
       tr.appendChild(tdName);
