@@ -277,11 +277,6 @@
         gap: 0.75rem; /* Reduced gap for responsiveness */
     }
 
-    /* Responsive table styles */
-    .card__products {
-        overflow-x: auto; /* Enable horizontal scrolling for small screens */
-    }
-
     .items-table {
         width: 100%;
         border-collapse: collapse;
@@ -294,21 +289,11 @@
         padding: 0.4rem; /* Reduced padding for table responsiveness */
         text-align: left;
         border-bottom: 1px solid #eee;
-        white-space: nowrap; /* Prevent text in cells from wrapping, forcing scroll */
     }
 
     .items-table th {
         background-color: #f8f9fa;
         font-weight: 600;
-    }
-
-    /* Optional: Further optimization for very small screens (hiding columns) */
-    @media (max-width: 480px) {
-        .items-table th:nth-child(3), /* Example: Hide the 'Quantity' column */
-        .items-table td:nth-child(3) {
-            display: none;
-        }
-        /* You can add more rules to hide other less critical columns */
     }
 </style>
 
@@ -392,6 +377,7 @@
     </div>
 </div>
 
+
 <div class="popup-overlay" id="cardPopup">
     <div class="popup-content">
         <button class="popup-close" onclick="closePopup()">&times;</button>
@@ -416,7 +402,7 @@
             <p><strong>Tracking:</strong> <span id="popupTracking"></span></p>
             <p><strong>Shipment Status:</strong> <span id="popupShipmentStatus"></span></p>
 
-            <div class="card__products" style="overflow-x: auto;">
+            <div class="card__products">
                 <strong>Items:</strong>
                 <table class="items-table">
                     <thead>
@@ -424,13 +410,6 @@
                             <th>S.No</th>
                             <th>Item Name</th>
                             <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                            <th>SKU</th>
-                            <th>Variant</th>
-                            <th>Property 1</th>
-                            <th>Property 2</th>
-                            <th>Property 3</th>
                         </tr>
                     </thead>
                     <tbody id="popupItems">
@@ -440,166 +419,141 @@
         </div>
     </div>
 </div>
+  
 
-<script>
-    function showPopup(cardElement) {
-        const popup = document.getElementById('cardPopup');
+  <script>
+  function showPopup(cardElement) {
+    const popup = document.getElementById('cardPopup');
+    
+    const order = {
+      platform: cardElement.querySelector('.card__source').textContent,
+      id: cardElement.querySelector('.card__id').textContent,
+      location: cardElement.querySelector('.card__location').textContent,
+      status: cardElement.querySelector('.card__status').textContent,
+      customer: cardElement.querySelector('.card__title').textContent,
+      phone: cardElement.querySelector('.card__contact').textContent,
+      amount: cardElement.dataset.amount || 'N/A',
+      date: cardElement.dataset.date || 'N/A',
+      pincode: cardElement.dataset.pincode || 'N/A',
+      note: cardElement.dataset.note || 'N/A',
+      tracking: cardElement.dataset.tracking || 'N/A',
+      shipmentStatus: cardElement.dataset.shipmentStatus || 'N/A',
+      items: cardElement.querySelectorAll('.card__list-item')
+    };
 
-        const order = {
-            platform: cardElement.querySelector('.card__source').textContent,
-            id: cardElement.querySelector('.card__id').textContent,
-            location: cardElement.querySelector('.card__location').textContent,
-            status: cardElement.querySelector('.card__status').textContent,
-            customer: cardElement.querySelector('.card__title').textContent,
-            phone: cardElement.querySelector('.card__contact').textContent,
-            amount: cardElement.dataset.amount,
-            advance_amount: cardElement.dataset.advance_amount,
-            balance_amount: cardElement.dataset.balance_amount,
-            date: cardElement.dataset.date,
-            pincode: cardElement.dataset.pincode,
-            note: cardElement.dataset.note,
-            tracking: cardElement.dataset.tracking,
-            shipmentStatus: cardElement.dataset.shipmentStatus,
-            items: cardElement.querySelectorAll('.card__list-item')
-        };
+    document.getElementById('popupPlatform').textContent = order.platform;
+    document.getElementById('popupId').textContent = order.id;
+    document.getElementById('popupLocation').textContent = order.location;
+    document.getElementById('popupStatus').textContent = order.status;
+    document.getElementById('popupTitle').textContent = order.customer;
+    document.getElementById('popupContact').textContent = order.phone;
+    document.getElementById('popupAmount').textContent = order.amount;
+    document.getElementById('popupadvance_amount').textContent = order.advance_amount;
+    document.getElementById('popupbalance_amount').textContent = order.balance_amount;
+    document.getElementById('popupDate').textContent = order.date;
+    document.getElementById('popupPincode').textContent = order.pincode;
+    document.getElementById('popupNote').textContent = order.note;
+    document.getElementById('popupTracking').textContent = order.tracking;
+    document.getElementById('popupShipmentStatus').textContent = order.shipmentStatus;
 
-        // Set platform class for styling
-        const platformElement = document.getElementById('popupPlatform');
-        platformElement.textContent = order.platform;
-        platformElement.className = `card__source card__source--${order.platform.toLowerCase()}`;
-        
-        document.getElementById('popupId').innerHTML = `<strong>Order ID:</strong> ${order.id}`;
-        document.getElementById('popupLocation').innerHTML = `<strong>Location:</strong> ${order.location}`;
-        document.getElementById('popupStatus').innerHTML = `<strong>Status:</strong> ${order.status}`;
-        document.getElementById('popupTitle').innerHTML = `<strong>Customer Name:</strong> ${order.customer}`;
-        document.getElementById('popupContact').innerHTML = `<strong>Contact:</strong> ${order.phone}`;
-        document.getElementById('popupAmount').innerHTML = `₹${order.amount}`;
-        document.getElementById('popupadvance_amount').innerHTML = `₹${order.advance_amount}`;
-        document.getElementById('popupbalance_amount').innerHTML = `₹${order.balance_amount}`;
-        document.getElementById('popupDate').innerHTML = `${order.date}`;
-        document.getElementById('popupPincode').innerHTML = `${order.pincode}`;
-        document.getElementById('popupNote').innerHTML = `${order.note}`;
-        document.getElementById('popupTracking').innerHTML = `${order.tracking}`;
-        document.getElementById('popupShipmentStatus').innerHTML = `${order.shipmentStatus}`;
-
-        const itemsTable = document.getElementById('popupItems');
-        itemsTable.innerHTML = '';
-        order.items.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            const tdSno = document.createElement('td');
-            const tdName = document.createElement('td');
-            const tdQuantity = document.createElement('td');
-            const tdPrice = document.createElement('td');
-            const tdTotal = document.createElement('td');
-            const tdSku = document.createElement('td');
-            const tdVariant = document.createElement('td');
-            const tdProp1 = document.createElement('td');
-            const tdProp2 = document.createElement('td');
-            const tdProp3 = document.createElement('td');
-
-            tdSno.textContent = index + 1;
-            tdName.textContent = item.textContent;
-            tdQuantity.textContent = item.dataset.quantity || '-';
-            tdPrice.textContent = item.dataset.price ? `₹${item.dataset.price}` : '-';
-            tdTotal.textContent = item.dataset.total ? `₹${item.dataset.total}` : '-';
-            tdSku.textContent = item.dataset.sku || '-';
-            tdVariant.textContent = item.dataset.variant || '-';
-            tdProp1.textContent = item.dataset.prop1 || '-';
-            tdProp2.textContent = item.dataset.prop2 || '-';
-            tdProp3.textContent = item.dataset.prop3 || '-';
-
-            tr.appendChild(tdSno);
-            tr.appendChild(tdName);
-            tr.appendChild(tdQuantity);
-            tr.appendChild(tdPrice);
-            tr.appendChild(tdTotal);
-            tr.appendChild(tdSku);
-            tr.appendChild(tdVariant);
-            tr.appendChild(tdProp1);
-            tr.appendChild(tdProp2);
-            tr.appendChild(tdProp3);
-            itemsTable.appendChild(tr);
-        });
-
-        popup.style.display = 'flex';
-    }
-
-    function closePopup() {
-        document.getElementById('cardPopup').style.display = 'none';
-    }
-
-    function showShipPopup(cardElement) {
-        const popup = document.getElementById('shipPopup');
-
-        const order = {
-            id: cardElement.querySelector('.card__id').textContent,
-            customer: cardElement.querySelector('.card__title').textContent,
-            items: cardElement.querySelectorAll('.card__list-item'),
-            amount: cardElement.dataset.amount,
-            date: cardElement.dataset.date,
-            pincode: cardElement.dataset.pincode,
-            tracking: cardElement.dataset.tracking
-        };
-
-        document.getElementById('shipOrderId').textContent = `Order ID: ${order.id}`;
-        document.getElementById('shipCustomer').textContent = `Customer: ${order.customer}`;
-
-        const itemsContainer = document.getElementById('shipItems');
-        itemsContainer.innerHTML = '';
-        order.items.forEach(item => {
-            const div = document.createElement('div');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'ship-form__checkbox';
-            checkbox.checked = true;
-
-            const label = document.createElement('label');
-            label.textContent = item.textContent;
-
-            div.appendChild(checkbox);
-            div.appendChild(label);
-            itemsContainer.appendChild(div);
-        });
-
-        popup.style.display = 'flex';
-    }
-
-    function closeShipPopup() {
-        document.getElementById('shipPopup').style.display = 'none';
-    }
-
-    document.querySelectorAll('.button--tertiary').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const card = e.target.closest('.card');
-            showPopup(card);
-        });
+    const itemsTable = document.getElementById('popupItems');
+    itemsTable.innerHTML = '';
+    order.items.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      const tdSno = document.createElement('td');
+      const tdName = document.createElement('td');
+      const tdQuantity = document.createElement('td');
+      
+      tdSno.textContent = index + 1;
+      tdName.textContent = item.textContent;
+      tdQuantity.textContent = '1'; // Default quantity, update this based on your data
+      
+      tr.appendChild(tdSno);
+      tr.appendChild(tdName);
+      tr.appendChild(tdQuantity);
+      itemsTable.appendChild(tr);
     });
 
-    document.querySelectorAll('.button--primary').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const card = e.target.closest('.card');
-            showShipPopup(card);
-        });
+    popup.style.display = 'flex';
+  }
+
+  function closePopup() {
+    document.getElementById('cardPopup').style.display = 'none';
+  }
+
+  function showShipPopup(cardElement) {
+    const popup = document.getElementById('shipPopup');
+    
+    const order = {
+      id: cardElement.querySelector('.card__id').textContent,
+      customer: cardElement.querySelector('.card__title').textContent,
+      items: cardElement.querySelectorAll('.card__list-item'),
+      amount: cardElement.dataset.amount,
+      date: cardElement.dataset.date,
+      pincode: cardElement.dataset.pincode,
+      tracking: cardElement.dataset.tracking
+    };
+
+    document.getElementById('shipOrderId').textContent = `Order ID: ${order.id}`;
+    document.getElementById('shipCustomer').textContent = `Customer: ${order.customer}`;
+
+    const itemsContainer = document.getElementById('shipItems');
+    itemsContainer.innerHTML = '';
+    order.items.forEach(item => {
+      const div = document.createElement('div');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'ship-form__checkbox';
+      checkbox.checked = true;
+      
+      const label = document.createElement('label');
+      label.textContent = item.textContent;
+      
+      div.appendChild(checkbox);
+      div.appendChild(label);
+      itemsContainer.appendChild(div);
     });
 
-    document.getElementById('cardPopup').addEventListener('click', (e) => {
-        if (e.target.className === 'popup-overlay') {
-            closePopup();
-        }
-    });
+    popup.style.display = 'flex';
+  }
 
-    document.getElementById('shipForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const status = document.getElementById('shipStatus').value;
-        closeShipPopup();
-    });
+  function closeShipPopup() {
+    document.getElementById('shipPopup').style.display = 'none';
+  }
 
-    document.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (!e.target.closest('.button')) {
-                showPopup(card);
-            }
-        });
+  document.querySelectorAll('.button--tertiary').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      showPopup(card);
+    });
+  });
+
+  document.querySelectorAll('.button--primary').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      showShipPopup(card);
+    });
+  });
+
+  document.getElementById('cardPopup').addEventListener('click', (e) => {
+    if (e.target.className === 'popup-overlay') {
+      closePopup();
+    }
+  });
+
+  document.getElementById('shipForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const status = document.getElementById('shipStatus').value;
+    // Handle form submission
+    closeShipPopup();
+  });
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Only trigger if not clicking a button
+      if (!e.target.closest('.button')) {
+        showPopup(card);
+      }
+    });
     });
 </script>
 
