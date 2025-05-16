@@ -504,6 +504,7 @@
       const tr = document.createElement('tr');
       const tdSno = document.createElement('td');
       const tdName = document.createElement('td');
+      const tdPotsize = document.createElement('td');
       const tdQuantity = document.createElement('td');
       
       tdSno.textContent = index + 1;
@@ -512,6 +513,7 @@
       
       tr.appendChild(tdSno);
       tr.appendChild(tdName);
+      tr.appendChild(tdPotsize);
       tr.appendChild(tdQuantity);
       itemsTable.appendChild(tr);
     });
