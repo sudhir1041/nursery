@@ -185,110 +185,133 @@
 
     .popup-content {
         background: #fff;
-        padding: 1rem;
+        padding: 1.5rem; /* Reduced padding for better responsiveness */
         border-radius: 1rem;
-        width: 95%;
-        max-width: 40rem;
-        max-height: 90vh; /* Limit height to 90% of viewport */
+        width: 95%; /* Increased width for better responsiveness */
+        max-width: 40rem; /* Reduced max-width for better responsiveness */
         position: relative;
         animation: popup 0.3s ease-out;
-        box-sizing: border-box;
-        overflow-y: auto; /* Enable vertical scrolling */
+        box-sizing: border-box; /* Ensure padding doesn't increase width */
     }
 
-    /* Make table container scrollable horizontally */
-    .card__products {
-        overflow-x: auto;
-        margin: 1rem -1rem;
-        padding: 0 1rem;
+    .popup-close {
+        position: absolute;
+        top: 0.5rem; /* Reduced top spacing */
+        right: 0.5rem; /* Reduced right spacing */
+        background: none;
+        border: none;
+        font-size: 1.2rem; /* Reduced font size */
+        cursor: pointer;
+        color: #666;
+    }
+
+    .popup-close:hover {
+        color: #000;
+    }
+
+    .card__source {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-right: 0.5rem;
+        font-weight: 600;
+    }
+
+    .card__source--shopify {
+        background:rgb(120, 158, 50);
+        color: white;
+    }
+
+    .card__source--wordpress {
+        background:rgb(20, 71, 95);
+        color: white;
+    }
+    .card__source--facebook {
+        background:rgb(37, 14, 168);
+        color: white;
+    }
+
+    @keyframes popup {
+        from {
+            transform: scale(0.7);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .ship-form {
+        padding: 1.5rem; /* Reduced padding for responsiveness */
+    }
+
+    .ship-form__row {
+        margin-bottom: 0.75rem; /* Reduced margin for responsiveness */
+    }
+
+    .ship-form__label {
+        display: block;
+        margin-bottom: 0.3rem; /* Reduced margin for responsiveness */
+        font-weight: 600;
+        font-size: 0.9rem; /* Slightly smaller font for responsiveness */
+    }
+
+    .ship-form__select {
+        width: 100%;
+        padding: 0.4rem; /* Reduced padding for responsiveness */
+        border: 1px solid #ddd;
+        border-radius: 0.25rem;
+        font-size: 0.9rem; /* Slightly smaller font for responsiveness */
+        box-sizing: border-box; /* Ensure padding doesn't increase width */
+    }
+
+    .ship-form__checkbox {
+        margin-right: 0.3rem; /* Reduced margin for responsiveness */
+    }
+
+    .ship-form__actions {
+        margin-top: 1rem; /* Reduced margin for responsiveness */
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem; /* Reduced gap for responsiveness */
     }
 
     .items-table {
-        width: 100%;
-        min-width: 300px; /* Minimum width before horizontal scroll */
-        border-collapse: collapse;
-        margin-top: 0.75rem;
-        font-size: 0.8rem;
-    }
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    display: block;
+    max-height: 200px; /* Set max height for vertical scroll */
+    overflow-y: auto; /* Enable vertical scroll */
+    overflow-x: auto; /* Enable horizontal scroll */
+}
 
-    .items-table th,
-    .items-table td {
-        padding: 0.4rem;
-        text-align: left;
-        border-bottom: 1px solid #eee;
-        white-space: nowrap; /* Prevent text wrapping */
-    }
+.items-table thead,
+.items-table tbody {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
 
-    /* Responsive adjustments for small screens */
-    @media (max-width: 480px) {
-        .popup-content {
-            padding: 0.75rem;
-            width: 98%;
-        }
+.items-table th,
+.items-table td {
+    padding: 0.4rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    min-width: 100px; /* Set minimum width for columns */
+}
 
-        .card__products {
-            margin: 0.5rem -0.75rem;
-            padding: 0 0.75rem;
-        }
+.items-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky; /* Make header sticky */
+    top: 0; /* Stick to top */
+    z-index: 1; /* Ensure header stays on top */
+}
+  
 
-        .items-table {
-            font-size: 0.75rem;
-        }
-
-        .items-table th,
-        .items-table td {
-            padding: 0.3rem;
-        }
-
-        .card__content p {
-            margin: 0.5rem 0;
-            font-size: 0.875rem;
-        }
-
-        .card__title {
-            font-size: 1rem;
-        }
-    }
-
-    /* Add smooth scrollbar styling */
-    .popup-content::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    .popup-content::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .popup-content::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
-    }
-
-    .popup-content::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-
-    /* Add smooth scrollbar styling for table container */
-    .card__products::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    .card__products::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .card__products::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
-    }
-
-    .card__products::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -413,7 +436,6 @@
         </div>
     </div>
 </div>
-  
 
   <script>
   function showPopup(cardElement) {
