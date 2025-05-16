@@ -463,20 +463,24 @@
             items: cardElement.querySelectorAll('.card__list-item')
         };
 
-        document.getElementById('popupPlatform').textContent = order.platform;
-        document.getElementById('popupId').textContent = order.id;
-        document.getElementById('popupLocation').textContent = order.location;
-        document.getElementById('popupStatus').textContent = order.status;
-        document.getElementById('popupTitle').textContent = order.customer;
-        document.getElementById('popupContact').textContent = order.phone;
-        document.getElementById('popupAmount').textContent = order.amount;
-        document.getElementById('popupadvance_amount').textContent = order.advance_amount;
-        document.getElementById('popupbalance_amount').textContent = order.balance_amount;
-        document.getElementById('popupDate').textContent = order.date;
-        document.getElementById('popupPincode').textContent = order.pincode;
-        document.getElementById('popupNote').textContent = order.note;
-        document.getElementById('popupTracking').textContent = order.tracking;
-        document.getElementById('popupShipmentStatus').textContent = order.shipmentStatus;
+        // Set platform class for styling
+        const platformElement = document.getElementById('popupPlatform');
+        platformElement.textContent = order.platform;
+        platformElement.className = `card__source card__source--${order.platform.toLowerCase()}`;
+        
+        document.getElementById('popupId').innerHTML = `<strong>Order ID:</strong> ${order.id}`;
+        document.getElementById('popupLocation').innerHTML = `<strong>Location:</strong> ${order.location}`;
+        document.getElementById('popupStatus').innerHTML = `<strong>Status:</strong> ${order.status}`;
+        document.getElementById('popupTitle').innerHTML = `<strong>Customer Name:</strong> ${order.customer}`;
+        document.getElementById('popupContact').innerHTML = `<strong>Contact:</strong> ${order.phone}`;
+        document.getElementById('popupAmount').innerHTML = `₹${order.amount}`;
+        document.getElementById('popupadvance_amount').innerHTML = `₹${order.advance_amount}`;
+        document.getElementById('popupbalance_amount').innerHTML = `₹${order.balance_amount}`;
+        document.getElementById('popupDate').innerHTML = `${order.date}`;
+        document.getElementById('popupPincode').innerHTML = `${order.pincode}`;
+        document.getElementById('popupNote').innerHTML = `${order.note}`;
+        document.getElementById('popupTracking').innerHTML = `${order.tracking}`;
+        document.getElementById('popupShipmentStatus').innerHTML = `${order.shipmentStatus}`;
 
         const itemsTable = document.getElementById('popupItems');
         itemsTable.innerHTML = '';
@@ -495,14 +499,14 @@
 
             tdSno.textContent = index + 1;
             tdName.textContent = item.textContent;
-            tdQuantity.textContent = item.dataset.quantity;
-            tdPrice.textContent = item.dataset.price;
-            tdTotal.textContent = item.dataset.total;
-            tdSku.textContent = item.dataset.sku;
-            tdVariant.textContent = item.dataset.variant;
-            tdProp1.textContent = item.dataset.prop1;
-            tdProp2.textContent = item.dataset.prop2;
-            tdProp3.textContent = item.dataset.prop3;
+            tdQuantity.textContent = item.dataset.quantity || '-';
+            tdPrice.textContent = item.dataset.price ? `₹${item.dataset.price}` : '-';
+            tdTotal.textContent = item.dataset.total ? `₹${item.dataset.total}` : '-';
+            tdSku.textContent = item.dataset.sku || '-';
+            tdVariant.textContent = item.dataset.variant || '-';
+            tdProp1.textContent = item.dataset.prop1 || '-';
+            tdProp2.textContent = item.dataset.prop2 || '-';
+            tdProp3.textContent = item.dataset.prop3 || '-';
 
             tr.appendChild(tdSno);
             tr.appendChild(tdName);
