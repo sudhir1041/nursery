@@ -27,9 +27,9 @@ def home(request):
             days_since_order = (today - o.created_at_shopify.astimezone()).days
             
             # Set highlight status based on days
-            if days_since_order >= 3:
+            if days_since_order >= 4:
                 highlight = 'three_days_old'
-            elif days_since_order >= 2:
+            elif days_since_order >= 3:
                 highlight = 'two_days_old'
             else:
                 highlight = 'normal'
@@ -59,9 +59,9 @@ def home(request):
             days_since_order = (today - o.date_created_woo.astimezone()).days
             
             # Set highlight status based on days
-            if days_since_order >= 3:
+            if days_since_order >= 4:
                 highlight = 'three_days_old'
-            elif days_since_order >= 2:
+            elif days_since_order >= 3:
                 highlight = 'two_days_old'
             else:
                 highlight = 'normal'
@@ -91,9 +91,9 @@ def home(request):
             days_since_order = (today - f.date_created.astimezone()).days
             
             # Set highlight status based on days
-            if days_since_order >= 3:
+            if days_since_order >= 4:
                 highlight = 'three_days_old'
-            elif days_since_order >= 2:
+            elif days_since_order >= 3:
                 highlight = 'two_days_old'
             else:
                 highlight = 'normal'
