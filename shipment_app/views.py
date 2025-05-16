@@ -3,6 +3,7 @@ from shopify_app.models import ShopifyOrder
 from woocommerce_app.models import WooCommerceOrder
 from facebook_app.models import Facebook_orders
 from datetime import datetime, timedelta
+import json
 import logging
 
 
@@ -25,6 +26,10 @@ def home(request):
         if unfulfilled:
             # Calculate days since order creation
             days_since_order = (today - o.created_at_shopify.astimezone()).days
+
+            original_total = None
+            advance_amount = None
+            balance_amount = None
             
             # Set highlight status based on days
             if days_since_order >= 4:
@@ -48,6 +53,9 @@ def home(request):
                 'platform': 'Shopify',
                 'shipment_status': o.shipment_status,
                 'items': o.line_items_json,
+                'original_total': original_total,
+                'advance_amount': advance_amount,
+                'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
 
@@ -57,6 +65,21 @@ def home(request):
         if o.status == 'processing' or o.status == 'partial-paid' :
             # Calculate days since order creation
             days_since_order = (today - o.date_created_woo.astimezone()).days
+
+            # Load raw_data JSON
+            raw_data = json.loads(o.raw_data) if o.raw_data else {}
+
+            # Extract partial payment details
+            original_total = None
+            advance_amount = None
+            balance_amount = None
+            for meta in raw_data.get("meta_data", []):
+                if meta.get("key") == "_pi_original_total":
+                    original_total = meta.get("value")
+                elif meta.get("key") == "_pi_advance_amount":
+                    advance_amount = meta.get("value")
+                elif meta.get("key") == "_pi_balance_amount":
+                    balance_amount = meta.get("value")
             
             # Set highlight status based on days
             if days_since_order >= 4:
@@ -66,6 +89,7 @@ def home(request):
             else:
                 highlight = 'normal'
                 
+            
             woo_orders.append({
                 'order_id': o.woo_id,
                 'date': o.date_created_woo,
@@ -80,6 +104,9 @@ def home(request):
                 'platform': 'Wordpress',
                 'shipment_status': o.shipment_status,
                 'items': o.line_items_json,
+                'original_total': original_total,
+                'advance_amount': advance_amount,
+                'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
 
@@ -89,6 +116,10 @@ def home(request):
         if f.status == 'processing' :
             # Calculate days since order creation
             days_since_order = (today - f.date_created.astimezone()).days
+
+            original_total = None
+            advance_amount = None
+            balance_amount = None
             
             # Set highlight status based on days
             if days_since_order >= 4:
@@ -122,6 +153,9 @@ def home(request):
                 'platform': 'Facebook',
                 'shipment_status': f.shipment_status,
                 'items': product_details,
+                'original_total': original_total,
+                'advance_amount': advance_amount,
+                'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
 
