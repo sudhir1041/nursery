@@ -448,42 +448,52 @@
             <p><strong>Shipment Status:</strong> <span id="popupShipmentStatus"></span></p>
 
             <div class="card__products">
-    <strong>Items:</strong>
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th>S.No</th>
-                <th>Item Name</th>
-                <th>Pot Size</th>
-                <th>Quantity</th>
-            </tr>
-        </thead>
-        <tbody id="popupItems">
-        </tbody>
-    </table>
-</div>
+                <strong>Items:</strong>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Item Name</th>
+                            <th>Pot Size</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="popupItems">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
-  <script>
-  function showPopup(cardElement) {
+<script>
+function showPopup(cardElement) {
     const popup = document.getElementById('cardPopup');
     
     const order = {
-      platform: cardElement.querySelector('.card__source').textContent,
-      id: cardElement.querySelector('.card__id').textContent,
-      location: cardElement.querySelector('.card__location').textContent,
-      status: cardElement.querySelector('.card__status').textContent,
-      customer: cardElement.querySelector('.card__title').textContent,
-      phone: cardElement.querySelector('.card__contact').textContent,
-      amount: cardElement.dataset.amount || 'N/A',
-      date: cardElement.dataset.date || 'N/A',
-      pincode: cardElement.dataset.pincode || 'N/A',
-      note: cardElement.dataset.note || 'N/A',
-      tracking: cardElement.dataset.tracking || 'N/A',
-      shipmentStatus: cardElement.dataset.shipmentStatus || 'N/A',
-      items: cardElement.querySelectorAll('.card__list-item')
+        platform: cardElement.querySelector('.card__source').textContent,
+        id: cardElement.querySelector('.card__id').textContent,
+        location: cardElement.querySelector('.card__location').textContent,
+        status: cardElement.querySelector('.card__status').textContent,
+        customer: cardElement.querySelector('.card__title').textContent,
+        phone: cardElement.querySelector('.card__contact').textContent,
+        amount: cardElement.dataset.amount || 'N/A',
+        advance_amount: cardElement.dataset.advance_amount || 'N/A',
+        balance_amount: cardElement.dataset.balance_amount || 'N/A',
+        date: cardElement.dataset.date || 'N/A',
+        pincode: cardElement.dataset.pincode || 'N/A',
+        note: cardElement.dataset.note || 'N/A',
+        tracking: cardElement.dataset.tracking || 'N/A',
+        shipmentStatus: cardElement.dataset.shipmentStatus || 'N/A',
+        items: Array.from(cardElement.querySelectorAll('.card__list-item')).map(item => {
+            const itemText = item.textContent;
+            const potSizeMatch = itemText.match(/\((.*?)\)/);
+            return {
+                name: itemText.replace(/\(.*?\)/, '').trim(),
+                potSize: potSizeMatch ? potSizeMatch[1] : 'N/A',
+                quantity: 1
+            };
+        })
     };
 
     document.getElementById('popupPlatform').textContent = order.platform;
@@ -504,45 +514,42 @@
     const itemsTable = document.getElementById('popupItems');
     itemsTable.innerHTML = '';
     order.items.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      const tdSno = document.createElement('td');
-      const tdName = document.createElement('td');
-      const tdPotsize = document.createElement('td');
-      const tdQuantity = document.createElement('td');
-      
-      const itemText = item.textContent;
-      const potSizeMatch = itemText.match(/\((.*?)\)/); // Extract text between parentheses
-      
-      tdSno.textContent = index + 1;
-      tdName.textContent = itemText.replace(/\(.*?\)/, '').trim(); // Remove pot size from name
-      tdPotsize.textContent = potSizeMatch ? potSizeMatch[1] : 'N/A';
-      tdQuantity.textContent = '1';
-      
-      tr.appendChild(tdSno);
-      tr.appendChild(tdName);
-      tr.appendChild(tdPotsize);
-      tr.appendChild(tdQuantity);
-      itemsTable.appendChild(tr);
+        const tr = document.createElement('tr');
+        const tdSno = document.createElement('td');
+        const tdName = document.createElement('td');
+        const tdPotsize = document.createElement('td');
+        const tdQuantity = document.createElement('td');
+        
+        tdSno.textContent = index + 1;
+        tdName.textContent = item.name;
+        tdPotsize.textContent = item.potSize;
+        tdQuantity.textContent = item.quantity;
+        
+        tr.appendChild(tdSno);
+        tr.appendChild(tdName);
+        tr.appendChild(tdPotsize);
+        tr.appendChild(tdQuantity);
+        itemsTable.appendChild(tr);
     });
 
     popup.style.display = 'flex';
-  }
+}
 
-  function closePopup() {
+function closePopup() {
     document.getElementById('cardPopup').style.display = 'none';
-  }
+}
 
-  function showShipPopup(cardElement) {
+function showShipPopup(cardElement) {
     const popup = document.getElementById('shipPopup');
     
     const order = {
-      id: cardElement.querySelector('.card__id').textContent,
-      customer: cardElement.querySelector('.card__title').textContent,
-      items: cardElement.querySelectorAll('.card__list-item'),
-      amount: cardElement.dataset.amount,
-      date: cardElement.dataset.date,
-      pincode: cardElement.dataset.pincode,
-      tracking: cardElement.dataset.tracking
+        id: cardElement.querySelector('.card__id').textContent,
+        customer: cardElement.querySelector('.card__title').textContent,
+        items: cardElement.querySelectorAll('.card__list-item'),
+        amount: cardElement.dataset.amount,
+        date: cardElement.dataset.date,
+        pincode: cardElement.dataset.pincode,
+        tracking: cardElement.dataset.tracking
     };
 
     document.getElementById('shipOrderId').textContent = `Order ID: ${order.id}`;
@@ -551,61 +558,60 @@
     const itemsContainer = document.getElementById('shipItems');
     itemsContainer.innerHTML = '';
     order.items.forEach(item => {
-      const div = document.createElement('div');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'ship-form__checkbox';
-      checkbox.checked = true;
-      
-      const label = document.createElement('label');
-      label.textContent = item.textContent;
-      
-      div.appendChild(checkbox);
-      div.appendChild(label);
-      itemsContainer.appendChild(div);
+        const div = document.createElement('div');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'ship-form__checkbox';
+        checkbox.checked = true;
+        
+        const label = document.createElement('label');
+        label.textContent = item.textContent;
+        
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        itemsContainer.appendChild(div);
     });
 
     popup.style.display = 'flex';
-  }
+}
 
-  function closeShipPopup() {
+function closeShipPopup() {
     document.getElementById('shipPopup').style.display = 'none';
-  }
+}
 
-  document.querySelectorAll('.button--tertiary').forEach(button => {
+document.querySelectorAll('.button--tertiary').forEach(button => {
     button.addEventListener('click', (e) => {
-      const card = e.target.closest('.card');
-      showPopup(card);
+        const card = e.target.closest('.card');
+        showPopup(card);
     });
-  });
+});
 
-  document.querySelectorAll('.button--primary').forEach(button => {
+document.querySelectorAll('.button--primary').forEach(button => {
     button.addEventListener('click', (e) => {
-      const card = e.target.closest('.card');
-      showShipPopup(card);
+        const card = e.target.closest('.card');
+        showShipPopup(card);
     });
-  });
+});
 
-  document.getElementById('cardPopup').addEventListener('click', (e) => {
+document.getElementById('cardPopup').addEventListener('click', (e) => {
     if (e.target.className === 'popup-overlay') {
-      closePopup();
+        closePopup();
     }
-  });
+});
 
-  document.getElementById('shipForm').addEventListener('submit', (e) => {
+document.getElementById('shipForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const status = document.getElementById('shipStatus').value;
-    // Handle form submission
     closeShipPopup();
-  });
-  document.querySelectorAll('.card').forEach(card => {
+});
+
+document.querySelectorAll('.card').forEach(card => {
     card.addEventListener('click', (e) => {
-      // Only trigger if not clicking a button
-      if (!e.target.closest('.button')) {
-        showPopup(card);
-      }
+        if (!e.target.closest('.button')) {
+            showPopup(card);
+        }
     });
-    });
+});
 </script>
 
 

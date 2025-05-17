@@ -165,15 +165,18 @@ def home(request):
                 'tracking': f.tracking_info,
                 'platform': 'Facebook',
                 'shipment_status': f.shipment_status,
-                'items': product_details,
+                'items': [{
+                    'name': product.get('product_name', ''),
+                    'quantity': product.get('quantity', 0),
+                    'price': product.get('price', 0),
+                    'image': '',
+                    'pot_size': ''
+                } for product in products],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
-
-            for i in fb_orders:
-                print(i)
 
     # Combine all orders
     all_orders = shopify_orders + woo_orders + fb_orders
