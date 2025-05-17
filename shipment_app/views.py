@@ -80,7 +80,7 @@ def home(request):
                 elif meta.get("key") == "_pi_balance_amount":
                     balance_amount = meta.get("value")
 
-            print(advance_amount,balance_amount)
+            print(original_total,advance_amount,balance_amount)
             
             # Set highlight status based on days
             if days_since_order >= 4:
