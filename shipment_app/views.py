@@ -79,8 +79,6 @@ def home(request):
                     advance_amount = meta.get("value")
                 elif meta.get("key") == "_pi_balance_amount":
                     balance_amount = meta.get("value")
-
-            print(original_total,advance_amount,balance_amount)
             
             # Set highlight status based on days
             if days_since_order >= 4:
@@ -110,6 +108,9 @@ def home(request):
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
+
+            for i in woo_orders:
+                print(i)
 
     # ======================== Facebook orders ======================
     fb_orders = []
