@@ -52,15 +52,19 @@ def home(request):
                 'tracking': o.tracking_details_json,
                 'platform': 'Shopify',
                 'shipment_status': o.shipment_status,
-                'items': o.line_items_json,
+                'items': [{
+                    'name': item.get('name', ''),
+                    'quantity': item.get('quantity', 0),
+                    'price': item.get('price', 0),
+                    'image': '',  
+                    'pot_size': item.get('variant_title', '')
+                } for item in o.line_items_json],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
 
-            for i in shopify_orders:
-                print(i)
 
     # ======================== WooCommerce orders ======================
     woo_orders = []
@@ -167,6 +171,9 @@ def home(request):
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
+
+            for i in fb_orders:
+                print(i)
 
     # Combine all orders
     all_orders = shopify_orders + woo_orders + fb_orders
