@@ -59,6 +59,9 @@ def home(request):
                 'is_overdue_highlight': highlight
             })
 
+            for i in shopify_orders:
+                print(i)
+
     # ======================== WooCommerce orders ======================
     woo_orders = []
     for o in woo:
@@ -102,15 +105,19 @@ def home(request):
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
                 'platform': 'Wordpress',
                 'shipment_status': o.shipment_status,
-                'items': o.line_items_json,
+                'items': [{
+                    'name': item.get('name', ''),
+                    'quantity': item.get('quantity', 0),
+                    'price': item.get('price', 0),
+                    'image': item.get('image', {}).get('src', ''),
+                    'pot_size': next((m.get('display_value') for m in item.get('meta_data', []) if m.get('display_key') == 'Size'), ''),
+                } for item in o.line_items_json],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             })
 
-            for i in woo_orders:
-                print(i)
 
     # ======================== Facebook orders ======================
     fb_orders = []
