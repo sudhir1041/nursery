@@ -66,19 +66,28 @@ def home(request):
             # Calculate days since order creation
             days_since_order = (today - o.date_created_woo.astimezone()).days
 
-            # Load raw_data JSON
-            raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data) if o.raw_data else {}
-            # Extract partial payment details
-            original_total = None
+            # Load raw_data JSON safely with error handling
+            try:
+                raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data) if o.raw_data else {}
+            except json.JSONDecodeError:
+                raw_data = {}
+                logger.error(f"Failed to parse raw_data JSON for order {o.woo_id}")
+
+            # Extract partial payment details with type conversion
+            original_total = None 
             advance_amount = None
             balance_amount = None
-            for meta in raw_data.get("meta_data", []):
-                if meta.get("key") == "_pi_original_total":
-                    original_total = meta.get("value")
-                elif meta.get("key") == "_pi_advance_amount":
-                    advance_amount = meta.get("value")
-                elif meta.get("key") == "_pi_balance_amount":
-                    balance_amount = meta.get("value")
+            
+            try:
+                for meta in raw_data.get("meta_data", []):
+                    if meta.get("key") == "_pi_original_total":
+                        original_total = float(meta.get("value", 0))
+                    elif meta.get("key") == "_pi_advance_amount":
+                        advance_amount = float(meta.get("value", 0))
+                    elif meta.get("key") == "_pi_balance_amount":
+                        balance_amount = float(meta.get("value", 0))
+            except (ValueError, TypeError):
+                logger.error(f"Error converting payment values for order {o.woo_id}")
             
             # Set highlight status based on days
             if days_since_order >= 4:
