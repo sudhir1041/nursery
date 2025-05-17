@@ -86,6 +86,8 @@ def home(request):
                         advance_amount = float(meta.get("value", 0))
                     elif meta.get("key") == "_pi_balance_amount":
                         balance_amount = float(meta.get("value", 0))
+
+                    logger.error(f"Error converting payment values for order {original_total},{advance_amount},{balance_amount}")
             except (ValueError, TypeError):
                 logger.error(f"Error converting payment values for order {o.woo_id}")
             
