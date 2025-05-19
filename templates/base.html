@@ -48,7 +48,7 @@
         <li><a href="{% url 'whatsapp_app:whatsapp_index' %}">
             <i class="fab fa-whatsapp"></i>WhatsApp
         </a></li>      
-        <li><a href="{% url 'shipment_index' %}">
+        <li><a href="{% url 'shipment:shipment_index' %}">
             <i class="fas fa-truck"></i>Shipments
         </a></li>
         {% if request.user.is_staff %}

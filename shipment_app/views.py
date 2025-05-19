@@ -1,9 +1,7 @@
-# In your app's views.py (e.g., shipment/views.py)
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt # For testing, remove for production if using standard CSRF
+from django.views.decorators.csrf import csrf_exempt 
 import json
 from datetime import datetime, timedelta
 
