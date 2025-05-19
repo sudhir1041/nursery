@@ -609,7 +609,7 @@ function showShipPopup(cardElement) {
 
     const itemsData = Array.from(cardElement.querySelectorAll('.card__list-item')).map((itemLi, index) => {
         return {
-            id: `item-${orderId}-${index}`, 
+            id: `item-${orderId}-${platform}-${index}`, // Made ID more unique
             name: itemLi.dataset.itemName,
             potSize: itemLi.dataset.itemPotsize,
             quantity: parseInt(itemLi.dataset.itemQuantity) || 1,
@@ -643,7 +643,14 @@ function showShipPopup(cardElement) {
     });
     
     const currentShipmentStatus = cardElement.dataset.shipmentStatus || 'processing';
-    document.getElementById('shipStatus').value = currentShipmentStatus.toLowerCase();
+    // Ensure the value exists in the dropdown options
+    const shipStatusDropdown = document.getElementById('shipStatus');
+    if ([...shipStatusDropdown.options].map(opt => opt.value).includes(currentShipmentStatus.toLowerCase())) {
+        shipStatusDropdown.value = currentShipmentStatus.toLowerCase();
+    } else {
+        shipStatusDropdown.value = 'processing'; // Default if status not in options
+    }
+
 
     popup.style.display = 'flex';
 }
@@ -673,9 +680,6 @@ document.querySelectorAll('.card').forEach(card => {
     if (cloneButton) {
         cloneButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            // This is where you would implement your separate clone functionality
-            // For example, by calling a different JS function that perhaps opens
-            // another popup or directly sends a request to your existing `clone_order` Django view.
             console.log('Clone button clicked for order:', card.dataset.orderId, 'Platform:', card.dataset.platform);
             alert('Clone functionality (full order duplication) to be implemented separately.');
         });
@@ -705,7 +709,7 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
     const form = e.target;
     const shippingStatus = document.getElementById('shipStatus').value;
     const orderId = form.dataset.orderId; 
-    const platform = form.dataset.platform; // Retrieve platform
+    const platform = form.dataset.platform; 
 
     const unselectedItems = [];
     const selectedItems = [];
@@ -727,7 +731,7 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
 
     const shippingData = {
         orderId: orderId,
-        platform: platform, // Add platform to the data
+        platform: platform, 
         shippingStatus: shippingStatus,
         selectedItems: selectedItems,
         unselectedItems: unselectedItems 
@@ -735,25 +739,23 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
 
     console.log("Shipping Data to send to backend:", JSON.stringify(shippingData, null, 2));
 
-    // URL for your new Django view
-    const processingUrl = '/process-shipment/'; // Replace with your actual URL if different
+    // CORRECTED URL: Added 'shipment/' prefix
+    const processingUrl = '/shipment/process-shipment/'; 
 
     fetch(processingUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken() // Use the function to get CSRF token
+            'X-CSRFToken': getCsrfToken() 
         },
         body: JSON.stringify(shippingData)
     })
     .then(response => {
         if (!response.ok) {
-            // Try to get error message from backend if available
-            return response.json().then(errData => {
-                throw new Error(errData.error || `Network response was not ok: ${response.statusText}`);
-            }).catch(() => {
-                // Fallback if response is not JSON or no error message
-                throw new Error(`Network response was not ok: ${response.statusText}`);
+            return response.json().then(errData => { // Try to parse JSON error from backend
+                throw new Error(errData.error || `Server error: ${response.status} ${response.statusText}`);
+            }).catch(() => { // Fallback if error response is not JSON
+                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
             });
         }
         return response.json();
@@ -761,17 +763,24 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
     .then(data => {
         console.log('Backend success response:', data);
         alert(data.message || `Order ${orderId} processed successfully.`);
-        // Optionally, update the card on the page (e.g., its status)
-        // This would require finding the card element and updating its display.
-        // For example:
-        // const cardToUpdate = document.querySelector(`.card[data-order-id='${orderId}'][data-platform='${platform}']`);
-        // if (cardToUpdate) {
-        //    cardToUpdate.querySelector('.card__status').textContent = shippingStatus; // Or more detailed status from backend
-        //    if (data.newShipmentStatus) { // If backend sends back the definitive new status
-        //        cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
-        //        cardToUpdate.querySelector('.card__status').textContent = data.newShipmentStatus;
-        //    }
-        // }
+        
+        // Optionally, update the card on the page
+        const cardToUpdate = document.querySelector(`.card[data-order-id='${orderId}'][data-platform='${platform}']`);
+        if (cardToUpdate) {
+           if (data.newShipmentStatus) { 
+               cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
+               const statusElement = cardToUpdate.querySelector('.card__status');
+               if (statusElement) {
+                   statusElement.textContent = data.newShipmentStatus;
+               }
+               // If the order is now fully shipped or cancelled, you might want to remove it or visually change it further.
+               // For example, if status is 'shipped' or 'delivered' or 'cancelled', you could hide the card or dim it.
+               if (['shipped', 'delivered', 'cancelled'].includes(data.newShipmentStatus.toLowerCase())) {
+                   // cardToUpdate.style.display = 'none'; // Example: Hide the card
+                   cardToUpdate.style.opacity = '0.5'; // Example: Dim the card
+               }
+           }
+        }
     })
     .catch((error) => {
         console.error('Error sending shipping data to backend:', error);
