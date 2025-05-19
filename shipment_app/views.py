@@ -37,11 +37,30 @@ def home(request):
             if days_since_order >= 4: highlight = 'three_days_old'
             elif days_since_order >= 3: highlight = 'two_days_old'
             
+            # Determine advance and balance amounts for Shopify
+            # Shopify's o.total_price is typically the final amount due after discounts.
+            # If you have a specific field in your ShopifyOrder model for 'advance paid' or 'discounts applied'
+            # that you want to use for 'advance_amount', use that here.
+            # For example, if o.current_total_discounts exists and represents the discount value:
+            # advance_payment_or_discount = o.current_total_discounts if hasattr(o, 'current_total_discounts') else "0.00"
+            # balance = o.total_price 
+            # original_total_before_discount = float(o.total_price) + float(advance_payment_or_discount)
+
+            # Assuming no separate advance payment field is explicitly tracked for Shopify in this context,
+            # and total_price is the amount to be collected.
+            shopify_advance_amount = "0.00" 
+            shopify_balance_amount = o.total_price
+            # If you want 'original_total' to be subtotal_price before discounts, and have a discount field:
+            # shopify_original_total = o.subtotal_price # or (float(o.total_price) + float(o.your_discount_field_value))
+            # For simplicity, if total_price is the grand total:
+            shopify_original_total = o.total_price
+
+
             all_orders.append({
                 'order_id': o.name, # Shopify's display name for order ID
                 'date': o.created_at_shopify,
                 'status': o.fulfillment_status or 'unfulfilled', # Main status
-                'amount': o.total_price,
+                'amount': o.total_price, # This is usually the final amount the customer pays
                 'customer': o.shipping_address_json.get('name', ''),
                 'phone': o.shipping_address_json.get('phone', ''),
                 'pincode': o.shipping_address_json.get('zip', ''),
@@ -56,9 +75,11 @@ def home(request):
                     'price': item.get('price', 0),
                     'pot_size': item.get('variant_title', '') or 'N/A' # Ensure pot_size is available
                 } for item in o.line_items_json],
-                'original_total': o.total_price, # Assuming this is the original
-                'advance_amount': o.total_discounts, # Example, adjust as per your model
-                'balance_amount': o.total_line_items_price, # Example
+                'original_total': shopify_original_total, 
+                'advance_amount': shopify_advance_amount, # Corrected: ShopifyOrder might not have 'total_discounts'.
+                                                          # Set to 0.00 or None if advance payments are not tracked this way for Shopify.
+                                                          # Verify against your ShopifyOrder model.
+                'balance_amount': shopify_balance_amount, # This would be o.total_price if advance_amount is 0.
                 'is_overdue_highlight': highlight
             })
 
@@ -73,7 +94,7 @@ def home(request):
             raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data or '{}')
             advance_amount = None
             balance_amount = None
-            original_total = o.total_amount # Default to total, adjust if partial payment meta exists
+            original_total = o.total_amount 
             for meta in raw_data.get("meta_data", []):
                 if meta.get("key") == "_pi_original_total": original_total = meta.get("value")
                 elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
@@ -96,7 +117,7 @@ def home(request):
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
                     'price': item.get('price', 0),
-                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') # More robust pot size extraction
+                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') 
                 } for item in o.line_items_json],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
@@ -106,7 +127,7 @@ def home(request):
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
-        if f.status == 'processing': # Process only orders that need shipping
+        if f.status == 'processing': 
             days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -131,20 +152,20 @@ def home(request):
                     'name': product.get('product_name', ''),
                     'quantity': product.get('quantity', 0),
                     'price': product.get('price', 0),
-                    'pot_size': product.get('variant_details', {}).get('size', 'N/A') # Example: if FB has variant details for size
+                    'pot_size': product.get('variant_details', {}).get('size', 'N/A') 
                 } for product in products],
-                'original_total': f.total_amount, # Assuming total is original
-                'advance_amount': None, # FB might not have this structure
-                'balance_amount': None,
+                'original_total': f.total_amount, 
+                'advance_amount': None, 
+                'balance_amount': f.total_amount, # Assuming total_amount is what's due if no advance.
                 'is_overdue_highlight': highlight
             })
     
     all_orders.sort(key=lambda x: x['date'], reverse=True)
-    context = {'orders': all_orders, 'project_name': 'Order Dashboard'} # Added project_name
+    context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
     return render(request, 'shipment/shipment.html', context)
 
 
-@require_POST # Ensures this view only accepts POST requests
+@require_POST 
 def process_shipment(request):
     try:
         data = json.loads(request.body)
@@ -159,8 +180,6 @@ def process_shipment(request):
 
         order_instance = None
         
-        # Convert order_id to integer if it's for WooCommerce or Facebook (if they use int IDs)
-        # Shopify order names are typically strings like '#1001'
         if platform == 'Shopify':
             order_instance = get_object_or_404(ShopifyOrder, name=order_id_str)
         elif platform == 'Wordpress':
@@ -170,17 +189,12 @@ def process_shipment(request):
             except ValueError:
                 return JsonResponse({'error': 'Invalid Order ID format for Wordpress.'}, status=400)
         elif platform == 'Facebook':
-            # Assuming Facebook order_id is a string or can be directly queried
-            # If it's an integer, convert it like WooCommerce
             order_instance = get_object_or_404(Facebook_orders, order_id=order_id_str)
         else:
             return JsonResponse({'error': 'Invalid platform specified.'}, status=400)
 
-        # Update the original order's shipment status
         order_instance.shipment_status = new_shipping_status
         
-        # Store unselected items in the JSON field
-        # Ensure your model has: unselected_items_for_clone = JSONField(null=True, blank=True, default=list)
         if hasattr(order_instance, 'unselected_items_for_clone'):
             order_instance.unselected_items_for_clone = unselected_items
         else:
@@ -188,12 +202,11 @@ def process_shipment(request):
 
         order_instance.save()
         
-        # You might want to log this action or trigger other processes
         logger.info(f"Processed shipment for {platform} Order ID {order_id_str}. Status: {new_shipping_status}. Unselected items: {len(unselected_items)}")
 
         return JsonResponse({
             'message': f'{platform} Order {order_id_str} updated successfully.',
-            'newShipmentStatus': new_shipping_status, # Send back the confirmed status
+            'newShipmentStatus': new_shipping_status, 
             'unselected_count': len(unselected_items)
         })
 
@@ -203,6 +216,3 @@ def process_shipment(request):
         logger.error(f"Error processing shipment: {e}", exc_info=True)
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
-# Your existing clone_order view (if you still need it for full order cloning)
-# def clone_order(request, order_id):
-#     # ... your existing logic ..
