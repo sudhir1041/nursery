@@ -1,102 +1,85 @@
-from django.shortcuts import render,redirect,HttpResponse
+# In your app's views.py (e.g., shipment/views.py)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt # For testing, remove for production if using standard CSRF
+import json
+from datetime import datetime, timedelta
+
+# Assuming your models are imported correctly
 from shopify_app.models import ShopifyOrder
 from woocommerce_app.models import WooCommerceOrder
-from facebook_app.models import Facebook_orders
-from datetime import datetime, timedelta
-import json
+from facebook_app.models import Facebook_orders 
+# Make sure these models have a JSONField, e.g.:
+# unselected_items_for_clone = models.JSONField(null=True, blank=True, default=list)
+
 import logging
-
-
 logger = logging.getLogger(__name__)
 
+# Your existing home view (slightly modified for item structure consistency if needed)
 def home(request):
-    # Get current date and date 30 days ago with timezone awareness
     today = datetime.now().astimezone()
     thirty_days_ago = today - timedelta(days=30)
 
-    shopify = ShopifyOrder.objects.filter(created_at_shopify__gte=thirty_days_ago)
-    woo = WooCommerceOrder.objects.filter(date_created_woo__gte=thirty_days_ago)
-    fb = Facebook_orders.objects.filter(date_created__gte=thirty_days_ago)
+    shopify_qs = ShopifyOrder.objects.filter(created_at_shopify__gte=thirty_days_ago)
+    woo_qs = WooCommerceOrder.objects.filter(date_created_woo__gte=thirty_days_ago)
+    fb_qs = Facebook_orders.objects.filter(date_created__gte=thirty_days_ago)
     
-    # ====================== Shopify Orders =======================
-    shopify_orders = []
-    status = 'unfulfilled'
-    for o in shopify:
-        unfulfilled = o.fulfillment_status is None
-        if unfulfilled:
-            # Calculate days since order creation
-            days_since_order = (today - o.created_at_shopify.astimezone()).days
+    all_orders = []
 
-            original_total = None
-            advance_amount = None
-            balance_amount = None
+    # ====================== Shopify Orders =======================
+    for o in shopify_qs:
+        unfulfilled = o.fulfillment_status is None # or other logic for 'pending'
+        if unfulfilled: # Process only orders that need shipping
+            days_since_order = (today - o.created_at_shopify.astimezone()).days
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
             
-            # Set highlight status based on days
-            if days_since_order >= 4:
-                highlight = 'three_days_old'
-            elif days_since_order >= 3:
-                highlight = 'two_days_old'
-            else:
-                highlight = 'normal'
-                                    
-            shopify_orders.append({
-                'order_id': o.name,
+            all_orders.append({
+                'order_id': o.name, # Shopify's display name for order ID
                 'date': o.created_at_shopify,
-                'status': status,
+                'status': o.fulfillment_status or 'unfulfilled', # Main status
                 'amount': o.total_price,
                 'customer': o.shipping_address_json.get('name', ''),
                 'phone': o.shipping_address_json.get('phone', ''),
                 'pincode': o.shipping_address_json.get('zip', ''),
                 'state': o.shipping_address_json.get('province', ''),
                 'note': o.internal_notes,
-                'tracking': o.tracking_details_json,
+                'tracking': o.tracking_details_json, # This might be a complex object
                 'platform': 'Shopify',
-                'shipment_status': o.shipment_status,
+                'shipment_status': o.shipment_status or 'Pending', # Your custom shipment status field
                 'items': [{
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
                     'price': item.get('price', 0),
-                    'image': '',  
-                    'pot_size': item.get('variant_title', '')
+                    'pot_size': item.get('variant_title', '') or 'N/A' # Ensure pot_size is available
                 } for item in o.line_items_json],
-                'original_total': original_total,
-                'advance_amount': advance_amount,
-                'balance_amount': balance_amount,
+                'original_total': o.total_price, # Assuming this is the original
+                'advance_amount': o.total_discounts, # Example, adjust as per your model
+                'balance_amount': o.total_line_items_price, # Example
                 'is_overdue_highlight': highlight
             })
 
-
     # ======================== WooCommerce orders ======================
-    woo_orders = []
-    for o in woo:
-        if o.status == 'processing' or o.status == 'partial-paid' :
-            # Calculate days since order creation
+    for o in woo_qs:
+        if o.status in ['processing', 'partial-paid']: # Process only orders that need shipping
             days_since_order = (today - o.date_created_woo.astimezone()).days
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
 
-            # Load raw_data JSON
-            raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data) if o.raw_data else {}
-            # Extract partial payment details
-            original_total = None
+            raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data or '{}')
             advance_amount = None
             balance_amount = None
+            original_total = o.total_amount # Default to total, adjust if partial payment meta exists
             for meta in raw_data.get("meta_data", []):
-                if meta.get("key") == "_pi_original_total":
-                    original_total = meta.get("value")
-                elif meta.get("key") == "_pi_advance_amount":
-                    advance_amount = meta.get("value")
-                elif meta.get("key") == "_pi_balance_amount":
-                    balance_amount = meta.get("value")
-            
-            # Set highlight status based on days
-            if days_since_order >= 4:
-                highlight = 'three_days_old'
-            elif days_since_order >= 3:
-                highlight = 'two_days_old'
-            else:
-                highlight = 'normal'
-                
-            
-            woo_orders.append({
+                if meta.get("key") == "_pi_original_total": original_total = meta.get("value")
+                elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
+                elif meta.get("key") == "_pi_balance_amount": balance_amount = meta.get("value")
+
+            all_orders.append({
                 'order_id': o.woo_id,
                 'date': o.date_created_woo,
                 'status': o.status,
@@ -108,13 +91,12 @@ def home(request):
                 'note': o.customer_note,
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
                 'platform': 'Wordpress',
-                'shipment_status': o.shipment_status,
+                'shipment_status': o.shipment_status or 'Pending',
                 'items': [{
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
                     'price': item.get('price', 0),
-                    'image': item.get('image', {}).get('src', ''),
-                    'pot_size': next((m.get('display_value') for m in item.get('meta_data', []) if m.get('display_key') == 'Size'), ''),
+                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') # More robust pot size extraction
                 } for item in o.line_items_json],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
@@ -122,37 +104,17 @@ def home(request):
                 'is_overdue_highlight': highlight
             })
 
-
     # ======================== Facebook orders ======================
-    fb_orders = []
-    for f in fb:
-        if f.status == 'processing' :
-            # Calculate days since order creation
+    for f in fb_qs:
+        if f.status == 'processing': # Process only orders that need shipping
             days_since_order = (today - f.date_created.astimezone()).days
-
-            original_total = None
-            advance_amount = None
-            balance_amount = None
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
             
-            # Set highlight status based on days
-            if days_since_order >= 4:
-                highlight = 'three_days_old'
-            elif days_since_order >= 3:
-                highlight = 'two_days_old'
-            else:
-                highlight = 'normal'
-                
-            # Extract product details from products_json
-            products = f.products_json if f.products_json else []
-            product_details = []
-            for product in products:
-                product_details.append({
-                    'name': product.get('product_name', ''),
-                    'quantity': product.get('quantity', 0),
-                    'price': product.get('price', '0.00')
-                })
-                
-            fb_orders.append({
+            products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
+
+            all_orders.append({
                 'order_id': f.order_id,
                 'date': f.date_created,
                 'status': f.status,
@@ -164,129 +126,83 @@ def home(request):
                 'note': f.customer_note,
                 'tracking': f.tracking_info,
                 'platform': 'Facebook',
-                'shipment_status': f.shipment_status,
+                'shipment_status': f.shipment_status or 'Pending',
                 'items': [{
                     'name': product.get('product_name', ''),
                     'quantity': product.get('quantity', 0),
                     'price': product.get('price', 0),
-                    'image': '',
-                    'pot_size': ''
+                    'pot_size': product.get('variant_details', {}).get('size', 'N/A') # Example: if FB has variant details for size
                 } for product in products],
-                'original_total': original_total,
-                'advance_amount': advance_amount,
-                'balance_amount': balance_amount,
+                'original_total': f.total_amount, # Assuming total is original
+                'advance_amount': None, # FB might not have this structure
+                'balance_amount': None,
                 'is_overdue_highlight': highlight
             })
-
-    # Combine all orders
-    all_orders = shopify_orders + woo_orders + fb_orders
     
-    # Sort orders by date in descending order (newest first)
     all_orders.sort(key=lambda x: x['date'], reverse=True)
-
-    context = {
-        'orders': all_orders
-    }
-
+    context = {'orders': all_orders, 'project_name': 'Order Dashboard'} # Added project_name
     return render(request, 'shipment/shipment.html', context)
 
 
+@require_POST # Ensures this view only accepts POST requests
+def process_shipment(request):
+    try:
+        data = json.loads(request.body)
+        order_id_str = data.get('orderId')
+        platform = data.get('platform')
+        new_shipping_status = data.get('shippingStatus')
+        selected_items = data.get('selectedItems', [])
+        unselected_items = data.get('unselectedItems', [])
 
-def clone_order(request, order_id):
-    if request.method == 'POST':
-        order_id = request.POST.get('order_id')
-        platform = request.POST.get('platform')
+        if not all([order_id_str, platform, new_shipping_status]):
+            return JsonResponse({'error': 'Missing required data (orderId, platform, shippingStatus).'}, status=400)
+
+        order_instance = None
         
+        # Convert order_id to integer if it's for WooCommerce or Facebook (if they use int IDs)
+        # Shopify order names are typically strings like '#1001'
         if platform == 'Shopify':
-            order = ShopifyOrder.objects.get(name=order_id)
-            clone_data = {
-                'order_id': order.name,
-                'date': order.created_at_shopify,
-                'status': order.fulfillment_status,
-                'amount': order.total_price,
-                'customer': order.shipping_address_json.get('name', ''),
-                'phone': order.shipping_address_json.get('phone', ''),
-                'pincode': order.shipping_address_json.get('zip', ''),
-                'city': order.shipping_address_json.get('city', ''),
-                'note': order.internal_notes,
-                'tracking': order.tracking_details_json,
-                'platform': 'Shopify',
-                'shipment_status': order.shipment_status,
-                'items': order.line_items_json
-            }
-            order.clone_orders = clone_data
-            order.save()
-            
+            order_instance = get_object_or_404(ShopifyOrder, name=order_id_str)
         elif platform == 'Wordpress':
-            order = WooCommerceOrder.objects.get(woo_id=order_id)
-            clone_data = {
-                'order_id': order.woo_id,
-                'date': order.date_created_woo,
-                'status': order.status,
-                'amount': order.total_amount, 
-                'customer': f"{order.billing_first_name or ''} {order.billing_last_name or ''}".strip(),
-                'phone': order.billing_phone,
-                'pincode': order.billing_postcode,
-                'city': order.billing_city,
-                'note': order.customer_note,
-                'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={order.woo_id}',
-                'platform': 'Wordpress',
-                'shipment_status': order.shipment_status,
-                'items': order.line_items_json
-            }
-            order.clone_orders = clone_data
-            order.save()
-            
+            try:
+                order_id_int = int(order_id_str)
+                order_instance = get_object_or_404(WooCommerceOrder, woo_id=order_id_int)
+            except ValueError:
+                return JsonResponse({'error': 'Invalid Order ID format for Wordpress.'}, status=400)
         elif platform == 'Facebook':
-            order = Facebook_orders.objects.get(order_id=order_id)
-            clone_data = {
-                'order_id': order.order_id,
-                'date': order.date_created,
-                'status': order.status,
-                'amount': order.total_amount,
-                'customer': f"{order.billing_first_name or ''} {order.billing_last_name or ''}".strip(),
-                'phone': order.billing_phone,
-                'pincode': order.billing_postcode,
-                'city': order.billing_city,
-                'note': order.customer_note,
-                'tracking': order.tracking_info,
-                'platform': 'Facebook',
-                'shipment_status': order.shipment_status,
-                'items': order.products_json
-            }
-            order.clone_orders = clone_data
-            order.save()
-            
-        return HttpResponse('Order cloned successfully')
+            # Assuming Facebook order_id is a string or can be directly queried
+            # If it's an integer, convert it like WooCommerce
+            order_instance = get_object_or_404(Facebook_orders, order_id=order_id_str)
+        else:
+            return JsonResponse({'error': 'Invalid platform specified.'}, status=400)
+
+        # Update the original order's shipment status
+        order_instance.shipment_status = new_shipping_status
         
-    return HttpResponse('Invalid request method')    
+        # Store unselected items in the JSON field
+        # Ensure your model has: unselected_items_for_clone = JSONField(null=True, blank=True, default=list)
+        if hasattr(order_instance, 'unselected_items_for_clone'):
+            order_instance.unselected_items_for_clone = unselected_items
+        else:
+            logger.warning(f"Model for {platform} ID {order_id_str} does not have 'unselected_items_for_clone' field.")
 
-def shipment_partial(request, order_id):
-    if request.method == 'POST':
-        order_id = request.POST.get('order_id')
-    return HttpResponse('Invalid request method')
+        order_instance.save()
+        
+        # You might want to log this action or trigger other processes
+        logger.info(f"Processed shipment for {platform} Order ID {order_id_str}. Status: {new_shipping_status}. Unselected items: {len(unselected_items)}")
 
-def shipment_full(request, order_id):
-    if request.method == 'POST':
-        order_id = request.POST.get('order_id')
-        platform = request.POST.get('platform')
+        return JsonResponse({
+            'message': f'{platform} Order {order_id_str} updated successfully.',
+            'newShipmentStatus': new_shipping_status, # Send back the confirmed status
+            'unselected_count': len(unselected_items)
+        })
 
-        if platform == 'Shopify':
-            order = ShopifyOrder.objects.get(name=order_id)
-            order.shipment_status = 'fully_shipped'
-            order.save()
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+    except Exception as e:
+        logger.error(f"Error processing shipment: {e}", exc_info=True)
+        return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
-        elif platform == 'Wordpress':
-            order = WooCommerceOrder.objects.get(woo_id=order_id)
-            order.shipment_status = 'fully_shipped'
-            order.save()
-
-        elif platform == 'Facebook':
-            order = Facebook_orders.objects.get(order_id=order_id)
-            order.shipment_status = 'fully_shipped'
-            order.save()
-
-        return HttpResponse('Order fully shipped successfully')
-
-    return HttpResponse('Invalid request method')
-    
+# Your existing clone_order view (if you still need it for full order cloning)
+# def clone_order(request, order_id):
+#     # ... your existing logic ..
