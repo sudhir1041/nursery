@@ -60,6 +60,14 @@ class WooCommerceOrder(models.Model):
     # Clone orders save here
     clone_orders = models.JSONField(default=list, blank=True, 
         help_text="Store clone orders as a JSON list, e.g., [{'order_id': 'XXX', 'platform': 'WooCommerce'}, ...]")
+    
+    unselected_items_for_clone = models.JSONField(
+        null=True,
+        blank=True,
+        default=list,
+        help_text="List of items unselected during a shipment process, intended for a future clone action."
+    )
+
 
     # Django Timestamps
     django_date_created = models.DateTimeField(auto_now_add=True)
