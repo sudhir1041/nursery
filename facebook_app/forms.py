@@ -45,7 +45,41 @@ class FacebookOrderForm(forms.ModelForm):
         ('WB', 'West Bengal')
     ]
 
+    INDIAN_CITIES = [
+        ('', 'Select City'),
+        ('Mumbai', 'Mumbai'),
+        ('Delhi', 'Delhi'),
+        ('Bangalore', 'Bangalore'),
+        ('Hyderabad', 'Hyderabad'),
+        ('Chennai', 'Chennai'),
+        ('Kolkata', 'Kolkata'),
+        ('Pune', 'Pune'),
+        ('Ahmedabad', 'Ahmedabad'),
+        ('Jaipur', 'Jaipur'),
+        ('Surat', 'Surat'),
+        ('Lucknow', 'Lucknow'),
+        ('Kanpur', 'Kanpur'),
+        ('Nagpur', 'Nagpur'),
+        ('Indore', 'Indore'),
+        ('Thane', 'Thane'),
+        ('Bhopal', 'Bhopal'),
+        ('Visakhapatnam', 'Visakhapatnam'),
+        ('Patna', 'Patna'),
+        ('Vadodara', 'Vadodara'),
+        ('Ghaziabad', 'Ghaziabad'),
+        ('Ludhiana', 'Ludhiana'),
+        ('Agra', 'Agra'),
+        ('Nashik', 'Nashik'),
+        ('Faridabad', 'Faridabad'),
+        ('Meerut', 'Meerut'),
+        ('Rajkot', 'Rajkot'),
+        ('Kalyan', 'Kalyan'),
+        ('Vasai', 'Vasai'),
+        ('Varanasi', 'Varanasi')
+    ]
+
     billing_state = forms.ChoiceField(choices=INDIAN_STATES, widget=forms.Select(attrs={'class': 'form-control'}))
+    billing_city = forms.ChoiceField(choices=INDIAN_CITIES, widget=forms.Select(attrs={'class': 'form-control'}))
 
     def clean_products_json(self):
 
