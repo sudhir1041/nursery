@@ -470,8 +470,7 @@ def order_details_view(request,order_id):
             'note': fb_order.customer_note,
             'tracking': f'http://parcelx.in/tracking.php?waybill_no={fb_order.tracking_info}',            
             'platform': 'Facebook',
-            'products': fb_order.products_json or []
-        }
+            'products': [{'name': item.get('name', ''), 'price': item.get('price', 0), 'quantity': item.get('quantity', 0)} for item in (fb_order.products_json or [])]        }
     else:
         order_data = None
 
