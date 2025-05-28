@@ -140,12 +140,8 @@ def facebook_order_create_view(request):
 # --- Order Edit View ---
 @login_required
 def facebook_order_edit_view(request, order_id):
-    # Convert string order_id to integer if needed
-    from django.http import Http404
-    try:
-        if isinstance(order_id, str):
-            order_id = int(order_id.lstrip('0'))
-    except ValueError:
+    # Remove this invalid conversion to int
+    if not isinstance(order_id, str) or not order_id.startswith('NS'):
         raise Http404(f"Invalid order ID format: {order_id}")
 
     order_instance = get_object_or_404(Facebook_orders, order_id=order_id)
@@ -154,16 +150,15 @@ def facebook_order_edit_view(request, order_id):
         form = FacebookOrderForm(request.POST, instance=order_instance)
         if form.is_valid():
             try:
-                form.save() 
+                form.save()
                 messages.success(request, f"Order {order_instance.order_id} updated successfully!")
-                # return redirect('facebook_order_detail', order_id=order_instance.order_id)
                 return redirect('facebook_index')
             except Exception as e:
                 logger.exception(f"Error updating Facebook order {order_id}: {e}")
                 messages.error(request, "Error updating order. Please check the data.")
         else:
-             messages.error(request, "Please correct the errors below.")
-    else: 
+            messages.error(request, "Please correct the errors below.")
+    else:
         form = FacebookOrderForm(instance=order_instance)
 
     context = {
@@ -173,6 +168,7 @@ def facebook_order_edit_view(request, order_id):
         'form_mode': 'Edit'
     }
     return render(request, 'facebook/order_form.html', context)
+
 
 
 # --- Order Delete View ---
