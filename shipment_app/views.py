@@ -26,96 +26,97 @@ def home(request):
     
     all_orders = []
 
-    # # ====================== Shopify Orders =======================
-    # for o in shopify_qs:
-    #     unfulfilled = o.fulfillment_status == 'unfulfilled' or o.fulfillment_status == 'none' and o.shipment_status== 'pending' # or other logic for 'pending'
-    #     if unfulfilled: # Process only orders that need shipping
-    #         days_since_order = (today - o.created_at_shopify.astimezone()).days
-    #         highlight = 'normal'
-    #         if days_since_order >= 4: highlight = 'three_days_old'
-    #         elif days_since_order >= 3: highlight = 'two_days_old'
+    # ====================== Shopify Orders =======================
+    for o in shopify_qs:
+        unfulfilled = o.fulfillment_status == 'unfulfilled' or o.fulfillment_status == 'none' and o.shipment_status== 'pending' # or other logic for 'pending'
+        if unfulfilled: # Process only orders that need shipping
+            days_since_order = (today - o.created_at_shopify.astimezone()).days
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
             
-    #         # Determine advance and balance amounts for Shopify
-    #         # Shopify's o.total_price is typically the final amount due after discounts.
-    #         # If you have a specific field in your ShopifyOrder model for 'advance paid' or 'discounts applied'
-    #         # that you want to use for 'advance_amount', use that here.
-    #         # For example, if o.current_total_discounts exists and represents the discount value:
-    #         # advance_payment_or_discount = o.current_total_discounts if hasattr(o, 'current_total_discounts') else "0.00"
-    #         # balance = o.total_price 
-    #         # original_total_before_discount = float(o.total_price) + float(advance_payment_or_discount)
+            # Determine advance and balance amounts for Shopify
+            # Shopify's o.total_price is typically the final amount due after discounts.
+            # If you have a specific field in your ShopifyOrder model for 'advance paid' or 'discounts applied'
+            # that you want to use for 'advance_amount', use that here.
+            # For example, if o.current_total_discounts exists and represents the discount value:
+            # advance_payment_or_discount = o.current_total_discounts if hasattr(o, 'current_total_discounts') else "0.00"
+            # balance = o.total_price 
+            # original_total_before_discount = float(o.total_price) + float(advance_payment_or_discount)
 
-    #         # Assuming no separate advance payment field is explicitly tracked for Shopify in this context,
-    #         # and total_price is the amount to be collected.
-    #         shopify_advance_amount = "0.00" 
-    #         shopify_balance_amount = o.total_price
-    #         # If you want 'original_total' to be subtotal_price before discounts, and have a discount field:
-    #         # shopify_original_total = o.subtotal_price # or (float(o.total_price) + float(o.your_discount_field_value))
-    #         # For simplicity, if total_price is the grand total:
-    #         shopify_original_total = o.total_price
+            # Assuming no separate advance payment field is explicitly tracked for Shopify in this context,
+            # and total_price is the amount to be collected.
+            shopify_advance_amount = "0.00" 
+            shopify_balance_amount = o.total_price
+            # If you want 'original_total' to be subtotal_price before discounts, and have a discount field:
+            # shopify_original_total = o.subtotal_price # or (float(o.total_price) + float(o.your_discount_field_value))
+            # For simplicity, if total_price is the grand total:
+            shopify_original_total = o.total_price
 
 
-    #         all_orders.append({
-    #             'order_id': o.name, # Shopify's display name for order ID
-    #             'date': o.created_at_shopify,
-    #             'status': o.fulfillment_status or 'unfulfilled', # Main status
-    #             'amount': o.total_price, # This is usually the final amount the customer pays
-    #             'customer': o.shipping_address_json.get('name', 'N/A'),
-    #             'phone': o.shipping_address_json.get('phone', 'N/A'),
-    #             'pincode': o.shipping_address_json.get('zip', 'N/A'),
-    #             'state': o.shipping_address_json.get('province', 'N/A'),                'note': o.internal_notes,
-    #             'tracking': o.tracking_details_json, # This might be a complex object
-    #             'platform': 'Shopify',
-    #             'shipment_status': o.shipment_status or 'Pending', # Your custom shipment status field
-    #             'items': [{
-    #                 'name': item.get('name', ''),
-    #                 'quantity': item.get('quantity', 0),
-    #                 'price': item.get('price', 0),
-    #                 'pot_size': item.get('variant_title', '') or 'N/A' # Ensure pot_size is available
-    #             } for item in o.line_items_json],
-    #             'original_total': shopify_original_total, 
-    #             'advance_amount': shopify_advance_amount, # Corrected: ShopifyOrder might not have 'total_discounts'.
-    #                                                       # Set to 0.00 or None if advance payments are not tracked this way for Shopify.
-    #                                                       # Verify against your ShopifyOrder model.
-    #             'balance_amount': shopify_balance_amount, # This would be o.total_price if advance_amount is 0.
-    #             'is_overdue_highlight': highlight
-    #         })
+            all_orders.append({
+                'order_id': o.name, # Shopify's display name for order ID
+                'date': o.created_at_shopify,
+                'status': o.fulfillment_status or 'unfulfilled', # Main status
+                'amount': o.total_price, # This is usually the final amount the customer pays
+                'customer': o.shipping_address_json.get('name', 'N/A'),
+                'phone': o.shipping_address_json.get('phone', 'N/A'),
+                'pincode': o.shipping_address_json.get('zip', 'N/A'),
+                'state': o.shipping_address_json.get('province', 'N/A'),                
+                'note': o.internal_notes,
+                'tracking': o.tracking_details_json, # This might be a complex object
+                'platform': 'Shopify',
+                'shipment_status': o.shipment_status or 'Pending', # Your custom shipment status field
+                'items': [{
+                    'name': item.get('name', ''),
+                    'quantity': item.get('quantity', 0),
+                    'price': item.get('price', 0),
+                    'pot_size': item.get('variant_title', '') or 'N/A' # Ensure pot_size is available
+                } for item in o.line_items_json],
+                'original_total': shopify_original_total, 
+                'advance_amount': shopify_advance_amount, # Corrected: ShopifyOrder might not have 'total_discounts'.
+                                                          # Set to 0.00 or None if advance payments are not tracked this way for Shopify.
+                                                          # Verify against your ShopifyOrder model.
+                'balance_amount': shopify_balance_amount, # This would be o.total_price if advance_amount is 0.
+                'is_overdue_highlight': highlight
+            })
 
     # ======================== WooCommerce orders ======================
-    for o in woo_qs:
-        if o.status in ['processing', 'partial-paid'] and o.shipment_status == 'pending':            
-            days_since_order = (today - o.date_created_woo.astimezone()).days
+    for woo in woo_qs:
+        if woo.status in ['processing', 'partial-paid'] and woo.shipment_status == 'pending':            
+            days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
             elif days_since_order >= 3: highlight = 'two_days_old'
 
-            raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data or '{}')
+            raw_data = woo.raw_data if isinstance(woo.raw_data, dict) else json.loads(woo.raw_data or '{}')
             advance_amount = None
             balance_amount = None
-            original_total = o.total_amount 
+            original_total = woo.total_amount 
             for meta in raw_data.get("meta_data", []):
                 if meta.get("key") == "_pi_original_total": original_total = meta.get("value")
                 elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
                 elif meta.get("key") == "_pi_balance_amount": balance_amount = meta.get("value")
 
             all_orders.append({
-                'order_id': o.woo_id,
-                'date': o.date_created_woo,
-                'status': o.status,
-                'amount': o.total_amount,
-                'customer': f"{o.billing_first_name or ''} {o.billing_last_name or ''}".strip(),
-                'phone': o.billing_phone,
-                'pincode': o.billing_postcode,
-                'state': o.billing_state,
-                'note': o.customer_note,
-                'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
+                'order_id': woo.woo_id,
+                'date': woo.date_created_woo,
+                'status': woo.status,
+                'amount': woo.total_amount,
+                'customer': f"{woo.billing_first_name or ''} {woo.billing_last_name or ''}".strip(),
+                'phone': woo.billing_phone,
+                'pincode': woo.billing_postcode,
+                'state': woo.billing_state,
+                'note': woo.customer_note,
+                'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={woo.woo_id}',
                 'platform': 'Wordpress',
-                'shipment_status': o.shipment_status or 'Pending',
+                'shipment_status': woo.shipment_status or 'Pending',
                 'items': [{
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
                     'price': item.get('price', 0),
                     'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') 
-                } for item in o.line_items_json],
+                } for item in woo.line_items_json],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
                 'balance_amount': balance_amount,
