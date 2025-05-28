@@ -415,9 +415,9 @@ def order_details_view(request,order_id):
     if '#' in str(order_id):
         woo_order = None
         shopify_order = ShopifyOrder.objects.filter(name=order_id).first()
-        fb_order = Facebook_orders.objects.filter(order_id=order_id).first()
+        fb_order = None
     else:
-        # For WooCommerce and Facebook, IDs are integers
+        # For WooCommerce IDs are integers, Facebook IDs are strings
         try:
             order_id_int = int(order_id)
             woo_order = WooCommerceOrder.objects.filter(woo_id=order_id_int).first()
@@ -426,8 +426,7 @@ def order_details_view(request,order_id):
         except ValueError:
             woo_order = None
             shopify_order = None
-            fb_order = None
-
+            fb_order = Facebook_orders.objects.filter(order_id=str(order_id)).first()
     if woo_order:
         order_data = {
             'order_id': woo_order.woo_id,
@@ -490,7 +489,7 @@ def all_orders_edit(request, order_id):
     if '#' in str(order_id):
         woo_order = None
         shopify_order = ShopifyOrder.objects.filter(name=order_id).first()
-        fb_order = Facebook_orders.objects.filter(order_id=order_id).first()
+        fb_order = None
     else:
         # For WooCommerce and Facebook, IDs are integers
         try:
@@ -501,7 +500,7 @@ def all_orders_edit(request, order_id):
         except ValueError:
             woo_order = None
             shopify_order = None
-            fb_order = None
+            fb_order = Facebook_orders.objects.filter(order_id=order_id).first()
 
     if request.method == 'POST':
         # Get form data
