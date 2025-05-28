@@ -22,7 +22,7 @@ def default_empty_list():
     return []
 
 class Facebook_orders(models.Model):
-    order_id = models.CharField(max_length=100, unique=True, db_index=True, help_text="Only Add Number Value Don't use any letter.")
+    order_id = models.CharField(max_length=100, unique=True, db_index=True)
     email = models.EmailField(blank=True, null=True, db_index=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     first_name = models.CharField(max_length=100, blank=True, null=True)
