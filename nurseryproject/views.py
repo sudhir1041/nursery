@@ -470,7 +470,8 @@ def order_details_view(request,order_id):
             'note': fb_order.customer_note,
             'tracking': f'http://parcelx.in/tracking.php?waybill_no={fb_order.tracking_info}',            
             'platform': 'Facebook',
-            'products': [{'name': item.get('product_name', ''), 'price': item.get('price', 0), 'quantity': item.get('quantity', 0), 'pot_size': item.get('pot_size', '')} for item in (fb_order.products_json or [])]        }            'products': [{'name': item.get('product_name', ''), 'price': item.get('price', 0), 'quantity': item.get('quantity', 0), 'pot_size': item.get('pot_size', '')} for item in (fb_order.products_json or [])]        }
+            'products': [{'name': item.get('product_name', ''), 'price': item.get('price', 0), 'quantity': item.get('quantity', 0), 'pot_size': item.get('pot_size', '')} for item in (fb_order.products_json or [])]        
+            }            
     else:
         order_data = None
 
