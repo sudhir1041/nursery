@@ -181,7 +181,7 @@ class FacebookOrderForm(forms.ModelForm):
             'email', 'phone', 'alternet_number', 'address',
             'city', 'state', 'postcode', 'country',
             'total_amount', 'shipment_amount', 'received_amount', 'pending_amount',
-            'mode_of_payment', 'currency', 'customer_note', 'internal_notes',
+            'mode_of_payment', 'currency', 'customer_note', 
             'tracking_info', 'products_json', 
             'plateform', 'date_created'
         ]

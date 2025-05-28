@@ -62,10 +62,6 @@ class Facebook_orders(models.Model):
         blank=True,
         help_text="Enter tracking numbers, links, or carrier info here."
     )
-    internal_notes = models.TextField(
-        blank=True,
-        help_text="Internal staff notes about this order."
-    )
 
     products_json = models.JSONField(
         default=default_empty_list, 
