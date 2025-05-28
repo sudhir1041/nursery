@@ -83,7 +83,7 @@ def home(request):
 
     # ======================== WooCommerce orders ======================
     for o in woo_qs:
-        if o.status in ['processing', 'partial-paid'] and o.shipment_status == 'pending': # Process only orders that need shipping
+        if o.status in ['processing', 'partial-paid'] or o.shipment_status == 'pending':            
             days_since_order = (today - o.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
