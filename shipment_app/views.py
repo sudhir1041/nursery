@@ -153,7 +153,7 @@ def home(request):
                 } for product in products],
                 'original_total': f.total_amount, 
                 'advance_amount': None, 
-                'balance_amount': f.total_amount, # Assuming total_amount is what's due if no advance.
+                'balance_amount': f.total_amount, 
                 'is_overdue_highlight': highlight
             })
     
