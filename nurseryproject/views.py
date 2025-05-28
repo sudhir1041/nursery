@@ -319,10 +319,10 @@ def all_orders_view(request):
     if search_query:
         fb_queryset = fb_queryset.filter(
             Q(order_id__icontains=search_query) |
-            Q(billing_first_name__icontains=search_query) |
-            Q(billing_last_name__icontains=search_query) |
-            Q(billing_phone__icontains=search_query) |
-            Q(billing_email__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(phone__icontains=search_query) |
+            Q(email__icontains=search_query) |
             Q(alternet_number__icontains=search_query)
         )
     if selected_date:
@@ -363,10 +363,10 @@ def all_orders_view(request):
             'date': o.date_created,
             'status': o.status,
             'amount': o.total_amount,
-            'customer': f"{o.billing_first_name or ''} {o.billing_last_name or ''}".strip(),
-            'phone': o.billing_phone,
-            'pincode': o.billing_postcode,
-            'city': o.billing_city,
+            'customer': f"{o.first_name or ''} {o.last_name or ''}".strip(),
+            'phone': o.phone,
+            'pincode': o.postcode,
+            'city': o.city,
             'note': o.customer_note,
             'tracking': fb_tracking_url,
             'platform': 'Facebook',
@@ -464,10 +464,10 @@ def order_details_view(request,order_id):
             'date': fb_order.date_created,
             'status': fb_order.status,
             'amount': fb_order.total_amount,
-            'customer': f"{fb_order.billing_first_name or ''} {fb_order.billing_last_name or ''}",
-            'phone': fb_order.billing_phone,
-            'pincode': fb_order.billing_postcode,
-            'city': fb_order.billing_city,
+            'customer': f"{fb_order.first_name or ''} {fb_order.last_name or ''}",
+            'phone': fb_order.phone,
+            'pincode': fb_order.postcode,
+            'city': fb_order.city,
             'note': fb_order.customer_note,
             'tracking': f'http://parcelx.in/tracking.php?waybill_no={fb_order.tracking_info}',            
             'platform': 'Facebook',
