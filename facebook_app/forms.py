@@ -96,8 +96,8 @@ class FacebookOrderForm(forms.ModelForm):
     ]
 
     order_id = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
-    billing_state = forms.ChoiceField(choices=INDIAN_STATES, widget=forms.Select(attrs={'class': 'form-control'}))
-    billing_city = forms.ChoiceField(choices=INDIAN_CITIES, widget=forms.Select(attrs={'class': 'form-control'}))
+    state = forms.ChoiceField(choices=INDIAN_STATES, widget=forms.Select(attrs={'class': 'form-control'}))
+    city = forms.ChoiceField(choices=INDIAN_CITIES, widget=forms.Select(attrs={'class': 'form-control'}))
     mode_of_payment = forms.ChoiceField(choices=PAYMENT_METHODS, widget=forms.Select(attrs={'class': 'form-control'}))
     plateform = forms.ChoiceField(choices=PLATFORMS, widget=forms.Select(attrs={'class': 'form-control'}))
 
@@ -105,7 +105,7 @@ class FacebookOrderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if not self.instance.pk:  # Only for new instances
             from datetime import datetime
-            today = datetime.now().strftime('%d%Y%m')
+            today = datetime.now().strftime('%d%m%y')
             # Get the last order_id for today
             last_order = Facebook_orders.objects.filter(order_id__startswith=f'NS{today}').order_by('-order_id').first()
             if last_order:
@@ -188,7 +188,7 @@ class FacebookOrderForm(forms.ModelForm):
             'customer_note': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'internal_notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'tracking_info': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'billing_address': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'products_json': forms.HiddenInput(),
         }
         help_texts = {
