@@ -415,7 +415,7 @@ def order_details_view(request,order_id):
     if '#' in str(order_id):
         woo_order = None
         shopify_order = ShopifyOrder.objects.filter(name=order_id).first()
-        fb_order = Facebook_orders.objects.filter(order_id=order_id_int).first()
+        fb_order = Facebook_orders.objects.filter(order_id=order_id).first()
     else:
         # For WooCommerce and Facebook, IDs are integers
         try:
@@ -490,7 +490,7 @@ def all_orders_edit(request, order_id):
     if '#' in str(order_id):
         woo_order = None
         shopify_order = ShopifyOrder.objects.filter(name=order_id).first()
-        fb_order = Facebook_orders.objects.filter(order_id=order_id_int).first()
+        fb_order = Facebook_orders.objects.filter(order_id=order_id).first()
     else:
         # For WooCommerce and Facebook, IDs are integers
         try:
