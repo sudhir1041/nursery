@@ -141,6 +141,7 @@ def facebook_order_create_view(request):
 @login_required
 def facebook_order_edit_view(request, order_id):
     # Convert string order_id to integer if needed
+    from django.http import Http404
     try:
         if isinstance(order_id, str):
             order_id = int(order_id.lstrip('0'))
