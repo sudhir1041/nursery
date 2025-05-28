@@ -33,11 +33,11 @@ def facebook_order_list_view(request):
     if search_query:
         logger.debug(f"Facebook Applying search filter: '{search_query}'")
         # Use Q objects for OR query on various fields
-        query_filter = Q(billing_email__icontains=search_query) | \
-                       Q(billing_phone__icontains=search_query) | \
+        query_filter = Q(email__icontains=search_query) | \
+                       Q(phone__icontains=search_query) | \
                        Q(alternet_number__icontains=search_query) | \
-                       Q(billing_first_name__icontains=search_query) | \
-                       Q(billing_last_name__icontains=search_query) | \
+                       Q(first_name__icontains=search_query) | \
+                       Q(last_name__icontains=search_query) | \
                        Q(order_id__iexact=search_query) 
         queryset = queryset.filter(query_filter)
         active_filter = True
