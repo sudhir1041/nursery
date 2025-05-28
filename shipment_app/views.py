@@ -125,8 +125,7 @@ def home(request):
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
-        if f.status == 'processing'  and f.shipment_status == 'pending': 
-            days_since_order = (today - f.date_created.astimezone()).days
+        if f.status == 'processing'  or f.shipment_status == 'pending': 
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
             elif days_since_order >= 3: highlight = 'two_days_old'
