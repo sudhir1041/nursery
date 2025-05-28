@@ -2,7 +2,7 @@ from django import forms
 from .models import Facebook_orders
 import json 
 
-class OrderForm(forms.ModelForm):
+class FacebookOrderForm(forms.ModelForm):
 
     INDIAN_STATES = [
         ('', 'Select State'),
