@@ -59,11 +59,10 @@ def home(request):
                 'date': o.created_at_shopify,
                 'status': o.fulfillment_status or 'unfulfilled', # Main status
                 'amount': o.total_price, # This is usually the final amount the customer pays
-                'customer': o.shipping_address_json.get('name', ''),
-                'phone': o.shipping_address_json.get('phone', ''),
-                'pincode': o.shipping_address_json.get('zip', ''),
-                'state': o.shipping_address_json.get('province', ''),
-                'note': o.internal_notes,
+                'customer': o.shipping_address_json.get('name', 'N/A'),
+                'phone': o.shipping_address_json.get('phone', 'N/A'),
+                'pincode': o.shipping_address_json.get('zip', 'N/A'),
+                'state': o.shipping_address_json.get('province', 'N/A'),                'note': o.internal_notes,
                 'tracking': o.tracking_details_json, # This might be a complex object
                 'platform': 'Shopify',
                 'shipment_status': o.shipment_status or 'Pending', # Your custom shipment status field
