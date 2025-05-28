@@ -81,80 +81,80 @@ def home(request):
             })
 
     # ======================== WooCommerce orders ======================
-    for o in woo_qs:
-        if o.status in ['processing', 'partial-paid'] and o.shipment_status == 'pending':            
-            days_since_order = (today - o.date_created_woo.astimezone()).days
-            highlight = 'normal'
-            if days_since_order >= 4: highlight = 'three_days_old'
-            elif days_since_order >= 3: highlight = 'two_days_old'
+    # for o in woo_qs:
+    #     if o.status in ['processing', 'partial-paid'] and o.shipment_status == 'pending':            
+    #         days_since_order = (today - o.date_created_woo.astimezone()).days
+    #         highlight = 'normal'
+    #         if days_since_order >= 4: highlight = 'three_days_old'
+    #         elif days_since_order >= 3: highlight = 'two_days_old'
 
-            raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data or '{}')
-            advance_amount = None
-            balance_amount = None
-            original_total = o.total_amount 
-            for meta in raw_data.get("meta_data", []):
-                if meta.get("key") == "_pi_original_total": original_total = meta.get("value")
-                elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
-                elif meta.get("key") == "_pi_balance_amount": balance_amount = meta.get("value")
+    #         raw_data = o.raw_data if isinstance(o.raw_data, dict) else json.loads(o.raw_data or '{}')
+    #         advance_amount = None
+    #         balance_amount = None
+    #         original_total = o.total_amount 
+    #         for meta in raw_data.get("meta_data", []):
+    #             if meta.get("key") == "_pi_original_total": original_total = meta.get("value")
+    #             elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
+    #             elif meta.get("key") == "_pi_balance_amount": balance_amount = meta.get("value")
 
-            all_orders.append({
-                'order_id': o.woo_id,
-                'date': o.date_created_woo,
-                'status': o.status,
-                'amount': o.total_amount,
-                'customer': f"{o.billing_first_name or ''} {o.billing_last_name or ''}".strip(),
-                'phone': o.billing_phone,
-                'pincode': o.billing_postcode,
-                'state': o.billing_state,
-                'note': o.customer_note,
-                'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
-                'platform': 'Wordpress',
-                'shipment_status': o.shipment_status or 'Pending',
-                'items': [{
-                    'name': item.get('name', ''),
-                    'quantity': item.get('quantity', 0),
-                    'price': item.get('price', 0),
-                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') 
-                } for item in o.line_items_json],
-                'original_total': original_total,
-                'advance_amount': advance_amount,
-                'balance_amount': balance_amount,
-                'is_overdue_highlight': highlight
-            })
+    #         all_orders.append({
+    #             'order_id': o.woo_id,
+    #             'date': o.date_created_woo,
+    #             'status': o.status,
+    #             'amount': o.total_amount,
+    #             'customer': f"{o.billing_first_name or ''} {o.billing_last_name or ''}".strip(),
+    #             'phone': o.billing_phone,
+    #             'pincode': o.billing_postcode,
+    #             'state': o.billing_state,
+    #             'note': o.customer_note,
+    #             'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={o.woo_id}',
+    #             'platform': 'Wordpress',
+    #             'shipment_status': o.shipment_status or 'Pending',
+    #             'items': [{
+    #                 'name': item.get('name', ''),
+    #                 'quantity': item.get('quantity', 0),
+    #                 'price': item.get('price', 0),
+    #                 'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') 
+    #             } for item in o.line_items_json],
+    #             'original_total': original_total,
+    #             'advance_amount': advance_amount,
+    #             'balance_amount': balance_amount,
+    #             'is_overdue_highlight': highlight
+    #         })
 
     # ======================== Facebook orders ======================
-    for f in fb_qs:
-        if f.status == 'processing'  and f.shipment_status == 'pending': 
-            highlight = 'normal'
-            if days_since_order >= 4: highlight = 'three_days_old'
-            elif days_since_order >= 3: highlight = 'two_days_old'
+    # for f in fb_qs:
+    #     if f.status == 'processing'  and f.shipment_status == 'pending': 
+    #         highlight = 'normal'
+    #         if days_since_order >= 4: highlight = 'three_days_old'
+    #         elif days_since_order >= 3: highlight = 'two_days_old'
             
-            products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
+    #         products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
 
-            all_orders.append({
-                'order_id': f.order_id,
-                'date': f.date_created,
-                'status': f.status,
-                'amount': f.total_amount,
-                'customer': f"{f.billing_first_name or ''} {f.billing_last_name or ''}".strip(),
-                'phone': f.billing_phone,
-                'pincode': f.billing_postcode,
-                'state': f.billing_state,
-                'note': f.customer_note,
-                'tracking': f.tracking_info,
-                'platform': 'Facebook',
-                'shipment_status': f.shipment_status or 'Pending',
-                'items': [{
-                    'name': product.get('product_name', ''),
-                    'quantity': product.get('quantity', 0),
-                    'price': product.get('price', 0),
-                    'pot_size': product.get('variant_details', {}).get('size', 'N/A') 
-                } for product in products],
-                'original_total': f.total_amount, 
-                'advance_amount': None, 
-                'balance_amount': f.total_amount, # Assuming total_amount is what's due if no advance.
-                'is_overdue_highlight': highlight
-            })
+    #         all_orders.append({
+    #             'order_id': f.order_id,
+    #             'date': f.date_created,
+    #             'status': f.status,
+    #             'amount': f.total_amount,
+    #             'customer': f"{f.billing_first_name or ''} {f.billing_last_name or ''}".strip(),
+    #             'phone': f.billing_phone,
+    #             'pincode': f.billing_postcode,
+    #             'state': f.billing_state,
+    #             'note': f.customer_note,
+    #             'tracking': f.tracking_info,
+    #             'platform': 'Facebook',
+    #             'shipment_status': f.shipment_status or 'Pending',
+    #             'items': [{
+    #                 'name': product.get('product_name', ''),
+    #                 'quantity': product.get('quantity', 0),
+    #                 'price': product.get('price', 0),
+    #                 'pot_size': product.get('variant_details', {}).get('size', 'N/A') 
+    #             } for product in products],
+    #             'original_total': f.total_amount, 
+    #             'advance_amount': None, 
+    #             'balance_amount': f.total_amount, # Assuming total_amount is what's due if no advance.
+    #             'is_overdue_highlight': highlight
+    #         })
     
     all_orders.sort(key=lambda x: x['date'], reverse=True)
     context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
