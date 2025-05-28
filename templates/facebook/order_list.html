@@ -78,20 +78,20 @@
                 <tbody>
                     {% for order in orders %}
                     <tr {% if order.is_overdue_highlight %} style="background-color:rgb(223, 124, 124);color:white;" {% endif %}>                                               
-                        <td><a class="order-details-view" href=""><i class="fas fa-eye"></i>{{ order.order_id }}<a/></td>
+                        <td><a class="order-details-view" href="{% url 'facebook_order_detail' order.order_id %}"><i class="fas fa-eye"></i>{{ order.order_id }}<a/></td>
                         <td>{{ order.date_created|date:"Y-m-d H:i" }}</td>
                         <td>
                             <span class="badge status-{{ order.status|lower|default:'unknown' }}">{{ order.get_status_display }}</span>
                         </td>
                         <td>{{ order.currency }} {{ order.total_amount|floatformat:2|default:"0.00" }}</td>
-                        <td>{{ order.billing_first_name }} {{ order.billing_last_name }}<br><small>{{ order.billing_email|default:"" }}</small></td>
-                        <td>{{ order.billing_phone|default:"N/A" }}</td>
-                        <td>{{ order.billing_city }}</td>
+                        <td>{{ order.first_name }} {{ order.last_name }}<br><small>{{ order.email|default:"" }}</small></td>
+                        <td>{{ order.phone|default:"N/A" }}</td>
+                        <td>{{ order.city }}</td>
                         <td>{{ order.plateform|default:"N/A" }}</td>
                         <td class="actions">
-                            {% comment %} <a href="{% url 'facebook_order_detail' order.order_id %}" class="btn btn-sm btn-info" title="View">👁️</a>
+                            <a href="{% url 'facebook_order_detail' order.order_id %}" class="btn btn-sm btn-info" title="View">👁️</a>
                             <a href="{% url 'facebook_order_edit' order.order_id %}" class="btn btn-sm btn-secondary" title="Edit">✏️</a>
-                            <a href="{% url 'facebook_order_delete' order.order_id %}" class="btn btn-sm btn-danger" title="Delete">🗑️</a> {% endcomment %}
+                            <a href="{% url 'facebook_order_delete' order.order_id %}" class="btn btn-sm btn-danger" title="Delete">🗑️</a>
                         </td>
                     </tr>
                     {% endfor %}
