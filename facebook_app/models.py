@@ -43,7 +43,7 @@ class Facebook_orders(models.Model):
     received_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     shipment_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     credit_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    plateform = models.CharField(default="Facebook", max_length=100, blank=True, null=True)
+    plateform = models.CharField(default="Manual", max_length=100, blank=True, null=True)
     status = models.CharField(
         max_length=50,
         choices=ORDER_STATUS_CHOICES,

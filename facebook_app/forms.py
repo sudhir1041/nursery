@@ -78,9 +78,28 @@ class FacebookOrderForm(forms.ModelForm):
         ('Varanasi', 'Varanasi')
     ]
 
+    PAYMENT_METHODS = [
+        ('', 'Select Payment Method'),
+        ('phonepe', 'PhonePe'),
+        ('paytm', 'Paytm'),
+        ('googlepay', 'Google Pay'),
+        ('cash', 'Cash'),
+        ('nursery_nisarga', 'Nursery Nisarga')
+    ]
+
+    PLATFORMS = [
+        ('', 'Select Platform'),
+        ('facebook', 'Facebook'),
+        ('woocommerce', 'WooCommerce'),
+        ('shopify', 'Shopify'),
+        ('offline', 'Offline')
+    ]
+
     order_id = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
     billing_state = forms.ChoiceField(choices=INDIAN_STATES, widget=forms.Select(attrs={'class': 'form-control'}))
     billing_city = forms.ChoiceField(choices=INDIAN_CITIES, widget=forms.Select(attrs={'class': 'form-control'}))
+    mode_of_payment = forms.ChoiceField(choices=PAYMENT_METHODS, widget=forms.Select(attrs={'class': 'form-control'}))
+    plateform = forms.ChoiceField(choices=PLATFORMS, widget=forms.Select(attrs={'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
