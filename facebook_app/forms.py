@@ -109,14 +109,16 @@ class FacebookOrderForm(forms.ModelForm):
             # Get the last order_id for today
             last_order = Facebook_orders.objects.filter(order_id__startswith=f'NS{today}').order_by('-order_id').first()
             if last_order:
-                # Extract the number from the last order_id and increment
-                last_num = int(last_order.order_id[10:])  # Skip NS + date
-                new_num = last_num + 1
+                try:
+                    # Extract the number from the last order_id and increment
+                    last_num = int(last_order.order_id[10:])  # Skip NS + date
+                    new_num = last_num + 1
+                except (ValueError, IndexError):
+                    new_num = 1
             else:
                 new_num = 1
             # Generate new order_id with date
-            self.initial['order_id'] = f'NS{today}{new_num}'   
-             
+            self.initial['order_id'] = f'NS{today}{new_num:04d}'  # Zero-pad to 4 digits                
     def clean_products_json(self):
         data = self.cleaned_data.get('products_json')
 
