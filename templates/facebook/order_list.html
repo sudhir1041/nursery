@@ -89,9 +89,9 @@
                         <td>{{ order.billing_city }}</td>
                         <td>{{ order.plateform|default:"N/A" }}</td>
                         <td class="actions">
-                            <a href="{% url 'facebook_order_detail' order.order_id %}" class="btn btn-sm btn-info" title="View">👁️</a>
+                            {% comment %} <a href="{% url 'facebook_order_detail' order.order_id %}" class="btn btn-sm btn-info" title="View">👁️</a>
                             <a href="{% url 'facebook_order_edit' order.order_id %}" class="btn btn-sm btn-secondary" title="Edit">✏️</a>
-                            <a href="{% url 'facebook_order_delete' order.order_id %}" class="btn btn-sm btn-danger" title="Delete">🗑️</a>
+                            <a href="{% url 'facebook_order_delete' order.order_id %}" class="btn btn-sm btn-danger" title="Delete">🗑️</a> {% endcomment %}
                         </td>
                     </tr>
                     {% endfor %}
