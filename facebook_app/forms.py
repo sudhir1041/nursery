@@ -96,7 +96,8 @@ class FacebookOrderForm(forms.ModelForm):
             else:
                 new_num = 1
             # Generate new order_id with date
-            self.initial['order_id'] = f'NS{today}{new_num:04d}'
+            self.initial['order_id'] = f'NS{today}{new_num}'   
+             
     def clean_products_json(self):
         data = self.cleaned_data.get('products_json')
 
