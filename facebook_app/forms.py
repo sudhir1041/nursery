@@ -78,11 +78,25 @@ class FacebookOrderForm(forms.ModelForm):
         ('Varanasi', 'Varanasi')
     ]
 
+    order_id = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
     billing_state = forms.ChoiceField(choices=INDIAN_STATES, widget=forms.Select(attrs={'class': 'form-control'}))
     billing_city = forms.ChoiceField(choices=INDIAN_CITIES, widget=forms.Select(attrs={'class': 'form-control'}))
 
-    def clean_products_json(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:  # Only for new instances
+            # Get the last order_id
+            last_order = Facebook_orders.objects.order_by('-order_id').first()
+            if last_order:
+                # Extract the number from the last order_id and increment
+                last_num = int(last_order.order_id[2:])
+                new_num = last_num + 1
+            else:
+                new_num = 1
+            # Generate new order_id
+            self.initial['order_id'] = f'NL{new_num:04d}'
 
+    def clean_products_json(self):
         data = self.cleaned_data.get('products_json')
 
         if data is None or data == '':
@@ -116,7 +130,6 @@ class FacebookOrderForm(forms.ModelForm):
                  raise forms.ValidationError(f"Item #{index+1}: 'price' is required.")
 
             try:
-
                 qty = int(item['quantity'])
                 if qty <= 0:
                     raise forms.ValidationError(f"Item #{index+1}: Quantity must be a positive integer.")
@@ -125,7 +138,6 @@ class FacebookOrderForm(forms.ModelForm):
                  raise forms.ValidationError(f"Item #{index+1}: Quantity must be a whole number.")
 
             try:
-                
                 price = float(item['price'])
                 if price < 0:
                      raise forms.ValidationError(f"Item #{index+1}: Price cannot be negative.")
@@ -133,13 +145,11 @@ class FacebookOrderForm(forms.ModelForm):
             except (ValueError, TypeError):
                  raise forms.ValidationError(f"Item #{index+1}: Price must be a number.")
 
-            
             item['pot_size'] = item.get('pot_size', '') 
 
             validated_products.append(item) 
         
         return validated_products
-
 
     class Meta:
         model = Facebook_orders
