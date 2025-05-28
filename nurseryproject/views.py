@@ -415,13 +415,13 @@ def order_details_view(request,order_id):
     if '#' in str(order_id):
         woo_order = None
         shopify_order = ShopifyOrder.objects.filter(name=order_id).first()
-        fb_order = None
+        fb_order = Facebook_orders.objects.filter(order_id=order_id_int).first()
     else:
         # For WooCommerce and Facebook, IDs are integers
         try:
             order_id_int = int(order_id)
             woo_order = WooCommerceOrder.objects.filter(woo_id=order_id_int).first()
-            fb_order = Facebook_orders.objects.filter(order_id=order_id_int).first()
+            fb_order = None
             shopify_order = None
         except ValueError:
             woo_order = None
@@ -490,13 +490,13 @@ def all_orders_edit(request, order_id):
     if '#' in str(order_id):
         woo_order = None
         shopify_order = ShopifyOrder.objects.filter(name=order_id).first()
-        fb_order = None
+        fb_order = Facebook_orders.objects.filter(order_id=order_id_int).first()
     else:
         # For WooCommerce and Facebook, IDs are integers
         try:
             order_id_int = int(order_id)
             woo_order = WooCommerceOrder.objects.filter(woo_id=order_id_int).first()
-            fb_order = Facebook_orders.objects.filter(order_id=order_id_int).first()
+            fb_order = None
             shopify_order = None
         except ValueError:
             woo_order = None
