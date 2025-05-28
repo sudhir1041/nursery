@@ -27,15 +27,15 @@
           <dl class="grid gap-6">
             <div>
               <dt class="text-sm font-medium text-gray-600 mb-2">Name</dt>
-              <dd class="text-lg">{{ order.billing_first_name|default:"" }} {{ order.billing_last_name|default:"" }}</dd>
+              <dd class="text-lg">{{ order.first_name|default:"" }} {{ order.last_name|default:"" }}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-600 mb-2">Email</dt>
-              <dd class="text-lg">{{ order.billing_email|default:"N/A" }}</dd>
+              <dd class="text-lg">{{ order.email|default:"N/A" }}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-600 mb-2">Phone</dt>
-              <dd class="text-lg">{{ order.billing_phone|default:"N/A" }}</dd>
+              <dd class="text-lg">{{ order.phone|default:"N/A" }}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-600 mb-2">Alternate Number</dt>
@@ -44,9 +44,9 @@
             <div>
               <dt class="text-sm font-medium text-gray-600 mb-2">Address</dt>
               <dd class="text-lg">
-                {{ order.billing_address|default:"-" }}<br>
-                {{ order.billing_city|default:"" }}, {{ order.billing_state|default:"" }} {{ order.billing_postcode|default:"" }}<br>
-                {{ order.billing_country|default:"INDIA" }}
+                {{ order.address|default:"-" }}<br>
+                {{ order.city|default:"" }}, {{ order.state|default:"" }} {{ order.postcode|default:"" }}<br>
+                {{ order.country|default:"INDIA" }}
               </dd>
             </div>
           </dl>
@@ -115,8 +115,8 @@
               <dd class="text-lg">{{ order.currency }} {{ order.shipment_amount|floatformat:2|default:"0.00" }}</dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-gray-600 mb-2">Credit Amount</dt>
-              <dd class="text-lg">{{ order.currency }} {{ order.credit_amount|floatformat:2|default:"0.00" }}</dd>
+              <dt class="text-sm font-medium text-gray-600 mb-2">Pending Amount</dt>
+              <dd class="text-lg">{{ order.currency }} {{ order.pending_amount|floatformat:2|default:"0.00" }}</dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-600 mb-2">Payment Mode</dt>
