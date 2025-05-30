@@ -737,6 +737,9 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
     const newOrderId = orderId + currentYear;
 
     const customerName = document.getElementById('shipCustomer').textContent.replace('Customer: ', '');
+    const customerAddress = document.getElementById('shipAddress').textContent.replace('Address: ', '');
+    const customerPhone = document.getElementById('shipPhone').textContent.replace('Phone: ', '');
+    const customerEmail = document.getElementById('shipEmail').textContent.replace('Email: ', '');
 
     const shippingData = {
         orderId: orderId,
@@ -748,8 +751,13 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         newOrderDetails: {
             orderId: newOrderId,
             customerName: customerName,
+            customerAddress: customerAddress,
+            customerPhone: customerPhone, 
+            customerEmail: customerEmail,
             platform: platform,
-            items: unselectedItems
+            items: unselectedItems,
+            orderDate: new Date().toISOString(),
+            shippingStatus: 'Pending'
         }
     };
 
