@@ -28,7 +28,7 @@ def home(request):
 
     # ====================== Shopify Orders =======================
     for o in shopify_qs:
-        unfulfilled = o.fulfillment_status == 'unfulfilled' or o.fulfillment_status == 'none' and o.shipment_status== 'pending' # or other logic for 'pending'
+        unfulfilled = o.fulfillment_status == 'unfulfilled' or o.fulfillment_status == 'none' and o.shipment_status== 'pending'
         if unfulfilled: # Process only orders that need shipping
             days_since_order = (today - o.created_at_shopify.astimezone()).days
             highlight = 'normal'
@@ -83,7 +83,7 @@ def home(request):
 
     # ======================== WooCommerce orders ======================
     for woo in woo_qs:
-        if woo.status in ['processing', 'partial-paid'] and woo.shipment_status == 'pending':            
+        if woo.status == 'processing' or woo.status == 'partial-paid' and woo.shipment_status == 'pending':            
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
