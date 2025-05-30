@@ -384,22 +384,16 @@
     .items-table td:nth-child(4) { width: 20%; } /* Quantity */
 
 </style>
+</style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="card__container">
     {% for order in orders %}
     <div class="card {{ order.is_overdue_highlight }}"
-         data-order-id="{{ order.order_id }}" {# Store order_id directly for easier access #}
-         data-platform="{{ order.platform }}" {# Store platform directly #}
-         data-amount="{{ order.amount }}"
-         data-date="{{ order.date }}"
-         data-pincode="{{ order.pincode }}"
-         data-note="{{ order.note }}"
-         data-tracking="{{ order.tracking }}"
+         data-order-id="{{ order.order_id }}"
+         data-platform="{{ order.platform }}"
          data-shipment-status="{{ order.shipment_status }}"
-         data-advance_amount="{{ order.advance_amount }}"
-         data-balance_amount="{{ order.balance_amount }}"
          >
         <div class="card__header">
             <div class="card__info">
@@ -409,12 +403,10 @@
             </div>
             <div class="card__status">{{ order.status }}</div>
         </div>
-
         <div class="card__content">
             <h3 class="card__title">{{ order.customer }}</h3>
-            <h5 class="card__date">{{ order.date|date:"d M Y, H:i" }}</h5> {# Format date #}
+            <h5 class="card__date">{{ order.date|date:"d M Y, H:i" }}</h5>
             <p class="card__contact"><strong>Phone:</strong> {{ order.phone }}</p>
-
             <div class="card__products">
                 <strong>Items:</strong>
                 <ul class="card__list">
@@ -429,7 +421,6 @@
                 </ul>
             </div>
         </div>
-
         <div class="card__actions">
             <button type="button" class="button button--primary"><i class="fas fa-shipping-fast"></i> Ship</button>
             <button type="button" class="button button--secondary"><i class="fas fa-clone"></i> Clone</button>
@@ -443,22 +434,18 @@
     <div class="popup-content ship-popup-content"> 
         <button class="popup-close" onclick="closeShipPopup()">&times;</button>
         <h2>Ship Order</h2>
-
         <form class="ship-form" id="shipForm">
-            {% csrf_token %} {# IMPORTANT: Add CSRF token for POST requests #}
+            {% csrf_token %}
             <div class="ship-form__row">
                 <label class="ship-form__label">Order Details</label>
                 <p id="shipOrderId" style="font-weight: bold;"></p>
                 <p id="shipCustomer"></p>
                 <p id="shipPlatform" style="font-size: 0.8em; color: #555;"></p>
             </div>
-
             <div class="ship-form__row">
                 <label class="ship-form__label">Items to Ship (Uncheck to exclude):</label>
-                <div id="shipItems">
-                    </div>
+                <div id="shipItems"></div>
             </div>
-
             <div class="ship-form__row">
                 <label class="ship-form__label" for="shipStatus">Shipping Status</label>
                 <select class="ship-form__select" id="shipStatus">
@@ -469,7 +456,6 @@
                     <option value="cancelled">Cancelled</option>
                 </select>
             </div>
-
             <div class="ship-form__actions">
                 <button type="button" class="button button--secondary" onclick="closeShipPopup()">Cancel</button>
                 <button type="submit" class="button button--primary">Confirm Shipping</button>
@@ -479,230 +465,51 @@
 </div>
 
 <div class="popup-overlay" id="cardPopup">
-    <div class="popup-content">
-        <button class="popup-close" onclick="closePopup()">&times;</button>
-        <div class="card__header">
-            <div class="card__info">
-                <span class="card__source" id="popupPlatform"></span>
-                <span class="card__id" id="popupId"></span>
-                <span class="card__location" id="popupLocation"></span>
-            </div>
-            <div class="card__status" id="popupStatus"></div>
-        </div>
-
-        <div class="card__content">
-            <h3 class="card__title" id="popupTitle"></h3>
-            <p class="card__contact" id="popupContact"></p>
-            <p><strong>Amount:</strong> <span id="popupAmount"></span></p>
-            <p><strong>Advance Amount:</strong> <span id="popupadvance_amount"></span></p>
-            <p><strong>Balance Amount:</strong> <span id="popupbalance_amount"></span></p>
-            <p><strong>Date:</strong> <span id="popupDate"></span></p>
-            <p><strong>Pincode:</strong> <span id="popupPincode"></span></p>
-            <p><strong>Note:</strong> <span id="popupNote"></span></p>
-            <p><strong>Tracking:</strong> <span id="popupTracking"></span></p>
-            <p><strong>Shipment Status:</strong> <span id="popupShipmentStatus"></span></p>
-
-            <div class="card__products">
-                <strong>Items:</strong>
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th>S.No</th>
-                            <th>Item Name</th>
-                            <th>Pot Size</th>
-                            <th>Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody id="popupItemsTableBody"> {# Changed ID for clarity #}
-                        </tbody>
-                </table>
-            </div>
-        </div>
     </div>
-</div>
 
 <script>
-// Function to get CSRF token from the form
-function getCsrfToken() {
-    return document.querySelector('#shipForm [name=csrfmiddlewaretoken]').value;
-}
-
-// Function to show the "View Card Details" popup
-function showPopup(cardElement) {
-    const popup = document.getElementById('cardPopup');
-    
-    const order = {
-        platform: cardElement.dataset.platform,
-        id: cardElement.dataset.orderId,
-        location: cardElement.querySelector('.card__location').textContent.trim(),
-        status: cardElement.querySelector('.card__status').textContent.trim(),
-        customer: cardElement.querySelector('.card__title').textContent.trim(),
-        phone: cardElement.querySelector('.card__contact').textContent.trim(),
-        amount: cardElement.dataset.amount || 'N/A',
-        advance_amount: cardElement.dataset.advance_amount || 'N/A',
-        balance_amount: cardElement.dataset.balance_amount || 'N/A',
-        date: cardElement.dataset.date || 'N/A', // Consider formatting this date
-        pincode: cardElement.dataset.pincode || 'N/A',
-        note: cardElement.dataset.note || 'N/A',
-        tracking: cardElement.dataset.tracking || 'N/A',
-        shipmentStatus: cardElement.dataset.shipmentStatus || 'N/A',
-        items: Array.from(cardElement.querySelectorAll('.card__list-item')).map(itemLi => {
-            return {
-                name: itemLi.dataset.itemName,
-                potSize: itemLi.dataset.itemPotsize,
-                quantity: parseInt(itemLi.dataset.itemQuantity) || 1
-            };
-        })
-    };
-
-    document.getElementById('popupPlatform').textContent = order.platform;
-    document.getElementById('popupPlatform').className = `card__source card__source--${order.platform.toLowerCase()}`;
-    document.getElementById('popupId').textContent = order.id;
-    document.getElementById('popupLocation').textContent = order.location;
-    document.getElementById('popupStatus').textContent = order.status;
-    document.getElementById('popupTitle').textContent = order.customer;
-    document.getElementById('popupContact').textContent = order.phone;
-    document.getElementById('popupAmount').textContent = order.amount;
-    document.getElementById('popupadvance_amount').textContent = order.advance_amount;
-    document.getElementById('popupbalance_amount').textContent = order.balance_amount;
-    document.getElementById('popupDate').textContent = new Date(order.date).toLocaleString(); // Format date
-    document.getElementById('popupPincode').textContent = order.pincode;
-    document.getElementById('popupNote').textContent = order.note;
-    document.getElementById('popupTracking').textContent = order.tracking;
-    document.getElementById('popupShipmentStatus').textContent = order.shipmentStatus;
-
-    const itemsTableBody = document.getElementById('popupItemsTableBody');
-    itemsTableBody.innerHTML = ''; 
-    order.items.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${item.name}</td>
-            <td>${item.potSize}</td>
-            <td>${item.quantity}</td>
-        `;
-        itemsTableBody.appendChild(tr);
-    });
-
-    popup.style.display = 'flex';
-}
-
-function closePopup() {
-    document.getElementById('cardPopup').style.display = 'none';
-}
+function getCsrfToken() { return document.querySelector('#shipForm [name=csrfmiddlewaretoken]').value; }
+function closePopup() { document.getElementById('cardPopup').style.display = 'none'; }
+function closeShipPopup() { document.getElementById('shipPopup').style.display = 'none'; }
 
 function showShipPopup(cardElement) {
     const popup = document.getElementById('shipPopup');
-    
-    const orderId = cardElement.dataset.orderId;
-    const platform = cardElement.dataset.platform;
+    const orderId = cardElement.dataset.orderId; const platform = cardElement.dataset.platform;
     const customerName = cardElement.querySelector('.card__title').textContent.trim();
-
     const shipForm = document.getElementById('shipForm');
-    shipForm.dataset.orderId = orderId;
-    shipForm.dataset.platform = platform; // Store platform on the form
-
+    shipForm.dataset.orderId = orderId; shipForm.dataset.platform = platform;
     document.getElementById('shipOrderId').textContent = `Order ID: ${orderId}`;
     document.getElementById('shipCustomer').textContent = `Customer: ${customerName}`;
     document.getElementById('shipPlatform').textContent = `Platform: ${platform}`;
-
-
-    const itemsData = Array.from(cardElement.querySelectorAll('.card__list-item')).map((itemLi, index) => {
-        return {
-            id: `item-${orderId}-${platform}-${index}`, // Made ID more unique
-            name: itemLi.dataset.itemName,
-            potSize: itemLi.dataset.itemPotsize,
-            quantity: parseInt(itemLi.dataset.itemQuantity) || 1,
-            displayText: itemLi.textContent.trim() 
-        };
-    });
-
+    const itemsData = Array.from(cardElement.querySelectorAll('.card__list-item')).map((itemLi, index) => ({
+        id: `item-${orderId}-${platform}-${index}`, name: itemLi.dataset.itemName, potSize: itemLi.dataset.itemPotsize,
+        quantity: parseInt(itemLi.dataset.itemQuantity) || 1, displayText: itemLi.textContent.trim() 
+    }));
     const itemsContainer = document.getElementById('shipItems');
     itemsContainer.innerHTML = ''; 
-
     itemsData.forEach(item => {
         const itemRowDiv = document.createElement('div');
         itemRowDiv.className = 'ship-form__item-row';
-
         const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'ship-form__checkbox';
-        checkbox.checked = true; 
-        checkbox.id = item.id; 
-        checkbox.dataset.itemName = item.name;
-        checkbox.dataset.itemPotSize = item.potSize;
-        checkbox.dataset.itemQuantity = item.quantity;
-
+        checkbox.type = 'checkbox'; checkbox.className = 'ship-form__checkbox';
+        checkbox.checked = true; checkbox.id = item.id; checkbox.dataset.itemName = item.name;
+        checkbox.dataset.itemPotSize = item.potSize; checkbox.dataset.itemQuantity = item.quantity;
         const label = document.createElement('label');
-        label.textContent = item.displayText;
-        label.htmlFor = checkbox.id; 
-
-        itemRowDiv.appendChild(checkbox);
-        itemRowDiv.appendChild(label);
+        label.textContent = item.displayText; label.htmlFor = checkbox.id; 
+        itemRowDiv.appendChild(checkbox); itemRowDiv.appendChild(label);
         itemsContainer.appendChild(itemRowDiv);
     });
-    
     const currentShipmentStatus = cardElement.dataset.shipmentStatus || 'processing';
-    // Ensure the value exists in the dropdown options
     const shipStatusDropdown = document.getElementById('shipStatus');
     if ([...shipStatusDropdown.options].map(opt => opt.value).includes(currentShipmentStatus.toLowerCase())) {
         shipStatusDropdown.value = currentShipmentStatus.toLowerCase();
-    } else {
-        shipStatusDropdown.value = 'processing'; // Default if status not in options
-    }
-
-
+    } else { shipStatusDropdown.value = 'processing'; }
     popup.style.display = 'flex';
 }
 
-function closeShipPopup() {
-    document.getElementById('shipPopup').style.display = 'none';
-}
-
-document.querySelectorAll('.card').forEach(card => {
-    const viewButton = card.querySelector('.button--tertiary');
-    if (viewButton) {
-        viewButton.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            showPopup(card);
-        });
-    }
-
-    const shipButton = card.querySelector('.button--primary');
-    if (shipButton) {
-        shipButton.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            showShipPopup(card);
-        });
-    }
-    
-    const cloneButton = card.querySelector('.button--secondary');
-    if (cloneButton) {
-        cloneButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('Clone button clicked for order:', card.dataset.orderId, 'Platform:', card.dataset.platform);
-            alert('Clone functionality (full order duplication) to be implemented separately.');
-        });
-    }
-
-    card.addEventListener('click', (e) => {
-        if (!e.target.closest('.button')) { 
-            showPopup(card);
-        }
-    });
-});
-
-document.getElementById('cardPopup').addEventListener('click', (e) => {
-    if (e.target.id === 'cardPopup') { 
-        closePopup();
-    }
-});
-
-document.getElementById('shipPopup').addEventListener('click', (e) => {
-    if (e.target.id === 'shipPopup') {
-        closeShipPopup();
-    }
-});
+document.querySelectorAll('.card .button--primary').forEach(button => button.addEventListener('click', (e) => { e.stopPropagation(); showShipPopup(e.target.closest('.card')); }));
+document.querySelectorAll('.card .button--tertiary').forEach(button => button.addEventListener('click', (e) => { e.stopPropagation(); /* showPopup logic here */ }));
+document.getElementById('shipPopup').addEventListener('click', (e) => { if (e.target.id === 'shipPopup') closeShipPopup(); });
 
 document.getElementById('shipForm').addEventListener('submit', (e) => {
     e.preventDefault(); 
@@ -714,13 +521,12 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
     const unselectedItems = [];
     const selectedItems = [];
 
-    const itemCheckboxes = document.querySelectorAll('#shipItems .ship-form__checkbox');
-
-    itemCheckboxes.forEach(checkbox => {
+    document.querySelectorAll('#shipItems .ship-form__checkbox').forEach(checkbox => {
         const itemDetails = {
             name: checkbox.dataset.itemName,
-            potSize: checkbox.dataset.itemPotSize,
-            quantity: parseInt(checkbox.dataset.itemQuantity) || 1 
+            pot_size: checkbox.dataset.itemPotSize,
+            quantity: parseInt(checkbox.dataset.itemQuantity) || 1,
+            price: 0
         };
         if (checkbox.checked) {
             selectedItems.push(itemDetails);
@@ -737,59 +543,52 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         unselectedItems: unselectedItems 
     };
 
-    console.log("Shipping Data to send to backend:", JSON.stringify(shippingData, null, 2));
-
     const processingUrl = '/shipment/process-shipment/'; 
 
     fetch(processingUrl, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken() 
-        },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         body: JSON.stringify(shippingData)
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(errData => { // Try to parse JSON error from backend
-                throw new Error(errData.error || `Server error: ${response.status} ${response.statusText}`);
-            }).catch(() => { // Fallback if error response is not JSON
-                throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-            });
+            return response.json().then(errData => { throw new Error(errData.error || `Server error: ${response.status}`); });
         }
         return response.json();
     })
     .then(data => {
-        console.log('Backend success response:', data);
-        alert(data.message || `Order ${orderId} processed successfully.`);
+        alert(data.message);
         
-        // Optionally, update the card on the page
         const cardToUpdate = document.querySelector(`.card[data-order-id='${orderId}'][data-platform='${platform}']`);
-        if (cardToUpdate) {
-           if (data.newShipmentStatus) { 
-               cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
-               const statusElement = cardToUpdate.querySelector('.card__status');
-               if (statusElement) {
-                   statusElement.textContent = data.newShipmentStatus;
-               }
-               // If the order is now fully shipped or cancelled, you might want to remove it or visually change it further.
-               // For example, if status is 'shipped' or 'delivered' or 'cancelled', you could hide the card or dim it.
-               if (['shipped', 'delivered', 'cancelled'].includes(data.newShipmentStatus.toLowerCase())) {
-                   // cardToUpdate.style.display = 'none'; // Example: Hide the card
-                   cardToUpdate.style.opacity = '0.5'; // Example: Dim the card
-               }
+        if (cardToUpdate && data.newShipmentStatus) {
+           cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
+           
+           const statusElement = cardToUpdate.querySelector('.card__status');
+           if (statusElement) {
+               statusElement.textContent = data.newShipmentStatus.replace(/_/g, ' ');
            }
+           
+           if (['shipped', 'delivered', 'cancelled'].includes(data.newShipmentStatus.toLowerCase())) {
+               cardToUpdate.style.opacity = '0.5';
+               cardToUpdate.querySelectorAll('.button').forEach(button => button.disabled = true);
+           } else if (data.newShipmentStatus.toLowerCase() === 'partially_shipped') {
+               const shipButton = cardToUpdate.querySelector('.button--primary');
+               if (shipButton) shipButton.style.display = 'none';
+           }
+        }
+        
+        if (data.clonedOrderId) {
+            setTimeout(() => { location.reload(); }, 1500);
         }
     })
     .catch((error) => {
-        console.error('Error sending shipping data to backend:', error);
-        alert(`Error processing order ${orderId}: ${error.message}. Please check console.`);
+        console.error('Error processing shipment:', error);
+        alert(`Error: ${error.message}`);
     })
     .finally(() => {
          closeShipPopup();
     });
 });
-
 </script>
 
 {% endblock %}
