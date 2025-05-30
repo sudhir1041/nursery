@@ -66,6 +66,7 @@ def home(request):
                 'note': o.internal_notes,
                 'tracking': o.tracking_details_json, # This might be a complex object
                 'platform': 'Shopify',
+                'shipment_status': o.shipment_status or 'Pending', # Your custom shipment status field
                 'items': [{
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
@@ -109,6 +110,7 @@ def home(request):
                 'note': woo.customer_note,
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={woo.woo_id}',
                 'platform': 'Wordpress',
+                'shipment_status': woo.shipment_status or 'Pending',
                 'items': [{
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
@@ -142,6 +144,7 @@ def home(request):
                 'note': f.customer_note,
                 'tracking': f.tracking_info,
                 'platform': 'Facebook',
+                'shipment_status': f.shipment_status or 'Pending',
                 'items': [{
                     'name': product.get('product_name', ''),
                     'quantity': product.get('quantity', 0),
