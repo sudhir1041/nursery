@@ -84,7 +84,7 @@ def home(request):
     # ======================== WooCommerce orders ======================
     for woo in woo_qs:
         if woo.status == 'processing' or woo.status == 'partial-paid' and woo.shipment_status == 'shipped' or woo.shipment_status == 'processing':
-            print(woo.shipment_status)            
+            logger.info(f"WooCommerce order shipment status: {woo.shipment_status}")                      
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
