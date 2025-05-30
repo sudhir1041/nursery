@@ -166,10 +166,12 @@ def home(request):
 def process_shipment(request):
     try:
         data = json.loads(request.body)
-        order_id_str = data.get('orderId')
+        
+        # FIX 1: Use .get() with a default and .strip() to clean the incoming ID string.
+        # This removes any accidental leading/trailing whitespace.
+        order_id_str = data.get('orderId', '').strip()
         platform = data.get('platform')
         new_shipping_status = data.get('shippingStatus')
-        selected_items = data.get('selectedItems', [])
         unselected_items = data.get('unselectedItems', [])
 
         if not all([order_id_str, platform, new_shipping_status]):
@@ -177,19 +179,32 @@ def process_shipment(request):
 
         order_instance = None
         
+        # FIX 2: Add logging to see the exact ID being used for the database query.
+        # This is extremely helpful for debugging.
+        logger.info(f"Attempting to process shipment. Platform: '{platform}', Cleaned ID: '{order_id_str}'")
+
         if platform == 'Shopify':
+            # CONFIRMED: Using string lookup for Shopify's 'name' field.
+            # Ensure your ShopifyOrder model's field is indeed named 'name'.
             order_instance = get_object_or_404(ShopifyOrder, name=order_id_str)
+
         elif platform == 'Wordpress':
+            # This logic is correct and working, so we leave it as is.
             try:
                 order_id_int = int(order_id_str)
                 order_instance = get_object_or_404(WooCommerceOrder, woo_id=order_id_int)
-            except ValueError:
+            except (ValueError, TypeError):
                 return JsonResponse({'error': 'Invalid Order ID format for Wordpress.'}, status=400)
+
         elif platform == 'Facebook':
+            # CONFIRMED: Using string lookup for Facebook's 'order_id' field.
+            # Ensure your Facebook_orders model's field is indeed named 'order_id'.
             order_instance = get_object_or_404(Facebook_orders, order_id=order_id_str)
+        
         else:
             return JsonResponse({'error': 'Invalid platform specified.'}, status=400)
 
+        # The rest of your function remains the same
         order_instance.shipment_status = new_shipping_status
         
         if hasattr(order_instance, 'unselected_items_for_clone'):
@@ -199,7 +214,7 @@ def process_shipment(request):
 
         order_instance.save()
         
-        logger.info(f"Processed shipment for {platform} Order ID {order_id_str}. Status: {new_shipping_status}. Unselected items: {len(unselected_items)}")
+        logger.info(f"Successfully processed shipment for {platform} Order ID {order_id_str}.")
 
         return JsonResponse({
             'message': f'{platform} Order {order_id_str} updated successfully.',
@@ -210,6 +225,6 @@ def process_shipment(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
     except Exception as e:
-        logger.error(f"Error processing shipment: {e}", exc_info=True)
+        # Enhanced logging for any other errors
+        logger.error(f"Error processing shipment: {type(e).__name__} - {e}", exc_info=True)
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
-
