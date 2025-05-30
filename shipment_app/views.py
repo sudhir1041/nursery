@@ -83,7 +83,7 @@ def home(request):
 
     # ======================== WooCommerce orders ======================
     for woo in woo_qs:
-        if woo.status == 'processing' or woo.status == 'partial-paid' and woo.shipment_status == 'pending':            
+        if woo.status == 'processing' or woo.status == 'partial-paid' and woo.shipment_status == 'pending' or woo.shipment_status == 'processing':            
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -125,7 +125,7 @@ def home(request):
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
-        if f.status == 'processing'  and f.shipment_status == 'pending': 
+        if f.status == 'processing'  and f.shipment_status == 'pending' or f.shipment_status == 'processing': 
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
             elif days_since_order >= 3: highlight = 'two_days_old'
