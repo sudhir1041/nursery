@@ -705,14 +705,15 @@ document.getElementById('shipPopup').addEventListener('click', (e) => {
 });
 
 document.getElementById('shipForm').addEventListener('submit', (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     const form = e.target;
     const shippingStatus = document.getElementById('shipStatus').value;
-    const orderId = form.dataset.orderId; 
-    const platform = form.dataset.platform; 
+    const orderId = form.dataset.orderId;
+    const platform = form.dataset.platform;
 
     const unselectedItems = [];
     const selectedItems = [];
+    let totalUnselectedPlants = 0;
 
     const itemCheckboxes = document.querySelectorAll('#shipItems .ship-form__checkbox');
 
@@ -720,40 +721,62 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         const itemDetails = {
             name: checkbox.dataset.itemName,
             potSize: checkbox.dataset.itemPotSize,
-            quantity: parseInt(checkbox.dataset.itemQuantity) || 1 
+            quantity: parseInt(checkbox.dataset.itemQuantity) || 1
         };
         if (checkbox.checked) {
             selectedItems.push(itemDetails);
         } else {
             unselectedItems.push(itemDetails);
+            totalUnselectedPlants += itemDetails.quantity;
         }
     });
 
+    // Get current year from system
+    const currentYear = new Date().getFullYear();
+    // Create new order ID for unselected items by appending current year
+    const newOrderId = orderId + currentYear;
+
+    const customerName = document.getElementById('shipCustomer').textContent.replace('Customer: ', '');
+    const customerEmail = document.getElementById('shipCustomer').dataset.email || '';
+    const customerPhone = document.getElementById('shipCustomer').dataset.phone || '';
+    const customerAddress = document.getElementById('shipCustomer').dataset.address || '';
+
     const shippingData = {
         orderId: orderId,
-        platform: platform, 
+        platform: platform,
         shippingStatus: shippingStatus,
         selectedItems: selectedItems,
-        unselectedItems: unselectedItems 
+        unselectedItems: unselectedItems,
+        totalUnselectedPlants: totalUnselectedPlants,
+        newOrderDetails: {
+            orderId: newOrderId,
+            customerName: customerName,
+            customerEmail: customerEmail,
+            customerPhone: customerPhone,
+            customerAddress: customerAddress,
+            platform: platform,
+            items: unselectedItems,
+            status: 'pending'
+        }
     };
 
     console.log("Shipping Data to send to backend:", JSON.stringify(shippingData, null, 2));
 
-    const processingUrl = '/shipment/process-shipment/'; 
+    const processingUrl = '/shipment/process-shipment/';
 
     fetch(processingUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken() 
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify(shippingData)
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(errData => { // Try to parse JSON error from backend
+            return response.json().then(errData => {
                 throw new Error(errData.error || `Server error: ${response.status} ${response.statusText}`);
-            }).catch(() => { // Fallback if error response is not JSON
+            }).catch(() => {
                 throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
             });
         }
@@ -761,24 +784,25 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
     })
     .then(data => {
         console.log('Backend success response:', data);
-        alert(data.message || `Order ${orderId} processed successfully.`);
         
-        // Optionally, update the card on the page
+        let message = `Order ${orderId} processed successfully.`;
+        if (unselectedItems.length > 0) {
+            message += `\nNew order ${newOrderId} created with ${totalUnselectedPlants} unselected plants for ${customerName}`;
+        }
+        alert(message);
+        
         const cardToUpdate = document.querySelector(`.card[data-order-id='${orderId}'][data-platform='${platform}']`);
         if (cardToUpdate) {
-           if (data.newShipmentStatus) { 
-               cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
-               const statusElement = cardToUpdate.querySelector('.card__status');
-               if (statusElement) {
-                   statusElement.textContent = data.newShipmentStatus;
-               }
-               // If the order is now fully shipped or cancelled, you might want to remove it or visually change it further.
-               // For example, if status is 'shipped' or 'delivered' or 'cancelled', you could hide the card or dim it.
-               if (['shipped', 'delivered', 'cancelled'].includes(data.newShipmentStatus.toLowerCase())) {
-                   // cardToUpdate.style.display = 'none'; // Example: Hide the card
-                   cardToUpdate.style.opacity = '0.5'; // Example: Dim the card
-               }
-           }
+            if (data.newShipmentStatus) {
+                cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
+                const statusElement = cardToUpdate.querySelector('.card__status');
+                if (statusElement) {
+                    statusElement.textContent = data.newShipmentStatus;
+                }
+                if (['shipped', 'delivered', 'cancelled'].includes(data.newShipmentStatus.toLowerCase())) {
+                    cardToUpdate.style.opacity = '0.5';
+                }
+            }
         }
     })
     .catch((error) => {
@@ -786,9 +810,10 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         alert(`Error processing order ${orderId}: ${error.message}. Please check console.`);
     })
     .finally(() => {
-         closeShipPopup();
+        closeShipPopup();
     });
 });
+
 
 </script>
 
