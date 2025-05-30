@@ -739,7 +739,6 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
 
     console.log("Shipping Data to send to backend:", JSON.stringify(shippingData, null, 2));
 
-    // CORRECTED URL: Added 'shipment/' prefix
     const processingUrl = '/shipment/process-shipment/'; 
 
     fetch(processingUrl, {
