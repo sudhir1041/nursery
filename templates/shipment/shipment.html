@@ -435,6 +435,10 @@
         overflow: hidden;
         text-overflow: ellipsis; /* Show ellipsis if header text is too long */
     }
+    .table-item{
+        word-wrap: break-word;
+        white-space: normal;
+    }
 
     /* Column widths for items table */
     .items-table th:nth-child(1), 
@@ -662,7 +666,7 @@ function showPopup(cardElement) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${index + 1}</td>
-            <td>${item.name}</td>
+            <td class="table-item">${item.name}</td>
             <td>${item.potSize}</td>
             <td>${item.quantity}</td>
         `;
