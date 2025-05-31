@@ -88,11 +88,8 @@
     }
 
     @media (max-width: 768px) {
-        .card__container {
-            padding: 0px;
-        }
         .card {
-            width: 100%; 
+            width: 100%; /* 1 card per row */
         }
     }
 
@@ -177,6 +174,29 @@
         font-size: 0.85rem; /* Slightly smaller item text */
         padding: 0.1rem 0;
     }
+
+    /* --- NEW: Style for initially hidden list items --- */
+    .card__list-item--hidden {
+        display: none;
+    }
+
+    /* --- NEW: Style for the "Show More" button --- */
+    .show-more-btn {
+        background: none;
+        border: none;
+        color: #3b82f6; /* Use primary theme color */
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.25rem 0;
+        margin-top: 0.25rem;
+        text-align: left;
+    }
+
+    .show-more-btn:hover {
+        text-decoration: underline;
+    }
+
 
     .card__actions {
         display: flex;
@@ -475,7 +495,7 @@
                 <strong>Items:</strong>
                 <ul class="card__list">
                     {% for item in order.items %}
-                    <li class="card__list-item"
+                    <li class="card__list-item {% if forloop.counter > 2 %}card__list-item--hidden{% endif %}"
                         data-item-name="{{ item.name }}"
                         data-item-potsize="{{ item.pot_size|default_if_none:'N/A' }}"
                         data-item-quantity="{{ item.quantity|default_if_none:1 }}">
@@ -483,7 +503,13 @@
                     </li>
                     {% endfor %}
                 </ul>
+                {% if order.items|length > 2 %}
+                    <button type="button" class="show-more-btn" aria-expanded="false">
+                        Show {{ order.items|length|add:"-2" }} more...
+                    </button>
+                {% endif %}
             </div>
+
         </div>
 
         <div class="card__actions">
@@ -716,6 +742,31 @@ function closeShipPopup() {
 }
 
 document.querySelectorAll('.card').forEach(card => {
+    // NEW: "Show More" functionality for items list
+    const showMoreButton = card.querySelector('.show-more-btn');
+    if (showMoreButton) {
+        showMoreButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents the card's main click event (opening the popup)
+
+            const hiddenItems = card.querySelectorAll('.card__list-item--hidden');
+            const isExpanded = showMoreButton.getAttribute('aria-expanded') === 'true';
+
+            hiddenItems.forEach(item => {
+                // Toggle the display style
+                item.style.display = isExpanded ? 'none' : 'list-item';
+            });
+
+            // Update the button text and its state for accessibility
+            if (isExpanded) {
+                showMoreButton.textContent = `Show ${hiddenItems.length} more...`;
+                showMoreButton.setAttribute('aria-expanded', 'false');
+            } else {
+                showMoreButton.textContent = 'Show Less';
+                showMoreButton.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+
     const viewButton = card.querySelector('.button--tertiary');
     if (viewButton) {
         viewButton.addEventListener('click', (e) => {
@@ -742,7 +793,8 @@ document.querySelectorAll('.card').forEach(card => {
     }
 
     card.addEventListener('click', (e) => {
-        if (!e.target.closest('.button')) { 
+        // Only open the main popup if the click was not on a button
+        if (!e.target.closest('button')) { 
             showPopup(card);
         }
     });
@@ -850,7 +902,7 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         const cardToUpdate = document.querySelector(`.card[data-order-id='${orderId}'][data-platform='${platform}']`);
         if (cardToUpdate) {
             if (data.newShipmentStatus) {
-                cardToUpdate.dataset.shipmentStatus = data.newShipmentStatus;
+                cardToUpdate.dataset.shipmentStatus = data.newShipTatus;
                 const statusElement = cardToUpdate.querySelector('.card__status');
                 if (statusElement) {
                     statusElement.textContent = data.newShipmentStatus;
