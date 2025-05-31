@@ -28,7 +28,7 @@ def home(request):
 
     # ====================== Shopify Orders =======================
     for o in shopify_qs:
-        if o.fulfillment_status in ['unfulfilled', 'none'] and o.shipment_status in ['pending', 'partially-shipped']:
+        if o.fulfillment_status in ['unfulfilled', 'none'] and o.shipment_status in ['pending', 'partially_shipped']:
             days_since_order = (today - o.created_at_shopify.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'

@@ -6,6 +6,43 @@
 {% block content %}
 
 <style>
+    /* --- Styles for the new Shipment Menu --- */
+    .shipment-menu {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem; /* Added space between menu and cards */
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.05);
+    }
+
+    .shipment-menu__link {
+        padding: 0.75rem 1.5rem;
+        text-decoration: none;
+        color: #495057;
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .shipment-menu__link:hover {
+        background-color: #f1f3f5;
+        border-color: #ced4da;
+    }
+
+    /* Active state for the currently selected menu item */
+    .shipment-menu__link.active {
+        background-color: #3b82f6; /* Using your primary button color */
+        color: #ffffff;
+        border-color: #3b82f6;
+    }
+
+    /* --- Existing Styles --- */
     .card__container {
         display: flex;
         flex-wrap: wrap;
@@ -386,6 +423,22 @@
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="shipment-menu">
+    {% comment %} {# 
+      - The `active` class highlights the current view.
+      - Your Django view should pass a context variable (e.g., `view_type`) 
+        to dynamically set which link is active.
+      - The `href` can point to the same page with a query parameter to filter orders.
+    #} {% endcomment %}
+    <a href="?status=ready" class="shipment-menu__link {% if view_type == 'ready' %}active{% endif %}">
+        Ready for Shipment
+    </a>
+    <a href="?status=shipped" class="shipment-menu__link {% if view_type == 'shipped' %}active{% endif %}">
+        Already Shipped
+    </a>
+</div>
+
 
 <div class="card__container">
     {% for order in orders %}
