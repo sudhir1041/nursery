@@ -63,6 +63,13 @@ class ShopifyOrder(models.Model):
 
     clone_orders = models.JSONField(default=list, blank=True, 
         help_text="Store clone orders as a JSON list, e.g., [{'order_id': 'XXX', 'platform': 'Shopify'}, ...]")
+    
+    unselected_items_for_clone = models.JSONField(
+        null=True,
+        blank=True,
+        default=list,
+        help_text="List of items unselected during a shipment process, intended for a future clone action."
+    )
 
     # Django Timestamps
     django_date_created = models.DateTimeField(default=timezone.now)

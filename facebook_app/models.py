@@ -74,6 +74,13 @@ class Facebook_orders(models.Model):
         blank=True,
         help_text='Store clone orders as a JSON list, e.g., [{"order_id": "XXX", "platform": "facebook"}, ...]'
     )
+    
+    unselected_items_for_clone = models.JSONField(
+        null=True,
+        blank=True,
+        default=list,
+        help_text="List of items unselected during a shipment process, intended for a future clone action."
+    )
     def __str__(self):
         return f"FB Order {self.order_id} ({self.billing_first_name or self.billing_email or ''})"
 
