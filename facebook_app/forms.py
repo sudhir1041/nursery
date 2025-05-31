@@ -78,14 +78,15 @@ class FacebookOrderForm(forms.ModelForm):
             if last_order:
                 try:
                     # Extract the number from the last order_id and increment
-                    last_num = int(last_order.order_id[10:]) 
-                    new_num = last_num + 1
+                    last_num = int(last_order.order_id[8:]) # Changed from 10 to 8 to get full number
+                    new_num = str(last_num + 1).zfill(1) # Zero pad to 4 digits
                 except (ValueError, IndexError):
-                    new_num = 1
+                    new_num = '01' # Start with 0001 if error
             else:
-                new_num = 1
+                new_num = '01' # Start with 0001 if no previous order
             # Generate new order_id with date
-            self.initial['order_id'] = f'NS{today}{new_num}'  # Zero-pad to 4 digits                
+            self.initial['order_id'] = f'NS{today}{new_num}'
+
     def clean_products_json(self):
         data = self.cleaned_data.get('products_json')
 
