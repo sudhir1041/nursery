@@ -461,7 +461,7 @@
         to dynamically set which link is active.
       - The `href` can point to the same page with a query parameter to filter orders.
     #} {% endcomment %}
-    <a href="?status=ready" class="shipment-menu__link {% if view_type == 'ready' %}active{% endif %}">
+    <a href="{% url 'shipment:shipment_index' %}" class="shipment-menu__link {% if view_type == 'ready' %}active{% endif %}">
         Ready for Shipment
     </a>
     <a href="{% url 'shipment:already_shipped' %}" class="shipment-menu__link {% if view_type == 'shipped' %}active{% endif %}">
