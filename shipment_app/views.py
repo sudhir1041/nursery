@@ -359,7 +359,8 @@ def shipped(request):
                 'is_overdue_highlight': highlight
             }
 
-            unselected_name = [item.get('name') for item in woo.unselected_items_for_clone] if woo.unselected_items_for_clone else []            all_items = woo.line_items_json
+            unselected_name = [item.get('name') for item in woo.unselected_items_for_clone] if woo.unselected_items_for_clone else []            
+            all_items = woo.line_items_json
             new_items = []
 
             for item in all_items:
