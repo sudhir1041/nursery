@@ -263,7 +263,7 @@ def process_shipment(request):
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
 
-def shipped(req):
+def shipped(request):
     today = datetime.now().astimezone()
     thirty_days_ago = today - timedelta(days=30)
 
@@ -275,7 +275,7 @@ def shipped(req):
 
     #============================== Shopify =================================
     for o in shopify_qs:
-        if o.fulfillment_status in ['fulfilled', 'none'] and o.shipment_status in ['shipped', 'partially_shipped']:
+        if o.shipment_status in ['shipped', 'partially_shipped']:
             days_since_order = (today - o.created_at_shopify.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -305,26 +305,25 @@ def shipped(req):
                 'is_overdue_highlight': highlight
             }
 
-            if o.shipment_status == 'partially_shipped':
-                order_data.update({
-                    'status': o.shipment_status,
-                    'items': [{
-                        'name': item.get('name', ''),
-                        'quantity': item.get('quantity', 0),
-                        'price': item.get('price', 0),
-                        'pot_size': item.get('variant_title', '') or 'N/A'
-                    } for item in o.unselected_items_for_clone]
-                })
-            else:
-                order_data.update({
-                    'status': o.fulfillment_status,
-                    'items': [{
-                        'name': item.get('name', ''),
-                        'quantity': item.get('quantity', 0),
-                        'price': item.get('price', 0),
-                        'pot_size': item.get('variant_title', '') or 'N/A'
-                    } for item in o.line_items_json]
-                })
+            unselected = o.unselected_items_for_clone
+            all_items = o.line_items_json
+            new_items = []
+
+            for items in unselected:
+                if items not in all_items:
+                    new_items.append(items)
+            
+            order_data.update({
+                'status': "shipped",
+                'items': [{
+                    'name': item.get('name', ''),
+                    'quantity': item.get('quantity', 0),
+                    'price': item.get('price', 0),
+                    'pot_size': item.get('variant_title', '') or 'N/A'
+                } for item in new_items]
+            })
 
             all_orders.append(order_data)
-
+    all_orders.sort(key=lambda x: x['date'], reverse=True)
+    context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
+    return render(request, 'shipment/shipped_order.html', context)
