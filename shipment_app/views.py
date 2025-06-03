@@ -309,8 +309,8 @@ def shipped(request):
             all_items = o.line_items_json
             new_items = []
 
-            for items in unselected:
-                if items not in all_items:
+            for items in all_items:
+                if items not in unselected:
                     new_items.append(items)
             
             order_data.update({
