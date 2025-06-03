@@ -473,8 +473,8 @@
 <div class="card__container">
     {% for order in orders %}
     <div class="card {{ order.is_overdue_highlight }}"
-         data-order-id="{{ order.order_id }}" {# Store order_id directly for easier access #}
-         data-platform="{{ order.platform }}" {# Store platform directly #}
+         data-order-id="{{ order.order_id }}" 
+         data-platform="{{ order.platform }}" 
          data-amount="{{ order.amount }}"
          data-date="{{ order.date }}"
          data-pincode="{{ order.pincode }}"
