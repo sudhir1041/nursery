@@ -1,0 +1,483 @@
+/* --- Styles for the new Shipment Menu --- */
+  .shipment-menu {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem; /* Added space between menu and cards */
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+  }
+
+  .shipment-menu__link {
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    color: #495057;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .shipment-menu__link:hover {
+    background-color: #f1f3f5;
+    border-color: #ced4da;
+  }
+
+  /* Active state for the currently selected menu item */
+  .shipment-menu__link.active {
+    background-color: #3b82f6; /* Using your primary button color */
+    color: #ffffff;
+    border-color: #3b82f6;
+  }
+
+  /* --- Existing Styles --- */
+  .card__container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    justify-content: center; /* UPDATED: Changed from flex-start to center the cards */
+    padding: 1.25rem;
+    width: 100%;
+  }
+
+  .card {
+    width: calc(33.333% - 1.25rem); /* 3 cards per row with gap */
+    min-width: 18rem; /* Minimum width before wrapping */
+    max-width: 22rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 0.625rem 1.25rem rgba(0, 0, 0, 0.12);
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-top: 10px solid transparent;
+    cursor: pointer; /* Add cursor pointer for whole card */
+  }
+
+  .card.normal {
+    border-top-color: green;
+  }
+
+  .card.two_days_old {
+    border-top-color: yellow;
+  }
+
+  .card.three_days_old {
+    border-top-color: red;
+  }
+
+  @media (max-width: 1200px) {
+    .card {
+      width: calc(50% - 1.25rem); /* 2 cards per row */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card__container {
+      padding: 0px;
+    }
+    .card {
+      width: 100%; /* 1 card per row */
+    }
+  }
+
+  .card:hover {
+    transform: translateY(-0.3125rem);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+  }
+
+  .card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem; /* Added margin */
+  }
+
+  .card__info {
+    font-size: 0.875rem;
+    color: #444;
+    display: flex; /* For aligning source, id, location */
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping if too long */
+  }
+
+  .card__id {
+    font-weight: 600;
+    margin-right: 0.625rem;
+    color: #2563eb;
+  }
+  .card__location {
+    font-size: 0.8rem;
+    color: #555;
+  }
+
+  .card__status {
+    background: #e0f2fe;
+    border-radius: 1.25rem;
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0369a1;
+  }
+
+  .card__content {
+    font-size: 0.875rem;
+    color: #1f2937;
+    flex-grow: 1; /* Allow content to take available space */
+  }
+
+  .card__title {
+    margin: 0.625rem 0 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .card__date {
+    margin: 0.25rem 0 0.5rem; /* Adjusted margin */
+    font-size: 0.9rem; /* Slightly smaller */
+    font-weight: 500; /* Normal weight */
+    color: rgb(70, 70, 70);
+  }
+
+  .card__contact {
+    margin-bottom: 0.625rem;
+    font-size: 0.8125rem;
+    color: #4b5563;
+  }
+
+  .card__products {
+    margin-top: 0.5rem; /* Added margin */
+  }
+
+  .card__list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.3125rem 0;
+  }
+
+  .card__list-item {
+    margin-bottom: 0.25rem; /* Slightly more space */
+    color: #374151; /* Darker text for items */
+    font-size: 0.85rem; /* Slightly smaller item text */
+    padding: 0.1rem 0;
+  }
+
+  /* --- NEW: Style for initially hidden list items --- */
+  .card__list-item--hidden {
+    display: none;
+  }
+
+  /* --- NEW: Style for the "Show More" button --- */
+  .show-more-btn {
+    background: none;
+    border: none;
+    color: #3b82f6; /* Use primary theme color */
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0;
+    margin-top: 0.25rem;
+    text-align: left;
+  }
+
+  .show-more-btn:hover {
+    text-decoration: underline;
+  }
+
+  .card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .button {
+    flex: 1 1 30%; /* Allow buttons to grow and shrink */
+    min-width: 80px; /* Minimum width for buttons */
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .button--primary {
+    background-color: #3b82f6;
+    color: #ffffff;
+  }
+
+  .button--secondary {
+    background-color: #f97316;
+    color: #ffffff;
+  }
+
+  .button--tertiary {
+    background-color: rgb(19, 133, 24);
+    color: rgb(255, 255, 255);
+  }
+
+  .button:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+
+  .button i {
+    /* Font Awesome icon style */
+    font-size: 0.875rem;
+  }
+
+  .popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem; /* Add padding for smaller screens */
+    box-sizing: border-box;
+  }
+
+  .popup-content {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    width: 95%;
+    max-width: 40rem; /* Max width for the view popup */
+    position: relative;
+    animation: popup 0.3s ease-out;
+    box-sizing: border-box;
+    max-height: 90vh; /* Max height for popup */
+    overflow-y: auto; /* Allow content to scroll if too tall */
+  }
+  .ship-popup-content {
+    /* Specific styling for ship popup if needed different size */
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    width: 95%;
+    max-width: 35rem; /* Slightly smaller max-width for ship popup */
+    position: relative;
+    animation: popup 0.3s ease-out;
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .popup-close {
+    position: absolute;
+    top: 0.75rem; /* Adjusted for better placement */
+    right: 0.75rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem; /* Larger for easier clicking */
+    cursor: pointer;
+    color: #666;
+    line-height: 1;
+  }
+
+  .popup-close:hover {
+    color: #000;
+  }
+
+  .card__source {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+    font-weight: 600;
+  }
+
+  .card__source--shopify {
+    background: rgb(120, 158, 50);
+    color: white;
+  }
+
+  .card__source--wordpress {
+    background: rgb(20, 71, 95);
+    color: white;
+  }
+  .card__source--facebook {
+    background: rgb(37, 14, 168);
+    color: white;
+  }
+
+  @keyframes popup {
+    from {
+      transform: scale(0.7);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .ship-form {
+    padding: 0; /* Remove padding as popup-content already has it */
+  }
+
+  .ship-form__row {
+    margin-bottom: 1rem; /* Increased margin for better spacing */
+  }
+
+  .ship-form__label {
+    display: block;
+    margin-bottom: 0.4rem; /* Increased margin */
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .ship-form__select {
+    width: 100%;
+    padding: 0.5rem; /* Increased padding */
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+
+  /* Styles for the item list in the ship popup */
+  #shipItems {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+    padding: 0.75rem; /* Increased padding */
+    margin-top: 0.5rem; /* Added margin top */
+  }
+
+  .ship-form__item-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.6rem; /* Increased margin */
+  }
+
+  .ship-form__item-row label {
+    font-weight: normal; /* Labels for items shouldn't be bold */
+    font-size: 0.85rem; /* Adjust font size */
+    margin-left: 0.3rem; /* Space between checkbox and label */
+  }
+
+  .ship-form__checkbox {
+    /* margin-right: 0.6rem; Removed to use margin on label */
+    transform: scale(1.1); /* Slightly larger checkboxes */
+  }
+
+  .ship-form__actions {
+    margin-top: 1.25rem; /* Increased margin */
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+  .shipment-menu {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
+  }
+
+  .shipment-menu__link {
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    color: #495057;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .shipment-menu__link:hover {
+    background-color: #f1f3f5;
+    border-color: #ced4da;
+  }
+
+  .shipment-menu__link.active {
+    background-color: #13851c;
+    color: #ffffff;
+    border-color: #13851c;
+  }
+
+  /* Styles for items table in view popup */
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    display: block; /* Changed to block for better overflow control */
+    max-height: 200px; /* Max height before scroll */
+    overflow-y: auto; /* Vertical scroll */
+    overflow-x: auto; /* Horizontal scroll for small screens */
+  }
+
+  .items-table thead,
+  .items-table tbody {
+    display: table; /* Keep table layout for children */
+    width: 100%;
+    table-layout: fixed; /* Important for fixed column widths */
+  }
+
+  .items-table th,
+  .items-table td {
+    padding: 0.4rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    min-width: 80px; /* Minimum width for columns */
+    word-wrap: break-word; /* Allow long words to break */
+  }
+
+  .items-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky; /* Sticky header */
+    top: 0;
+    z-index: 1;
+    white-space: nowrap; /* Prevent header text from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Show ellipsis if header text is too long */
+  }
+  .table-item {
+    word-wrap: break-word;
+    white-space: normal;
+  }
+
+  /* Column widths for items table */
+  .items-table th:nth-child(1),
+  .items-table td:nth-child(1) {
+    width: 10%;
+  } /* S.No */
+  .items-table th:nth-child(2),
+  .items-table td:nth-child(2) {
+    width: 45%;
+  } /* Item Name */
+  .items-table th:nth-child(3),
+  .items-table td:nth-child(3) {
+    width: 25%;
+  } /* Pot Size */
+  .items-table th:nth-child(4),
+  .items-table td:nth-child(4) {
+    width: 20%;
+  } /* Quantity */
