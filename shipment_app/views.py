@@ -326,7 +326,7 @@ def shipped(request):
             all_orders.append(order_data)
     # ======================== WooCommerce orders ======================
     for woo in woo_qs:
-        if woo.status == 'processing' and woo.shipment_status in ['pending','processing', 'partially_shipped']:                      
+        if woo.shipment_status in ['shipped', 'partially_shipped']:                      
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -385,7 +385,7 @@ def shipped(request):
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
-        if f.status == 'processing' and f.shipment_status in ['pending','processing', 'partially-shipped']:
+        if f.shipment_status in ['shipped', 'partially_shipped']:
             days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
