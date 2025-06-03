@@ -305,14 +305,14 @@ def shipped(request):
                 'is_overdue_highlight': highlight
             }
 
-            unselected = o.unselected_items_for_clone
+            unselected_name = [item.get('name') for item in o.unselected_items_for_clone]
             all_items = o.line_items_json
             new_items = []
 
-            for items in all_items:
-                if items not in unselected:
-                    new_items.append(items)
-            
+            for item in all_items:
+                if item.get('name') not in unselected_name:
+                    new_items.append(item)  
+
             order_data.update({
                 'status': "shipped",
                 'items': [{
