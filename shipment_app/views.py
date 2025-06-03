@@ -324,6 +324,106 @@ def shipped(request):
             })
 
             all_orders.append(order_data)
+    #===========================Woocommerce==================================
+    for woo in woo_qs:
+        if woo.shipment_status in ['shipped', 'partially_shipped']:                      
+            days_since_order = (today - woo.date_created_woo.astimezone()).days
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
+
+            raw_data = woo.raw_data if isinstance(woo.raw_data, dict) else json.loads(woo.raw_data or '{}')
+            advance_amount = None
+            balance_amount = None
+            original_total = woo.total_amount 
+            for meta in raw_data.get("meta_data", []):
+                if meta.get("key") == "_pi_original_total": original_total = meta.get("value")
+                elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
+                elif meta.get("key") == "_pi_balance_amount": balance_amount = meta.get("value")
+
+            order_data = {
+                'order_id': woo.woo_id,
+                'date': woo.date_created_woo,
+                'amount': woo.total_amount,
+                'customer': f"{woo.billing_first_name or ''} {woo.billing_last_name or ''}".strip(),
+                'phone': woo.billing_phone,
+                'pincode': woo.billing_postcode,
+                'state': woo.billing_state,
+                'note': woo.customer_note,
+                'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={woo.woo_id}',
+                'platform': 'Wordpress',
+                'shipment_status': woo.shipment_status or 'Pending',
+                'original_total': original_total,
+                'advance_amount': advance_amount,
+                'balance_amount': balance_amount,
+                'is_overdue_highlight': highlight
+            }
+            unselected_name = [item.get('name') for item in woo.unselected_items_for_clone]
+            all_items = woo.line_items_json
+            new_items = []
+
+            for item in all_items:
+                if item.get('name') not in unselected_name:
+                    new_items.append(item)  
+
+            order_data.update({
+                'status': "shipped",
+                'items': [{
+                    'name': item.get('name', ''),
+                    'quantity': item.get('quantity', 0),
+                    'price': item.get('price', 0),
+                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
+                } for item in new_items]
+            })
+            all_orders.append(order_data)
+    #========================Facebook Order =====================
+    for f in fb_qs:
+        if f.shipment_status in ['shipped', 'partially-shipped']:
+            days_since_order = (today - f.date_created.astimezone()).days
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
+            
+            products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
+
+            order_data = {
+                'order_id': f.order_id,
+                'date': f.date_created,
+                'status': f.status,
+                'amount': f.total_amount,
+                'customer': f"{f.first_name or ''} {f.last_name or ''}".strip(),
+                'phone': f.phone,
+                'pincode': f.postcode,
+                'state': f.state,
+                'note': f.customer_note,
+                'tracking': f.tracking_info,
+                'platform': 'Facebook',
+                'shipment_status': f.shipment_status or 'Pending',
+                'original_total': f.total_amount,
+                'advance_amount': None,
+                'balance_amount': f.total_amount,
+                'is_overdue_highlight': highlight
+            }
+
+            unselected_name = [item.get('name') for item in f.unselected_items_for_clone]
+            all_items = products
+            new_items = []
+
+            for item in all_items:
+                if item.get('product_name') not in unselected_name:
+                    new_items.append(item)  
+
+            order_data.update({
+                'status': "shipped",
+                'items': [{
+                    'name': item.get('product_name', ''),
+                    'quantity': item.get('quantity', 0),
+                    'price': item.get('price', 0),
+                    'pot_size': item.get('variant_details', {}).get('size', 'N/A')
+                } for item in new_items]
+            })
+            all_orders.append(order_data) 
+
     all_orders.sort(key=lambda x: x['date'], reverse=True)
     context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
     return render(request, 'shipment/shipped_order.html', context)
