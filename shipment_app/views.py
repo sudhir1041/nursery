@@ -28,7 +28,7 @@ def home(request):
 
     # ====================== Shopify Orders =======================
     for o in shopify_qs:
-        if o.fulfillment_status in ['unfulfilled', 'none'] and o.shipment_status in ['pending', 'partially_shipped']:
+        if o.fulfillment_status in ['unfulfilled', 'none'] and o.shipment_status in ['pending','processing', 'partially_shipped']:
             days_since_order = (today - o.created_at_shopify.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -83,7 +83,7 @@ def home(request):
 
     # ======================== WooCommerce orders ======================
     for woo in woo_qs:
-        if woo.status == 'processing' and woo.shipment_status in ['pending', 'partially_shipped']:                      
+        if woo.status == 'processing' and woo.shipment_status in ['pending','processing', 'partially_shipped']:                      
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -141,7 +141,7 @@ def home(request):
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
-        if f.status == 'processing' and f.shipment_status in ['pending', 'partially-shipped']:
+        if f.status == 'processing' and f.shipment_status in ['pending','processing', 'partially-shipped']:
             days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -261,4 +261,70 @@ def process_shipment(request):
         # Enhanced logging for any other errors
         logger.error(f"Error processing shipment: {type(e).__name__} - {e}", exc_info=True)
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+
+def shipped(req):
+    today = datetime.now().astimezone()
+    thirty_days_ago = today - timedelta(days=30)
+
+    shopify_qs = ShopifyOrder.objects.filter(created_at_shopify__gte=thirty_days_ago)
+    woo_qs = WooCommerceOrder.objects.filter(date_created_woo__gte=thirty_days_ago)
+    fb_qs = Facebook_orders.objects.filter(date_created__gte=thirty_days_ago)
+    
+    all_orders = []
+
+    #============================== Shopify =================================
+    for o in shopify_qs:
+        if o.fulfillment_status in ['fulfilled', 'none'] and o.shipment_status in ['shipped', 'partially_shipped']:
+            days_since_order = (today - o.created_at_shopify.astimezone()).days
+            highlight = 'normal'
+            if days_since_order >= 4: highlight = 'three_days_old'
+            elif days_since_order >= 3: highlight = 'two_days_old'
+            
+            # Determine advance and balance amounts for Shopify
+            shopify_advance_amount = "0.00" 
+            shopify_balance_amount = o.total_price
+            shopify_original_total = o.total_price
+
+            order_data = {
+                'order_id': o.name,
+                'date': o.created_at_shopify,
+                'status': o.fulfillment_status or 'fulfilled',
+                'amount': o.total_price,
+                'customer': o.shipping_address_json.get('name', 'N/A'),
+                'phone': o.shipping_address_json.get('phone', 'N/A'),
+                'pincode': o.shipping_address_json.get('zip', 'N/A'),
+                'state': o.shipping_address_json.get('province', 'N/A'),                
+                'note': o.internal_notes,
+                'tracking': o.tracking_details_json,
+                'platform': 'Shopify',
+                'shipment_status': o.shipment_status or 'Pending',
+                'original_total': shopify_original_total,
+                'advance_amount': shopify_advance_amount,
+                'balance_amount': shopify_balance_amount,
+                'is_overdue_highlight': highlight
+            }
+
+            if o.shipment_status == 'partially_shipped':
+                order_data.update({
+                    'status': o.shipment_status,
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': item.get('variant_title', '') or 'N/A'
+                    } for item in o.unselected_items_for_clone]
+                })
+            else:
+                order_data.update({
+                    'status': o.fulfillment_status,
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': item.get('variant_title', '') or 'N/A'
+                    } for item in o.line_items_json]
+                })
+
+            all_orders.append(order_data)
 
