@@ -464,7 +464,7 @@
     <a href="?status=ready" class="shipment-menu__link {% if view_type == 'ready' %}active{% endif %}">
         Ready for Shipment
     </a>
-    <a href="{% url 'already_shipped' %}" class="shipment-menu__link {% if view_type == 'shipped' %}active{% endif %}">
+    <a href="{% url 'shipment:already_shipped' %}" class="shipment-menu__link {% if view_type == 'shipped' %}active{% endif %}">
         Already Shipped
     </a>
 </div>
