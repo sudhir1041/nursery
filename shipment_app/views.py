@@ -60,7 +60,7 @@ def home(request):
 
             if o.shipment_status == 'partially_shipped':
                 order_data.update({
-                    'status': o.fulfillment_status,
+                    'status': o.shipment_status,
                     'items': [{
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
@@ -70,7 +70,7 @@ def home(request):
                 })
             else:
                 order_data.update({
-                    'status': 'Shipped',
+                    'status': o.fulfillment_status,
                     'items': [{
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
@@ -118,7 +118,7 @@ def home(request):
 
             if woo.shipment_status == 'partially_shipped':
                 order_data.update({
-                    'status': woo.status,
+                    'status': woo.shipment_status,
                     'items': [{
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
@@ -128,7 +128,7 @@ def home(request):
                 })
             else:
                 order_data.update({
-                    'status': 'Shipped',
+                    'status': woo.status,
                     'items': [{
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
@@ -170,7 +170,7 @@ def home(request):
 
             if f.shipment_status == 'partially-shipped':
                 order_data.update({
-                    'status': f.status,
+                    'status': f.shipment_status,
                     'items': [{
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
@@ -180,7 +180,7 @@ def home(request):
                 })
             else:
                 order_data.update({
-                    'status': 'Shipped',
+                    'status': f.status,
                     'items': [{
                         'name': product.get('product_name', ''),
                         'quantity': product.get('quantity', 0),
