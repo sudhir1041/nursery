@@ -324,9 +324,9 @@ def shipped(request):
             })
 
             all_orders.append(order_data)
-    #===========================Woocommerce==================================
+    # ======================== WooCommerce orders ======================
     for woo in woo_qs:
-        if woo.shipment_status in ['shipped', 'partially_shipped']:                      
+        if woo.status == 'processing' and woo.shipment_status in ['pending','processing', 'partially_shipped']:                      
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -358,13 +358,14 @@ def shipped(request):
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             }
+
             unselected_name = [item.get('name') for item in woo.unselected_items_for_clone]
             all_items = woo.line_items_json
             new_items = []
 
             for item in all_items:
                 if item.get('name') not in unselected_name:
-                    new_items.append(item)  
+                    new_items.append(item)
 
             order_data.update({
                 'status': "shipped",
@@ -375,10 +376,12 @@ def shipped(request):
                     'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
                 } for item in new_items]
             })
+
             all_orders.append(order_data)
-    #========================Facebook Order =====================
+
+    # ======================== Facebook orders ======================
     for f in fb_qs:
-        if f.shipment_status in ['shipped', 'partially-shipped']:
+        if f.status == 'processing' and f.shipment_status in ['pending','processing', 'partially-shipped']:
             days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -411,7 +414,7 @@ def shipped(request):
 
             for item in all_items:
                 if item.get('product_name') not in unselected_name:
-                    new_items.append(item)  
+                    new_items.append(item)
 
             order_data.update({
                 'status': "shipped",
@@ -422,7 +425,8 @@ def shipped(request):
                     'pot_size': item.get('variant_details', {}).get('size', 'N/A')
                 } for item in new_items]
             })
-            all_orders.append(order_data) 
+
+            all_orders.append(order_data)    
 
     all_orders.sort(key=lambda x: x['date'], reverse=True)
     context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
