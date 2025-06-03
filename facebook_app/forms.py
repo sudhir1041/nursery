@@ -83,7 +83,7 @@ class FacebookOrderForm(forms.ModelForm):
                 except (ValueError, IndexError):
                     new_num = '01' # Start with 0001 if error
             else:
-                new_num = '01' # Start with 0001 if no previous order
+                new_num = '01' 
             # Generate new order_id with date
             self.initial['order_id'] = f'NS{today}{new_num}'
 

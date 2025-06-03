@@ -35,50 +35,51 @@ def home(request):
             elif days_since_order >= 3: highlight = 'two_days_old'
             
             # Determine advance and balance amounts for Shopify
-            # Shopify's o.total_price is typically the final amount due after discounts.
-            # If you have a specific field in your ShopifyOrder model for 'advance paid' or 'discounts applied'
-            # that you want to use for 'advance_amount', use that here.
-            # For example, if o.current_total_discounts exists and represents the discount value:
-            # advance_payment_or_discount = o.current_total_discounts if hasattr(o, 'current_total_discounts') else "0.00"
-            # balance = o.total_price 
-            # original_total_before_discount = float(o.total_price) + float(advance_payment_or_discount)
-
-            # Assuming no separate advance payment field is explicitly tracked for Shopify in this context,
-            # and total_price is the amount to be collected.
             shopify_advance_amount = "0.00" 
             shopify_balance_amount = o.total_price
-            # If you want 'original_total' to be subtotal_price before discounts, and have a discount field:
-            # shopify_original_total = o.subtotal_price # or (float(o.total_price) + float(o.your_discount_field_value))
-            # For simplicity, if total_price is the grand total:
             shopify_original_total = o.total_price
 
-
-            all_orders.append({
-                'order_id': o.name, # Shopify's display name for order ID
+            order_data = {
+                'order_id': o.name,
                 'date': o.created_at_shopify,
-                'status': o.fulfillment_status or 'unfulfilled', # Main status
-                'amount': o.total_price, # This is usually the final amount the customer pays
+                'status': o.fulfillment_status or 'unfulfilled',
+                'amount': o.total_price,
                 'customer': o.shipping_address_json.get('name', 'N/A'),
                 'phone': o.shipping_address_json.get('phone', 'N/A'),
                 'pincode': o.shipping_address_json.get('zip', 'N/A'),
                 'state': o.shipping_address_json.get('province', 'N/A'),                
                 'note': o.internal_notes,
-                'tracking': o.tracking_details_json, # This might be a complex object
+                'tracking': o.tracking_details_json,
                 'platform': 'Shopify',
-                'shipment_status': o.shipment_status or 'Pending', # Your custom shipment status field
-                'items': [{
-                    'name': item.get('name', ''),
-                    'quantity': item.get('quantity', 0),
-                    'price': item.get('price', 0),
-                    'pot_size': item.get('variant_title', '') or 'N/A' # Ensure pot_size is available
-                } for item in o.line_items_json],
-                'original_total': shopify_original_total, 
-                'advance_amount': shopify_advance_amount, # Corrected: ShopifyOrder might not have 'total_discounts'.
-                                                          # Set to 0.00 or None if advance payments are not tracked this way for Shopify.
-                                                          # Verify against your ShopifyOrder model.
-                'balance_amount': shopify_balance_amount, # This would be o.total_price if advance_amount is 0.
+                'shipment_status': o.shipment_status or 'Pending',
+                'original_total': shopify_original_total,
+                'advance_amount': shopify_advance_amount,
+                'balance_amount': shopify_balance_amount,
                 'is_overdue_highlight': highlight
-            })
+            }
+
+            if o.shipment_status == 'partially_shipped':
+                order_data.update({
+                    'status': o.fulfillment_status,
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': item.get('variant_title', '') or 'N/A'
+                    } for item in o.unselected_items_for_clone]
+                })
+            else:
+                order_data.update({
+                    'status': 'Shipped',
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': item.get('variant_title', '') or 'N/A'
+                    } for item in o.line_items_json]
+                })
+
+            all_orders.append(order_data)
 
     # ======================== WooCommerce orders ======================
     for woo in woo_qs:
@@ -97,10 +98,9 @@ def home(request):
                 elif meta.get("key") == "_pi_advance_amount": advance_amount = meta.get("value")
                 elif meta.get("key") == "_pi_balance_amount": balance_amount = meta.get("value")
 
-            all_orders.append({
+            order_data = {
                 'order_id': woo.woo_id,
                 'date': woo.date_created_woo,
-                'status': woo.status,
                 'amount': woo.total_amount,
                 'customer': f"{woo.billing_first_name or ''} {woo.billing_last_name or ''}".strip(),
                 'phone': woo.billing_phone,
@@ -110,28 +110,46 @@ def home(request):
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={woo.woo_id}',
                 'platform': 'Wordpress',
                 'shipment_status': woo.shipment_status or 'Pending',
-                'items': [{
-                    'name': item.get('name', ''),
-                    'quantity': item.get('quantity', 0),
-                    'price': item.get('price', 0),
-                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A') 
-                } for item in woo.line_items_json],
                 'original_total': original_total,
                 'advance_amount': advance_amount,
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
-            })
+            }
+
+            if woo.shipment_status == 'partially_shipped':
+                order_data.update({
+                    'status': woo.status,
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
+                    } for item in woo.unselected_items_for_clone]
+                })
+            else:
+                order_data.update({
+                    'status': 'Shipped',
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
+                    } for item in woo.line_items_json]
+                })
+
+            all_orders.append(order_data)
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
         if f.status == 'processing' and f.shipment_status in ['pending', 'partially-shipped']:
+            days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
             elif days_since_order >= 3: highlight = 'two_days_old'
             
             products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
 
-            all_orders.append({
+            order_data = {
                 'order_id': f.order_id,
                 'date': f.date_created,
                 'status': f.status,
@@ -144,18 +162,34 @@ def home(request):
                 'tracking': f.tracking_info,
                 'platform': 'Facebook',
                 'shipment_status': f.shipment_status or 'Pending',
-                'items': [{
-                    'name': product.get('product_name', ''),
-                    'quantity': product.get('quantity', 0),
-                    'price': product.get('price', 0),
-                    'pot_size': product.get('variant_details', {}).get('size', 'N/A') 
-                } for product in products],
-                'original_total': f.total_amount, 
-                'advance_amount': None, 
-                'balance_amount': f.total_amount, 
+                'original_total': f.total_amount,
+                'advance_amount': None,
+                'balance_amount': f.total_amount,
                 'is_overdue_highlight': highlight
-            })
-    
+            }
+
+            if f.shipment_status == 'partially-shipped':
+                order_data.update({
+                    'status': f.status,
+                    'items': [{
+                        'name': item.get('name', ''),
+                        'quantity': item.get('quantity', 0),
+                        'price': item.get('price', 0),
+                        'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
+                    } for item in f.unselected_items_for_clone]
+                })
+            else:
+                order_data.update({
+                    'status': 'Shipped',
+                    'items': [{
+                        'name': product.get('product_name', ''),
+                        'quantity': product.get('quantity', 0),
+                        'price': product.get('price', 0),
+                        'pot_size': product.get('variant_details', {}).get('size', 'N/A')
+                    } for product in products]
+                })
+
+            all_orders.append(order_data)    
     all_orders.sort(key=lambda x: x['date'], reverse=True)
     context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
     return render(request, 'shipment/shipment.html', context)
