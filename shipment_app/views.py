@@ -372,8 +372,12 @@ def shipped(request):
                 'items': [{
                     'name': item.get('name', ''),
                     'quantity': item.get('quantity', 0),
-                    'price': item.get('price', 0),
-                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
+                    'price': float(item.get('price', 0)),
+                    'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A'),
+                    'sku': item.get('sku', ''),
+                    'image': item.get('image', {}).get('src', ''),
+                    'product_id': item.get('product_id', ''),
+                    'variation_id': item.get('variation_id', 0)
                 } for item in new_items]
             })
 
