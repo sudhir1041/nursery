@@ -47,7 +47,8 @@ def home(request):
                 'customer': o.shipping_address_json.get('name', 'N/A'),
                 'phone': o.shipping_address_json.get('phone', 'N/A'),
                 'pincode': o.shipping_address_json.get('zip', 'N/A'),
-                'state': o.shipping_address_json.get('province', 'N/A'),                
+                'state': o.shipping_address_json.get('province', 'N/A'),
+                'address': o.shipping_address_json.get('address1', 'N/A'),
                 'note': o.internal_notes,
                 'tracking': o.tracking_details_json,
                 'platform': 'Shopify',
@@ -106,6 +107,7 @@ def home(request):
                 'phone': woo.billing_phone,
                 'pincode': woo.billing_postcode,
                 'state': woo.billing_state,
+                'address': woo.billing_address_1,
                 'note': woo.customer_note,
                 'tracking': f'https://nurserynisarga.in/admin-track-order/?track_order_id={woo.woo_id}',
                 'platform': 'Wordpress',
@@ -115,6 +117,7 @@ def home(request):
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             }
+            
 
             if woo.shipment_status == 'partially_shipped':
                 order_data.update({
@@ -155,6 +158,7 @@ def home(request):
                 'status': f.status,
                 'amount': f.total_amount,
                 'customer': f"{f.first_name or ''} {f.last_name or ''}".strip(),
+                'address': f.address,
                 'phone': f.phone,
                 'pincode': f.postcode,
                 'state': f.state,

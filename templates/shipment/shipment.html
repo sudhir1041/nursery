@@ -141,6 +141,7 @@
             <p><strong>Advance Amount:</strong> <span id="popupadvance_amount"></span></p>
             <p><strong>Balance Amount:</strong> <span id="popupbalance_amount"></span></p>
             <p><strong>Date:</strong> <span id="popupDate"></span></p>
+            <p><strong>Address:</strong> <span id="popupAddress"></span></p>
             <p><strong>Pincode:</strong> <span id="popupPincode"></span></p>
             <p><strong>Note:</strong> <span id="popupNote"></span></p>
             <p><strong>Tracking:</strong> <span id="popupTracking"></span></p>
@@ -210,6 +211,7 @@ function showPopup(cardElement) {
     document.getElementById('popupadvance_amount').textContent = order.advance_amount;
     document.getElementById('popupbalance_amount').textContent = order.balance_amount;
     document.getElementById('popupDate').textContent = new Date(order.date).toLocaleString(); // Format date
+    document.getElementById('popupAddress').textContent = order.address;
     document.getElementById('popupPincode').textContent = order.pincode;
     document.getElementById('popupNote').textContent = order.note;
     document.getElementById('popupTracking').textContent = order.tracking;
