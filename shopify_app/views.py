@@ -254,14 +254,13 @@ def shopify_order_list_view(request):
     # Define which fulfillment statuses indicate the order needs action
     actionable_fulfillment_statuses = ['unfulfilled', 'partially_fulfilled', 'scheduled', 'on_hold']
 
-    for order in orders: # Iterate through the orders ON THE CURRENT PAGE
+    for order in orders: 
         # Set a default value first
         order.is_overdue_highlight = False
         try:
             # Check if required fields exist and date is valid before processing
-            if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify')  and order.created_at_shopify:
+            if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
 
-                # Check if fulfillment status indicates action needed
                 # Handles None status and checks against the list (case-insensitive)
                 current_status = order.fulfillment_status
                 needs_action = (
@@ -272,7 +271,7 @@ def shopify_order_list_view(request):
 
                 # Check if it's older than 3 days
                 is_old = order.created_at_shopify < two_days_ago
-                # matching timezone.now(). Adjust if it's naive.
+                # matching timezone.now(). 
 
                 # Highlight if both conditions are met
                 if needs_action and is_old:
@@ -280,7 +279,7 @@ def shopify_order_list_view(request):
 
         except Exception as e:
             # Log unexpected errors during highlight calculation for a specific order
-            shopify_order_id = getattr(order, 'shopify_id', getattr(order, 'id', 'N/A')) # Get ID safely
+            shopify_order_id = getattr(order, 'shopify_id', getattr(order, 'id', 'N/A')) 
             logger.error(f"Error calculating highlight for Shopify Order ID {shopify_order_id}: {e}", exc_info=True)
             order.is_overdue_highlight = False 
 
