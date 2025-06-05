@@ -178,7 +178,6 @@ def home(request):
                     'items': [{
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
-                        'price': item.get('price', 0),
                         'pot_size': item.get('potSize', 0),
                     } for item in f.unselected_items_for_clone]
                 })
