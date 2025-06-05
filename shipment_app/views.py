@@ -92,7 +92,6 @@ def home(request):
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
             elif days_since_order >= 3: highlight = 'two_days_old'
-
             raw_data = woo.raw_data if isinstance(woo.raw_data, dict) else json.loads(woo.raw_data or '{}')
             advance_amount = None
             balance_amount = None
@@ -285,8 +284,6 @@ def shipped(request):
         if o.shipment_status in ['shipped', 'partially_shipped']:
             days_since_order = (today - o.created_at_shopify.astimezone()).days
             highlight = 'normal'
-            if days_since_order >= 4: highlight = 'three_days_old'
-            elif days_since_order >= 3: highlight = 'two_days_old'
             
             # Determine advance and balance amounts for Shopify
             shopify_advance_amount = "0.00" 
@@ -336,9 +333,7 @@ def shipped(request):
         if woo.shipment_status in ['shipped', 'partially_shipped']:                      
             days_since_order = (today - woo.date_created_woo.astimezone()).days
             highlight = 'normal'
-            if days_since_order >= 4: highlight = 'three_days_old'
-            elif days_since_order >= 3: highlight = 'two_days_old'
-
+            
             raw_data = woo.raw_data if isinstance(woo.raw_data, dict) else json.loads(woo.raw_data or '{}')
             advance_amount = None
             balance_amount = None
@@ -395,8 +390,7 @@ def shipped(request):
         if f.shipment_status in ['shipped', 'partially_shipped']:
             days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
-            if days_since_order >= 4: highlight = 'three_days_old'
-            elif days_since_order >= 3: highlight = 'two_days_old'
+        
             
             products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
 
