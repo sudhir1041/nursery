@@ -279,7 +279,7 @@ def order_list_view(request):
             # Check status and date validity before comparison
             if order.status and order.date_created_woo:
                 is_overdue = (
-                    order.status.lower() in ['processing', 'on-hold', 'partial-paid'] and order.shipment_status == 'shipped' and
+                    order.status.lower() in ['processing', 'on-hold', 'partial-paid'] and order.shipment_status.lower() in ['processing','partially-shppied','cancelled'] and
                     order.date_created_woo < two_days_ago
                     # ^^ IMPORTANT: Assumes date_created_woo is timezone-aware,
                     # matching timezone.now(). Adjust if it's naive.
