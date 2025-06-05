@@ -259,7 +259,7 @@ def shopify_order_list_view(request):
         order.is_overdue_highlight = False
         try:
             # Check if required fields exist and date is valid before processing
-            if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipment_status == 'shipped' and order.created_at_shopify:
+            if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify')  and order.created_at_shopify:
 
                 # Check if fulfillment status indicates action needed
                 # Handles None status and checks against the list (case-insensitive)
