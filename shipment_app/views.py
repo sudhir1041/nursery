@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt 
+from django.contrib.auth.decorators import login_required
 import json
 from datetime import datetime, timedelta
+
 
 # Assuming your models are imported correctly
 from shopify_app.models import ShopifyOrder
@@ -15,7 +17,8 @@ from facebook_app.models import Facebook_orders
 import logging
 logger = logging.getLogger(__name__)
 
-# Your existing home view (slightly modified for item structure consistency if needed)
+
+@login_required
 def home(request):
     today = datetime.now().astimezone()
     thirty_days_ago = today - timedelta(days=30)
@@ -198,7 +201,7 @@ def home(request):
     context = {'orders': all_orders, 'project_name': 'Order Dashboard'} 
     return render(request, 'shipment/shipment.html', context)
 
-
+@login_required
 @require_POST 
 def process_shipment(request):
     try:
@@ -266,7 +269,7 @@ def process_shipment(request):
         logger.error(f"Error processing shipment: {type(e).__name__} - {e}", exc_info=True)
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
-
+@login_required
 def shipped(request):
     today = datetime.now().astimezone()
     thirty_days_ago = today - timedelta(days=30)

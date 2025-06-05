@@ -179,8 +179,7 @@ def woocommerce_webhook_receiver(request):
 
 # --- Frontend Views ---
 
-@login_required
-@require_GET # Use require_GET for views that only display data
+
 @login_required
 @require_GET
 def order_list_view(request):
