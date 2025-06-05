@@ -119,8 +119,6 @@ def home(request):
                 'balance_amount': balance_amount,
                 'is_overdue_highlight': highlight
             }
-            
-
             if woo.shipment_status == 'partially_shipped':
                 order_data.update({
                     'status': woo.shipment_status,
@@ -181,7 +179,7 @@ def home(request):
                         'name': item.get('name', ''),
                         'quantity': item.get('quantity', 0),
                         'price': item.get('price', 0),
-                        'pot_size': next((m.get('value') for m in item.get('meta_data', []) if m.get('key') == 'pa_size' or m.get('display_key', '').lower() == 'size'), 'N/A')
+                        'pot_size': item.get('potSize', 0),
                     } for item in f.unselected_items_for_clone]
                 })
             else:
@@ -191,7 +189,7 @@ def home(request):
                         'name': product.get('product_name', ''),
                         'quantity': product.get('quantity', 0),
                         'price': product.get('price', 0),
-                        'pot_size': product.get('variant_details', {}).get('size', 'N/A')
+                        'pot_size': product.get('potSize', 'N/A')
                     } for product in products]
                 })
 
