@@ -259,22 +259,29 @@ def shopify_order_list_view(request):
         order.is_overdue_highlight = False
         try:
             # Check if required fields exist and date is valid before processing
-            if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+            if (hasattr(order, 'fulfillment_status') and 
+                hasattr(order, 'created_at_shopify') and 
+                hasattr(order, 'shipemnt_status') and
+                order.created_at_shopify):
 
-                # Handles None status and checks against the list (case-insensitive)
+                # Check both Shopify fulfillment status and shipment status
                 current_status = order.fulfillment_status
-                needs_action = (
+                needs_action_shopify = (
                     current_status is None or
                     (isinstance(current_status, str) and
                      current_status.lower() in actionable_fulfillment_statuses)
                 )
 
-                # Check if it's older than 3 days
-                is_old = order.created_at_shopify < two_days_ago
-                # matching timezone.now(). 
+                # Check custom shipment status
+                needs_action_shipment = (
+                    order.shipemnt_status in ['processing', 'partially-shipped', 'cancelled']
+                )
 
-                # Highlight if both conditions are met
-                if needs_action and is_old:
+                # Check if it's older than 2 days
+                is_old = order.created_at_shopify < two_days_ago
+
+                # Highlight if both status conditions and age condition are met
+                if needs_action_shopify and needs_action_shipment and is_old:
                     order.is_overdue_highlight = True
 
         except Exception as e:
