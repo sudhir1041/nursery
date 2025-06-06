@@ -174,7 +174,7 @@ def home(request):
             logger.info(f"Shipment status: {f.shipment_status}")
             logger.info(f"Unselected items: {f.unselected_items_for_clone}")
 
-            if f.shipment_status == 'partially-shipped':
+            if f.shipment_status == ['partially-shipped','pending']:
                 order_data.update({
                     'status': f.shipment_status,
                     'items': [{
