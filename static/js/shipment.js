@@ -105,7 +105,7 @@ function showShipPopup(cardElement) {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'ship-form__checkbox';
-        checkbox.checked = true; 
+        checkbox.checked = false; // <-- UPDATED: Items are now unselected by default
         checkbox.id = item.id; 
         checkbox.dataset.itemName = item.name;
         checkbox.dataset.itemPotSize = item.potSize;
@@ -317,4 +317,3 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         closeShipPopup();
     });
 });
-
