@@ -152,14 +152,14 @@ def home(request):
             elif days_since_order >= 3: highlight = 'two_days_old'
             
             products = f.products_json if isinstance(f.products_json, list) else json.loads(f.products_json or '[]')
-
+            logger.info(f"Facebook order address: {f.address}")
             order_data = {
                 'order_id': f.order_id,
                 'date': f.date_created,
                 'status': f.status,
                 'amount': f.total_amount,
                 'customer': f"{f.first_name or ''} {f.last_name or ''}".strip(),
-                'address': f.address,
+                'address': f.address,                
                 'phone': f.phone,
                 'pincode': f.postcode,
                 'state': f.state,
