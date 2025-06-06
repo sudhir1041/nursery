@@ -105,7 +105,7 @@ function showShipPopup(cardElement) {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'ship-form__checkbox';
-        checkbox.checked = false; // <-- UPDATED: Items are now unselected by default
+        checkbox.checked = false; 
         checkbox.id = item.id; 
         checkbox.dataset.itemName = item.name;
         checkbox.dataset.itemPotSize = item.potSize;
@@ -295,25 +295,15 @@ document.getElementById('shipForm').addEventListener('submit', (e) => {
         }
         alert(message);
         
-        const cardToUpdate = document.querySelector(`.card[data-order-id='${orderId}'][data-platform='${platform}']`);
-        if (cardToUpdate) {
-            if (data.newShipmentStatus) {
-                cardToUpdate.dataset.shipmentStatus = data.newShipTatus;
-                const statusElement = cardToUpdate.querySelector('.card__status');
-                if (statusElement) {
-                    statusElement.textContent = data.newShipmentStatus;
-                }
-                if (['shipped', 'delivered', 'cancelled'].includes(data.newShipmentStatus.toLowerCase())) {
-                    cardToUpdate.style.opacity = '0.5';
-                }
-            }
-        }
+        // UPDATE: Refresh the page after 2 seconds to show the updated order list
+        setTimeout(() => {
+            location.reload();
+        }, 2000); // 2000 milliseconds = 2 seconds
     })
     .catch((error) => {
         console.error('Error sending shipping data to backend:', error);
         alert(`Error processing order ${orderId}: ${error.message}. Please check console.`);
-    })
-    .finally(() => {
-        closeShipPopup();
+        closeShipPopup(); // Close popup only on error, since success will refresh
     });
 });
+
