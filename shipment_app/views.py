@@ -172,9 +172,6 @@ def home(request):
                 'balance_amount': f.total_amount,
                 'is_overdue_highlight': highlight
             }
-            
-            logger.info(f"Unselected items: {f.unselected_items_for_clone}")
-            logger.info(f"Shipment status: {f.shipment_status}")
 
             if f.shipment_status == 'partially_shipped':
                 order_data.update({
