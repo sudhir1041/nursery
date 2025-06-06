@@ -144,8 +144,8 @@ def home(request):
 
     # ======================== Facebook orders ======================
     for f in fb_qs:
-        logger.info(f"Shipment status: {f.shipment_status}")
-        if f.status == 'processing' and f.shipment_status in ['pending','processing', 'partially-shipped']:
+        
+        if f.status == 'processing' and f.shipment_status in ['pending','processing','partially_shipped']:
             days_since_order = (today - f.date_created.astimezone()).days
             highlight = 'normal'
             if days_since_order >= 4: highlight = 'three_days_old'
@@ -174,8 +174,9 @@ def home(request):
             }
             
             logger.info(f"Unselected items: {f.unselected_items_for_clone}")
+            logger.info(f"Shipment status: {f.shipment_status}")
 
-            if f.shipment_status == 'partially-shipped':
+            if f.shipment_status == 'partially_shipped':
                 order_data.update({
                     'status': f.shipment_status,
                     'items': [{
