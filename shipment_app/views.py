@@ -181,16 +181,16 @@ def home(request):
                         'pot_size': item.get('potSize', 0),
                     } for item in f.unselected_items_for_clone]
                 })
-            else:
-                order_data.update({
-                    'status': f.status,
-                    'items': [{
-                        'name': product.get('product_name', ''),
-                        'quantity': product.get('quantity', 0),
-                        'price': product.get('price', 0),
-                        'pot_size': product.get('potSize', 'N/A')
-                    } for product in products]
-                })
+            # else:
+            #     order_data.update({
+            #         'status': f.status,
+            #         'items': [{
+            #             'name': product.get('product_name', ''),
+            #             'quantity': product.get('quantity', 0),
+            #             'price': product.get('price', 0),
+            #             'pot_size': product.get('potSize', 'N/A')
+            #         } for product in products]
+            #     })
 
             all_orders.append(order_data)    
     all_orders.sort(key=lambda x: x['date'], reverse=True)
