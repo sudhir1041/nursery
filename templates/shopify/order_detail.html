@@ -176,7 +176,8 @@
             <dl class="space-y-3">
                <div>
                  <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Tracking Link</dt>
-                 <dd>
+                 <dd><a href="https://lalitenterprise.com/pages/trackorder?channel_order_no={{ order.name|default:order.shopify_id|slice:"1:" }}" target="_blank">https://lalitenterprise.com/pages/trackorder?channel_order_no={{ order.name|default:order.shopify_id|slice:"1:" }}</a></dd>
+                 {% comment %} <dd>
                     {% with fulfillments=order.raw_data.fulfillments %}
                         {% if fulfillments %}
                             {% with first_fulfillment=fulfillments.0 %}
@@ -196,7 +197,7 @@
                             <span class="text-muted">N/A</span>
                         {% endif %}
                     {% endwith %}
-                 </dd>
+                 </dd> {% endcomment %}
                </div>
               </div>
             </dl>
