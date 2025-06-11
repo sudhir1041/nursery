@@ -131,7 +131,8 @@ animation: blink 1s infinite;
                             <td>{{ order.shipping_address_json.zip|default:"N/A" }}</td>
                             <td>{{ order.shipping_address_json.city|default:"N/A" }}</td>
                             <td>{{ order.internal_notes|default:"N/A" }}</td>
-                            <td>
+                            <td><a href="https://lalitenterprise.com/pages/trackorder?channel_order_no={{ order.name|default:order.shopify_id }}" target="_blank">{{ order.name|default:order.shopify_id }}</a></td>
+                            {% comment %} <td>
                                 {% with fulfillments=order.raw_data.fulfillments %}
                                     {% if fulfillments %}
                                         {% with first_fulfillment=fulfillments.0 %}
@@ -151,7 +152,7 @@ animation: blink 1s infinite;
                                         <span class="text-muted">N/A</span>
                                     {% endif %}
                                 {% endwith %}
-                            </td>
+                            </td> {% endcomment %}
                             <td>
                                 <a href="{% url 'shopify_order_detail' order.shopify_id %}" class="btn btn-sm btn-info">👁️ View</a>
                                 <a href="{% url 'shopify_order_edit' order.shopify_id %}" class="btn btn-sm btn-secondary">✏️ Edit</a> {# Update href if edit view exists #}
