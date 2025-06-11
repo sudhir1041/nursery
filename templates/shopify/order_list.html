@@ -131,9 +131,8 @@ animation: blink 1s infinite;
                             <td>{{ order.shipping_address_json.zip|default:"N/A" }}</td>
                             <td>{{ order.shipping_address_json.city|default:"N/A" }}</td>
                             <td>{{ order.internal_notes|default:"N/A" }}</td>
-                            <td><a href="https://lalitenterprise.com/pages/trackorder?channel_order_no={{ order.name|default:order.shopify_id }}" target="_blank">{{ order.name|default:order.shopify_id }}</a></td>
+                            <td><a href="https://lalitenterprise.com/pages/trackorder?channel_order_no={{ order.name|default:order.shopify_id|slice:"1:" }}" target="_blank">{{ order.name|default:order.shopify_id }}</a></td>                            
                             {% comment %} <td>
-                                {% with fulfillments=order.raw_data.fulfillments %}
                                     {% if fulfillments %}
                                         {% with first_fulfillment=fulfillments.0 %}
                                             {% if first_fulfillment.tracking_urls.0 %}
