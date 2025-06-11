@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1cm; /* Standard A4 margin */
+        }
+        body {
+            font-family: "Helvetica", "sans-serif";
+            font-size: 12px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 5px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .header-table td {
+            padding: 0;
+        }
+        .items-table {
+            margin-top: 30px;
+        }
+        .items-table thead th {
+            background-color: #2d3748; /* dark gray */
+            color: #ffffff;
+            padding: 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .items-table tbody td {
+            border-bottom: 1px solid #e2e8f0; /* light gray */
+            padding: 10px;
+        }
+        .totals-table {
+            width: 45%;
+            float: right;
+            margin-top: 20px;
+        }
+        .totals-table td {
+            padding: 8px;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .font-bold {
+            font-weight: bold;
+        }
+        .text-lg {
+            font-size: 1.1em;
+        }
+        .total-row {
+             background-color: #f7fafc; /* very light gray */
+        }
+        .address-block {
+            line-height: 1.5;
+        }
+        .invoice-details-table td {
+            padding: 2px 5px;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <table class="header-table" style="margin-bottom: 40px;">
+        <tr>
+            <td style="width: 60%;">
+                <img src="https://nurserynisarga.in/wp-content/uploads/2021/11/cropped-Nursery_Nisarga_Logo_with_R_150x150-px.webp" style="height: 50pt;">
+            </td>
+            <td class="text-right" style="font-size: 11px; width: 40%;">
+                <span class="font-bold">Nursery Nisarga</span><br/>
+                Opposite MGM School, BDA Road<br/>
+                Bhopal, Madhyapradesh 462022, Contact<br/>
+                8435472529
+            </td>
+        </tr>
+    </table>
+
+    <!-- Invoice Title and Details Section -->
+    <table style="margin-bottom: 40px;">
+        <tr>
+            <td style="width: 50%;">
+                <h2 style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0;">INVOICE</h2>
+                <div class="font-bold" style="margin-bottom: 5px;">Billed To</div>
+                <div class="address-block">
+                    {{ invoice.customer.name }}<br>
+                    {{ invoice.customer.address|linebreaksbr }}<br>
+                    {{ invoice.customer.email }}<br>
+                    {{ invoice.customer.phone }}
+                </div>
+            </td>
+            <td style="width: 50%; vertical-align: middle;">
+                <table class="invoice-details-table" style="float: right;">
+                    <tr>
+                        <td class="font-bold">Invoice Number:</td>
+                        <td class="text-right">{{ invoice.invoice_number }}</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">Invoice Date:</td>
+                        <td class="text-right">{{ invoice.issue_date|date:"F j, Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">Order Number:</td>
+                        <td class="text-right">{{ invoice.id }}</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">Order Date:</td>
+                        <td class="text-right">{{ invoice.created_at|date:"F j, Y" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">Payment Method:</td>
+                        <td class="text-right">{{ payment_method }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Invoice Items Table -->
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th style="text-align: center;">Quantity</th>
+                <th class="text-right">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.items.all %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td class="text-right">₹{{ item.unit_price|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals Section -->
+    <table class="totals-table">
+        <tr>
+            <td class="font-bold">Subtotal</td>
+            <td class="text-right">₹{{ subtotal|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td class="font-bold" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Shipping</td>
+            <td class="text-right" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">{{ shipping_cost }}</td>
+        </tr>
+        <tr class="total-row">
+            <td class="font-bold text-lg">Total</td>
+            <td class="font-bold text-lg text-right">₹{{ total|floatformat:2 }}</td>
+        </tr>
+    </table>
+    
+    <!-- Footer Section -->
+    <div style="position: fixed; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 10px;">
+        <hr>
+        <p>or mail us order@nurserynisarga.in</p>
+        <p>Follow Us, Insta, Fb - Nurserynisargaonline</p>
+    </div>
+
+</body>
+</html>

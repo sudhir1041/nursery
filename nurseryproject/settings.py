@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'django_celery_beat',
+    'invoice_app',
     'woocommerce_app',
     'shopify_app',
     'facebook_app',
