@@ -17,5 +17,5 @@ urlpatterns = [
     path('facebook/', include('facebook_app.urls')),
     path('whatsapp/', include('whatsapp_app.urls', namespace='whatsapp_app')),
     path('shipment/',include('shipment_app.urls')),
-    path('invoice/', include('invoice_app.urls')),
+    path('invoice/', include('invoice_app.urls', namespace='invoice_app')),
 ]
