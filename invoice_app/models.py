@@ -1,15 +1,11 @@
-# invoice/models.py
-
+import decimal
 from django.db import models
 from django.utils import timezone
-import uuid
 
 class Customer(models.Model):
-    """
-    Model to store customer information.
-    """
-    name = models.CharField(max_length=200)
-    email = models.EmailField(unique=True)
+    """Stores customer information."""
+    name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True, help_text="Customer's unique email address.")
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,42 +15,68 @@ class Customer(models.Model):
 
 class Invoice(models.Model):
     """
-    Model for the main invoice.
+    Stores the main invoice data, linking a customer to a set of items.
     """
-    STATUS_CHOICES = (
+    STATUS_CHOICES = [
         ('DRAFT', 'Draft'),
-        ('SENT', 'Sent'),
         ('PAID', 'Paid'),
+        ('UNPAID', 'Unpaid'),
         ('CANCELLED', 'Cancelled'),
-    )
+    ]
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='invoices')
-    invoice_number = models.CharField(max_length=100, unique=True)
+    # Core Invoice Details
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    invoice_number = models.CharField(max_length=50, unique=True)
     issue_date = models.DateField(default=timezone.now)
-    due_date = models.DateField()
+    due_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='DRAFT')
-    notes = models.TextField(blank=True, null=True)
+    
+    # Financial Details
+    shipping_cost = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=decimal.Decimal('0.00')
+    )
+    payment_method = models.CharField(max_length=50, default='Not Specified', blank=True)
+
+    # Additional Information
+    notes = models.TextField(blank=True, help_text="Internal notes or terms and conditions for the customer.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def get_total(self):
-        # Calculate the total amount for the invoice from its items.
-        return sum(item.get_total() for item in self.items.all())
-
+    
     def __str__(self):
-        return f"Invoice {self.invoice_number} for {self.customer.name}"
+        return f"Invoice {self.invoice_number} for {self.customer}"
+
+    @property
+    def subtotal(self):
+        """Calculates the sum of all item totals before shipping or taxes."""
+        return sum(item.total_price for item in self.items.all())
+
+    @property
+    def total(self):
+        """Calculates the final total, including shipping costs."""
+        return self.subtotal + self.shipping_cost
 
 class InvoiceItem(models.Model):
-    """
-    Model for individual items within an invoice.
-    """
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
-    description = models.CharField(max_length=255)
+    """Represents a single line item on an invoice."""
+    invoice = models.ForeignKey(
+        Invoice, 
+        on_delete=models.CASCADE, 
+        related_name='items' # This allows using `invoice.items.all()`
+    )
+    description = models.CharField(max_length=255, help_text="Description of the product or service.")
     quantity = models.PositiveIntegerField(default=1)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def get_total(self):
-        return self.quantity * self.unit_price
+    unit_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        help_text="Price per unit."
+    )
 
     def __str__(self):
-        return f"{self.description} ({self.quantity})"
+        return f"{self.quantity} x {self.description}"
+
+    @property
+    def total_price(self):
+        """Calculates the total price for this line item (quantity * unit_price)."""
+        return self.quantity * self.unit_price
+

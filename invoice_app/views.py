@@ -1,97 +1,61 @@
-# invoice/views.py
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
+import decimal
+from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from django.template.loader import get_template
-from xhtml2pdf import pisa
+from django.template.loader import render_to_string
 
-from .models import Invoice
-from .utils import create_invoice_from_data
+# You will need to install weasyprint: pip install WeasyPrint
+from weasyprint import HTML
 
-# This callback is necessary for xhtml2pdf to find images via URL
-def link_callback(uri, rel):
+# Make sure to import your actual models
+# from .models import Invoice, InvoiceItem
+
+def download_invoice_pdf(request, invoice_id):
     """
-    Handle external URLs for images.
+    Generates a PDF from a Tailwind CSS HTML template for a given invoice
+    and returns it as a downloadable file.
     """
-    # Allows http and https links
-    if uri.startswith('https://') or uri.startswith('http://'):
-        return uri
-    # In case you had local static files, this would handle them, but for now we only need the URL part.
-    return uri
-
-
-def create_invoice_view(request):
-    """
-    Renders the invoice creation form and handles its submission.
-    """
-    if request.method == 'POST':
-        source = request.POST.get('source')
-        raw_data = request.POST.get('raw_data')
-
-        if not source or not raw_data:
-            messages.error(request, 'Source and JSON data are required.')
-            return render(request, 'invoice/create_invoice.html')
-        
-        try:
-            invoice = create_invoice_from_data(source, raw_data)
-            messages.success(request, f'Successfully created invoice {invoice.invoice_number}.')
-            return redirect('invoice:invoice_detail', invoice_id=invoice.id)
-        except ValueError as e:
-            messages.error(request, str(e))
-    
-    return render(request, 'invoice/create_invoice.html')
-
-
-def invoice_detail_view(request, invoice_id):
-    """
-    Displays a single, detailed invoice page.
-    """
+    # 1. Fetch the required invoice object.
+    # get_object_or_404 is a shortcut that raises a 404 error if the object is not found.
     invoice = get_object_or_404(Invoice, pk=invoice_id)
-    subtotal = invoice.get_total()
-    shipping_cost = 0.00
+    
+    # Assumes your InvoiceItem model has a ForeignKey to Invoice with related_name='items'
+    items = invoice.items.all() 
+
+    # 2. Calculate totals directly in the view.
+    # This keeps your template clean and focused on presentation.
+    subtotal = sum(item.quantity * item.unit_price for item in items)
+    
+    # Safely get 'shipping_cost' from your Invoice model.
+    # Defaults to 0.00 if the field doesn't exist for some reason.
+    shipping_cost = getattr(invoice, 'shipping_cost', decimal.Decimal('0.00'))
     total = subtotal + shipping_cost
 
+    # 3. Prepare the full context dictionary to pass to the template.
+    # This contains all the dynamic data your HTML template needs.
     context = {
         'invoice': invoice,
+        'items': items,
         'subtotal': subtotal,
-        'shipping_cost': "Free Shipping" if shipping_cost == 0 else f"₹{shipping_cost:.2f}",
+        'shipping_cost': shipping_cost,
         'total': total,
-        'payment_method': "Credit Card/Debit Card/NetBanking" if invoice.status == 'PAID' else "Pending Payment",
-    }
-    
-    return render(request, 'invoice/invoice_detail.html', context)
-
-
-def generate_invoice_pdf(request, invoice_id):
-    """
-    Generates and serves a PDF version of the invoice.
-    """
-    invoice = get_object_or_404(Invoice, pk=invoice_id)
-    subtotal = invoice.get_total()
-    shipping_cost = 0.00
-    total = subtotal + shipping_cost
-
-    context = {
-        'invoice': invoice,
-        'subtotal': subtotal,
-        'shipping_cost': "Free Shipping" if shipping_cost == 0 else f"₹{shipping_cost:.2f}",
-        'total': total,
-        'payment_method': "Credit Card/Debit Card/NetBanking" if invoice.status == 'PAID' else "Pending Payment",
+        # Safely get 'payment_method'. Defaults to 'Not Specified'.
+        'payment_method': getattr(invoice, 'payment_method', 'Not Specified'), 
     }
 
-    # Render the HTML template for the PDF
-    template = get_template('invoice/pdf_template.html')
-    html = template.render(context)
+    # 4. Render the HTML template to a string.
+    # Replace 'your_invoice_app' with the actual name of your Django app.
+    # The template file should be located at:
+    # your_invoice_app/templates/your_invoice_app/tailwind_invoice_template.html
+    html_string = render_to_string('your_invoice_app/tailwind_invoice_template.html', context)
+
+    # 5. Generate the PDF file in memory using WeasyPrint.
+    # The base_url helps WeasyPrint locate external files like images or fonts.
+    pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+
+    # 6. Create the final HTTP response with the correct headers.
+    response = HttpResponse(pdf_file, content_type='application/pdf')
     
-    # Create the PDF response
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{invoice.invoice_number}.pdf"'
+    # The Content-Disposition header tells the browser to prompt a download.
+    response['Content-Disposition'] = f'attachment; filename="invoice-{invoice.invoice_number}.pdf"'
     
-    # Create the PDF using pisa, passing the link_callback
-    pisa_status = pisa.CreatePDF(
-       html, dest=response, link_callback=link_callback)
-    
-    if pisa_status.err:
-       return HttpResponse('We had some errors creating the PDF <pre>' + html + '</pre>')
     return response
