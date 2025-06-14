@@ -36,12 +36,12 @@ def create_invoice(request, woo_id):
             }
         except:
             try:
-                order_source = get_object_or_404(ShopifyOrder, id=woo_id)
+                order_source = get_object_or_404(ShopifyOrder, woo_id=woo_id)
                 # Add Shopify order data mapping here
                 order_data = {}
             except:
                 try:
-                    order_source = get_object_or_404(Facebook_orders, id=woo_id)
+                    order_source = get_object_or_404(Facebook_orders, woo_id=woo_id)
                     # Add Facebook order data mapping here
                     order_data = {}
                 except:
