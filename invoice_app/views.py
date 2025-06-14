@@ -35,17 +35,17 @@ def create_invoice(request, woo_id):
                 'shipping_charge': order_source.raw_data.get('shipping_charge', 0)
             }
         except:
-            try:
-                order_source = get_object_or_404(ShopifyOrder, woo_id=woo_id)
-                # Add Shopify order data mapping here
-                order_data = {}
-            except:
-                try:
-                    order_source = get_object_or_404(Facebook_orders, woo_id=woo_id)
-                    # Add Facebook order data mapping here
-                    order_data = {}
-                except:
-                    raise Exception("Order not found in any source")
+            # try:
+            #     order_source = get_object_or_404(ShopifyOrder, woo_id=woo_id)
+            #     # Add Shopify order data mapping here
+            #     order_data = {}
+            # except:
+            #     try:
+            #         order_source = get_object_or_404(Facebook_orders, woo_id=woo_id)
+            #         # Add Facebook order data mapping here
+            #         order_data = {}
+            #     except:
+            #         raise Exception("Order not found in any source")
 
         # Check if order already exists
         existing_order = Order.objects.filter(order_id=woo_id).first()
