@@ -39,4 +39,6 @@ def create_invoice(request,id):
     )
 
     logger.info(f"Invoice created with number: {invoice.invoice_number}")
+def create_company(request):
+    shopify = 'data'
 
