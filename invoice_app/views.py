@@ -4,6 +4,7 @@ from woocommerce_app.models import WooCommerceOrder
 from shopify_app.models import ShopifyOrder
 from facebook_app.models import Facebook_orders
 from .models import Order,Invoice,Company_name
+from django.http import HttpResponse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ def create_invoice(request,id):
         existing_invoice = Invoice.objects.filter(order__id=id).first()
         if existing_invoice:
             logger.info(f"Invoice already exists with number: {existing_invoice.invoice_number}")
-            return
+            return HttpResponse(f"Invoice already exists with number: {existing_invoice.invoice_number}")
 
         # Try to get order from different sources
         try:
@@ -59,9 +60,11 @@ def create_invoice(request,id):
         )
 
         logger.info(f"Invoice created with number: {invoice.invoice_number}")
+        return HttpResponse(f"Invoice created successfully with number: {invoice.invoice_number}")
 
     except Exception as e:
         logger.error(f"Error creating invoice: {str(e)}")
+        return HttpResponse(f"Error creating invoice: {str(e)}")
 
 def create_company(request):
     shopify = 'data'
