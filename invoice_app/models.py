@@ -1,82 +1,61 @@
-import decimal
 from django.db import models
-from django.utils import timezone
+import random
 
-class Customer(models.Model):
-    """Stores customer information."""
-    name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True, help_text="Customer's unique email address.")
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+class Order(models.Model):
+    def generate_invoice_id():
+        return str(random.randint(100000, 999999))
+    invoice_id = models.CharField(max_length=6, default=generate_invoice_id, editable=False, unique=True)
+    order_date = models.DateTimeField(auto_now_add=True)
+    customer_name = models.CharField(max_length=200)
+    customer_address = models.TextField()
+    customer_email = models.EmailField()
+    customer_phone = models.CharField(max_length=15)
+    order_total = models.DecimalField(max_digits=10, decimal_places=2)
+    order_status = models.CharField(max_length=50)
+    order_items = models.JSONField()
+    order_shipment_status = models.CharField(max_length=50)
+    order_notes = models.TextField(blank=True, null=True)
+    payment_method = models.CharField(max_length=100)
+    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return self.name
+        return f"Order {self.order_id}"
+
+    class Meta:
+        ordering = ['-order_date']
+
+class Company_name(models.Model):
+    company_name = models.CharField(max_length=100)
+    company_address = models.TextField()
+    company_phone = models.CharField(max_length=15)
+    company_email = models.EmailField()
+    company_website = models.URLField()
+    company_logo = models.ImageField(upload_to='company_logo/', blank=True, null=True)
+
+    def __str__(self):
+        return self.company_name
+    class Meta:
+        verbose_name_plural = 'Company Details'
 
 class Invoice(models.Model):
-    """
-    Stores the main invoice data, linking a customer to a set of items.
-    """
-    STATUS_CHOICES = [
-        ('DRAFT', 'Draft'),
-        ('PAID', 'Paid'),
-        ('UNPAID', 'Unpaid'),
-        ('CANCELLED', 'Cancelled'),
-    ]
-
-    # Core Invoice Details
-    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-    invoice_number = models.CharField(max_length=50, unique=True)
-    issue_date = models.DateField(default=timezone.now)
-    due_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='DRAFT')
-    
-    # Financial Details
-    shipping_cost = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=decimal.Decimal('0.00')
-    )
-    payment_method = models.CharField(max_length=50, default='Not Specified', blank=True)
-
-    # Additional Information
-    notes = models.TextField(blank=True, help_text="Internal notes or terms and conditions for the customer.")
+    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    invoice_date = models.DateTimeField(auto_now_add=True)
+    invoice_number = models.CharField(max_length=20, unique=True)
+    pdf_file = models.FileField(upload_to='invoices/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"Invoice {self.invoice_number} for {self.customer}"
-
-    @property
-    def subtotal(self):
-        """Calculates the sum of all item totals before shipping or taxes."""
-        return sum(item.total_price for item in self.items.all())
-
-    @property
-    def total(self):
-        """Calculates the final total, including shipping costs."""
-        return self.subtotal + self.shipping_cost
-
-class InvoiceItem(models.Model):
-    """Represents a single line item on an invoice."""
-    invoice = models.ForeignKey(
-        Invoice, 
-        on_delete=models.CASCADE, 
-        related_name='items' # This allows using `invoice.items.all()`
-    )
-    description = models.CharField(max_length=255, help_text="Description of the product or service.")
-    quantity = models.PositiveIntegerField(default=1)
-    unit_price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        help_text="Price per unit."
-    )
 
     def __str__(self):
-        return f"{self.quantity} x {self.description}"
+        return f"Invoice {self.invoice_number} for Order {self.order.invoice_id}"
 
-    @property
-    def total_price(self):
-        """Calculates the total price for this line item (quantity * unit_price)."""
-        return self.quantity * self.unit_price
+    def generate_invoice_number(self):
+        return f"INV-{self.order.invoice_id}"
+
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            self.invoice_number = self.generate_invoice_number()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-invoice_date']
 

@@ -1,0 +1,1193 @@
+INFO 2025-05-07 12:24:09,223 views 403918 138291992684224 Shopify webhook signature verified successfully.
+INFO 2025-05-07 12:24:09,224 views 403918 138291992684224 Processing webhook for topic 'orders/fulfilled', resource ID '6520702828848'.
+INFO 2025-05-07 12:24:09,224 views 403918 138291992684224 Order-related topic detected. Fetching latest data for order ID 6520702828848 via API...
+INFO 2025-05-07 12:24:09,860 utils 403918 138291992684224 Util: Successfully fetched Shopify order 6520702828848.
+INFO 2025-05-07 12:24:09,877 views 403918 138291992684224 Updated ShopifyOrder object for shopify_id=6520702828848.
+INFO 2025-05-08 11:24:25,203 views 404143 129600882742976 Shopify webhook signature verified successfully.
+INFO 2025-05-08 11:24:25,205 views 404143 129600882742976 Processing webhook for topic 'orders/create', resource ID '6534693945648'.
+INFO 2025-05-08 11:24:25,205 views 404143 129600882742976 Order-related topic detected. Fetching latest data for order ID 6534693945648 via API...
+INFO 2025-05-08 11:24:25,821 utils 404143 129600882742976 Util: Successfully fetched Shopify order 6534693945648.
+INFO 2025-05-08 11:24:25,851 views 404143 129600882742976 Created ShopifyOrder object for shopify_id=6534693945648.
+INFO 2025-05-08 12:11:02,441 views 404143 129600882742976 Shopify webhook signature verified successfully.
+INFO 2025-05-08 12:11:02,442 views 404143 129600882742976 Processing webhook for topic 'orders/create', resource ID '6534726811952'.
+INFO 2025-05-08 12:11:02,442 views 404143 129600882742976 Order-related topic detected. Fetching latest data for order ID 6534726811952 via API...
+INFO 2025-05-08 12:11:03,009 utils 404143 129600882742976 Util: Successfully fetched Shopify order 6534726811952.
+INFO 2025-05-08 12:11:03,024 views 404143 129600882742976 Created ShopifyOrder object for shopify_id=6534726811952.
+INFO 2025-05-08 13:09:31,967 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-08 13:09:31,970 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6533146575152'.
+INFO 2025-05-08 13:09:31,970 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6533146575152 via API...
+INFO 2025-05-08 13:09:32,615 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6533146575152.
+INFO 2025-05-08 13:09:32,626 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6533146575152.
+INFO 2025-05-08 13:18:30,212 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-08 13:18:30,213 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6534769901872'.
+INFO 2025-05-08 13:18:30,213 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6534769901872 via API...
+INFO 2025-05-08 13:18:30,787 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6534769901872.
+INFO 2025-05-08 13:18:30,799 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6534769901872.
+INFO 2025-05-09 10:33:43,214 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-09 10:33:43,216 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6536214282544'.
+INFO 2025-05-09 10:33:43,216 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6536214282544 via API...
+INFO 2025-05-09 10:33:43,804 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6536214282544.
+INFO 2025-05-09 10:33:43,855 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6536214282544.
+INFO 2025-05-09 11:33:01,258 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-09 11:33:01,261 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6534726811952'.
+INFO 2025-05-09 11:33:01,261 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6534726811952 via API...
+INFO 2025-05-09 11:33:01,838 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6534726811952.
+INFO 2025-05-09 11:33:01,858 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6534726811952.
+INFO 2025-05-09 11:34:00,738 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-09 11:34:00,739 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6534693945648'.
+INFO 2025-05-09 11:34:00,739 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6534693945648 via API...
+INFO 2025-05-09 11:34:02,391 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6534693945648.
+INFO 2025-05-09 11:34:02,414 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6534693945648.
+INFO 2025-05-09 15:43:08,955 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-09 15:43:08,957 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6536438153520'.
+INFO 2025-05-09 15:43:08,958 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6536438153520 via API...
+INFO 2025-05-09 15:43:09,576 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6536438153520.
+INFO 2025-05-09 15:43:09,613 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6536438153520.
+INFO 2025-05-10 12:27:28,768 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-10 12:27:28,772 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6536214282544'.
+INFO 2025-05-10 12:27:28,772 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6536214282544 via API...
+INFO 2025-05-10 12:27:29,725 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6536214282544.
+INFO 2025-05-10 12:27:29,755 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6536214282544.
+INFO 2025-05-10 12:28:58,342 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-10 12:28:58,342 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6536438153520'.
+INFO 2025-05-10 12:28:58,342 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6536438153520 via API...
+INFO 2025-05-10 12:28:58,947 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6536438153520.
+INFO 2025-05-10 12:28:58,963 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6536438153520.
+INFO 2025-05-10 12:40:29,996 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-10 12:40:29,996 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6538200252720'.
+INFO 2025-05-10 12:40:29,996 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6538200252720 via API...
+INFO 2025-05-10 12:40:30,534 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6538200252720.
+INFO 2025-05-10 12:40:30,553 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6538200252720.
+INFO 2025-05-10 18:30:23,230 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-10 18:30:23,232 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6538456334640'.
+INFO 2025-05-10 18:30:23,232 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6538456334640 via API...
+INFO 2025-05-10 18:30:24,063 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6538456334640.
+INFO 2025-05-10 18:30:24,085 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6538456334640.
+INFO 2025-05-10 23:38:54,926 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-10 23:38:54,929 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6538948739376'.
+INFO 2025-05-10 23:38:54,930 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6538948739376 via API...
+INFO 2025-05-10 23:38:55,713 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6538948739376.
+INFO 2025-05-10 23:38:55,761 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6538948739376.
+INFO 2025-05-11 12:11:54,674 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-11 12:11:54,676 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6539827577136'.
+INFO 2025-05-11 12:11:54,677 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6539827577136 via API...
+INFO 2025-05-11 12:11:55,684 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6539827577136.
+INFO 2025-05-11 12:11:55,757 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6539827577136.
+INFO 2025-05-11 17:35:59,178 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-11 17:35:59,180 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6534769901872'.
+INFO 2025-05-11 17:35:59,180 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6534769901872 via API...
+INFO 2025-05-11 17:36:00,131 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6534769901872.
+INFO 2025-05-11 17:36:00,207 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6534769901872.
+INFO 2025-05-11 18:05:04,280 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-11 18:05:04,286 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6538948739376'.
+INFO 2025-05-11 18:05:04,287 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6538948739376 via API...
+INFO 2025-05-11 18:05:04,960 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6538948739376.
+INFO 2025-05-11 18:05:05,061 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6538948739376.
+INFO 2025-05-12 08:36:00,201 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-12 08:36:00,205 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6539827577136'.
+INFO 2025-05-12 08:36:00,205 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6539827577136 via API...
+INFO 2025-05-12 08:36:01,280 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6539827577136.
+INFO 2025-05-12 08:36:01,397 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6539827577136.
+INFO 2025-05-12 12:39:38,516 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-12 12:39:38,521 views 404143 129600633960128 Processing webhook for topic 'orders/fulfilled', resource ID '6538200252720'.
+INFO 2025-05-12 12:39:38,521 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6538200252720 via API...
+INFO 2025-05-12 12:39:39,392 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6538200252720.
+INFO 2025-05-12 12:39:39,409 views 404143 129600633960128 Updated ShopifyOrder object for shopify_id=6538200252720.
+INFO 2025-05-12 12:56:42,334 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-12 12:56:42,334 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6541423313200'.
+INFO 2025-05-12 12:56:42,334 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6541423313200 via API...
+INFO 2025-05-12 12:56:42,964 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6541423313200.
+INFO 2025-05-12 12:56:42,988 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6541423313200.
+INFO 2025-05-12 19:40:49,149 views 404143 129600633960128 Shopify webhook signature verified successfully.
+INFO 2025-05-12 19:40:49,153 views 404143 129600633960128 Processing webhook for topic 'orders/create', resource ID '6541744800048'.
+INFO 2025-05-12 19:40:49,154 views 404143 129600633960128 Order-related topic detected. Fetching latest data for order ID 6541744800048 via API...
+INFO 2025-05-12 19:40:49,797 utils 404143 129600633960128 Util: Successfully fetched Shopify order 6541744800048.
+INFO 2025-05-12 19:40:49,827 views 404143 129600633960128 Created ShopifyOrder object for shopify_id=6541744800048.
+INFO 2025-05-12 21:10:37,175 views 404143 129600617174720 Shopify webhook signature verified successfully.
+INFO 2025-05-12 21:10:37,177 views 404143 129600617174720 Processing webhook for topic 'orders/create', resource ID '6541868237104'.
+INFO 2025-05-12 21:10:37,177 views 404143 129600617174720 Order-related topic detected. Fetching latest data for order ID 6541868237104 via API...
+INFO 2025-05-12 21:10:38,000 utils 404143 129600617174720 Util: Successfully fetched Shopify order 6541868237104.
+INFO 2025-05-12 21:10:38,016 views 404143 129600617174720 Created ShopifyOrder object for shopify_id=6541868237104.
+INFO 2025-05-13 00:09:32,362 views 404143 129600617174720 Shopify webhook signature verified successfully.
+INFO 2025-05-13 00:09:32,366 views 404143 129600617174720 Processing webhook for topic 'orders/create', resource ID '6542111408432'.
+INFO 2025-05-13 00:09:32,367 views 404143 129600617174720 Order-related topic detected. Fetching latest data for order ID 6542111408432 via API...
+INFO 2025-05-13 00:09:33,429 utils 404143 129600617174720 Util: Successfully fetched Shopify order 6542111408432.
+INFO 2025-05-13 00:09:33,449 views 404143 129600617174720 Created ShopifyOrder object for shopify_id=6542111408432.
+INFO 2025-05-13 12:17:08,410 views 404143 129600617174720 Shopify webhook signature verified successfully.
+INFO 2025-05-13 12:17:08,414 views 404143 129600617174720 Processing webhook for topic 'orders/fulfilled', resource ID '6538456334640'.
+INFO 2025-05-13 12:17:08,415 views 404143 129600617174720 Order-related topic detected. Fetching latest data for order ID 6538456334640 via API...
+INFO 2025-05-13 12:17:09,287 utils 404143 129600617174720 Util: Successfully fetched Shopify order 6538456334640.
+INFO 2025-05-13 12:17:09,317 views 404143 129600617174720 Updated ShopifyOrder object for shopify_id=6538456334640.
+INFO 2025-05-13 12:24:08,095 views 404143 129600617174720 Shopify webhook signature verified successfully.
+INFO 2025-05-13 12:24:08,096 views 404143 129600617174720 Processing webhook for topic 'orders/fulfilled', resource ID '6541423313200'.
+INFO 2025-05-13 12:24:08,096 views 404143 129600617174720 Order-related topic detected. Fetching latest data for order ID 6541423313200 via API...
+INFO 2025-05-13 12:24:08,681 utils 404143 129600617174720 Util: Successfully fetched Shopify order 6541423313200.
+INFO 2025-05-13 12:24:08,695 views 404143 129600617174720 Updated ShopifyOrder object for shopify_id=6541423313200.
+INFO 2025-05-13 19:31:40,312 views 404143 129600617174720 Shopify webhook signature verified successfully.
+INFO 2025-05-13 19:31:40,316 views 404143 129600617174720 Processing webhook for topic 'orders/create', resource ID '6543205695792'.
+INFO 2025-05-13 19:31:40,317 views 404143 129600617174720 Order-related topic detected. Fetching latest data for order ID 6543205695792 via API...
+INFO 2025-05-13 19:31:41,152 utils 404143 129600617174720 Util: Successfully fetched Shopify order 6543205695792.
+INFO 2025-05-13 19:31:41,197 views 404143 129600617174720 Created ShopifyOrder object for shopify_id=6543205695792.
+INFO 2025-05-14 00:25:55,471 views 404143 129600617174720 Shopify webhook signature verified successfully.
+INFO 2025-05-14 00:25:55,472 views 404143 129600617174720 Processing webhook for topic 'orders/create', resource ID '6543603761456'.
+INFO 2025-05-14 00:25:55,472 views 404143 129600617174720 Order-related topic detected. Fetching latest data for order ID 6543603761456 via API...
+INFO 2025-05-14 00:25:56,436 utils 404143 129600617174720 Util: Successfully fetched Shopify order 6543603761456.
+INFO 2025-05-14 00:25:56,460 views 404143 129600617174720 Created ShopifyOrder object for shopify_id=6543603761456.
+INFO 2025-05-14 11:32:03,999 views 522209 127526291658432 Shopify webhook signature verified successfully.
+INFO 2025-05-14 11:32:04,000 views 522209 127526291658432 Processing webhook for topic 'orders/create', resource ID '6544335896880'.
+INFO 2025-05-14 11:32:04,000 views 522209 127526291658432 Order-related topic detected. Fetching latest data for order ID 6544335896880 via API...
+INFO 2025-05-14 11:32:04,787 utils 522209 127526291658432 Util: Successfully fetched Shopify order 6544335896880.
+INFO 2025-05-14 11:32:04,798 views 522209 127526291658432 Created ShopifyOrder object for shopify_id=6544335896880.
+INFO 2025-05-14 12:12:27,638 views 522934 140132460418752 Shopify webhook signature verified successfully.
+INFO 2025-05-14 12:12:27,639 views 522934 140132460418752 Processing webhook for topic 'orders/fulfilled', resource ID '6541744800048'.
+INFO 2025-05-14 12:12:27,639 views 522934 140132460418752 Order-related topic detected. Fetching latest data for order ID 6541744800048 via API...
+INFO 2025-05-14 12:12:28,325 utils 522934 140132460418752 Util: Successfully fetched Shopify order 6541744800048.
+INFO 2025-05-14 12:12:28,353 views 522934 140132460418752 Updated ShopifyOrder object for shopify_id=6541744800048.
+INFO 2025-05-14 12:13:32,426 views 522934 140132460418752 Shopify webhook signature verified successfully.
+INFO 2025-05-14 12:13:32,427 views 522934 140132460418752 Processing webhook for topic 'orders/fulfilled', resource ID '6541868237104'.
+INFO 2025-05-14 12:13:32,427 views 522934 140132460418752 Order-related topic detected. Fetching latest data for order ID 6541868237104 via API...
+INFO 2025-05-14 12:13:33,029 utils 522934 140132460418752 Util: Successfully fetched Shopify order 6541868237104.
+INFO 2025-05-14 12:13:33,040 views 522934 140132460418752 Updated ShopifyOrder object for shopify_id=6541868237104.
+INFO 2025-05-14 12:18:24,401 views 523322 130302339540672 Shopify webhook signature verified successfully.
+INFO 2025-05-14 12:18:24,403 views 523322 130302339540672 Processing webhook for topic 'orders/fulfilled', resource ID '6542111408432'.
+INFO 2025-05-14 12:18:24,403 views 523322 130302339540672 Order-related topic detected. Fetching latest data for order ID 6542111408432 via API...
+INFO 2025-05-14 12:18:25,016 utils 523322 130302339540672 Util: Successfully fetched Shopify order 6542111408432.
+INFO 2025-05-14 12:18:25,029 views 523322 130302339540672 Updated ShopifyOrder object for shopify_id=6542111408432.
+INFO 2025-05-14 14:01:37,075 views 523398 137236267550400 Shopify webhook signature verified successfully.
+INFO 2025-05-14 14:01:37,075 views 523398 137236267550400 Processing webhook for topic 'orders/create', resource ID '6544423518512'.
+INFO 2025-05-14 14:01:37,075 views 523398 137236267550400 Order-related topic detected. Fetching latest data for order ID 6544423518512 via API...
+INFO 2025-05-14 14:01:37,965 utils 523398 137236267550400 Util: Successfully fetched Shopify order 6544423518512.
+INFO 2025-05-14 14:01:37,974 views 523398 137236267550400 Created ShopifyOrder object for shopify_id=6544423518512.
+INFO 2025-05-14 21:57:02,294 views 529205 127197855602368 Shopify webhook signature verified successfully.
+INFO 2025-05-14 21:57:02,296 views 529205 127197855602368 Processing webhook for topic 'orders/create', resource ID '6544958783792'.
+INFO 2025-05-14 21:57:02,296 views 529205 127197855602368 Order-related topic detected. Fetching latest data for order ID 6544958783792 via API...
+INFO 2025-05-14 21:57:03,112 utils 529205 127197855602368 Util: Successfully fetched Shopify order 6544958783792.
+INFO 2025-05-14 21:57:03,125 views 529205 127197855602368 Created ShopifyOrder object for shopify_id=6544958783792.
+INFO 2025-05-15 12:11:44,136 views 529205 127197855602368 Shopify webhook signature verified successfully.
+INFO 2025-05-15 12:11:44,140 views 529205 127197855602368 Processing webhook for topic 'orders/create', resource ID '6545890640176'.
+INFO 2025-05-15 12:11:44,140 views 529205 127197855602368 Order-related topic detected. Fetching latest data for order ID 6545890640176 via API...
+INFO 2025-05-15 12:11:44,908 utils 529205 127197855602368 Util: Successfully fetched Shopify order 6545890640176.
+INFO 2025-05-15 12:11:44,943 views 529205 127197855602368 Created ShopifyOrder object for shopify_id=6545890640176.
+INFO 2025-05-15 13:05:49,107 views 529205 127197855602368 Shopify webhook signature verified successfully.
+INFO 2025-05-15 13:05:49,108 views 529205 127197855602368 Processing webhook for topic 'orders/fulfilled', resource ID '6543603761456'.
+INFO 2025-05-15 13:05:49,108 views 529205 127197855602368 Order-related topic detected. Fetching latest data for order ID 6543603761456 via API...
+INFO 2025-05-15 13:05:49,744 utils 529205 127197855602368 Util: Successfully fetched Shopify order 6543603761456.
+INFO 2025-05-15 13:05:49,775 views 529205 127197855602368 Updated ShopifyOrder object for shopify_id=6543603761456.
+INFO 2025-05-15 13:09:11,578 views 529205 127197855602368 Shopify webhook signature verified successfully.
+INFO 2025-05-15 13:09:11,579 views 529205 127197855602368 Processing webhook for topic 'orders/fulfilled', resource ID '6544335896880'.
+INFO 2025-05-15 13:09:11,579 views 529205 127197855602368 Order-related topic detected. Fetching latest data for order ID 6544335896880 via API...
+INFO 2025-05-15 13:09:12,132 utils 529205 127197855602368 Util: Successfully fetched Shopify order 6544335896880.
+INFO 2025-05-15 13:09:12,166 views 529205 127197855602368 Updated ShopifyOrder object for shopify_id=6544335896880.
+INFO 2025-05-15 18:23:33,258 views 545563 123524917499584 Shopify webhook signature verified successfully.
+INFO 2025-05-15 18:23:33,258 views 545563 123524917499584 Processing webhook for topic 'orders/create', resource ID '6546164121904'.
+INFO 2025-05-15 18:23:33,258 views 545563 123524917499584 Order-related topic detected. Fetching latest data for order ID 6546164121904 via API...
+INFO 2025-05-15 18:23:34,075 utils 545563 123524917499584 Util: Successfully fetched Shopify order 6546164121904.
+INFO 2025-05-15 18:23:34,111 views 545563 123524917499584 Created ShopifyOrder object for shopify_id=6546164121904.
+INFO 2025-05-16 12:01:09,405 views 556637 131856802137792 Shopify webhook signature verified successfully.
+INFO 2025-05-16 12:01:09,407 views 556637 131856802137792 Processing webhook for topic 'orders/create', resource ID '6547382796592'.
+INFO 2025-05-16 12:01:09,407 views 556637 131856802137792 Order-related topic detected. Fetching latest data for order ID 6547382796592 via API...
+INFO 2025-05-16 12:01:10,226 utils 556637 131856802137792 Util: Successfully fetched Shopify order 6547382796592.
+INFO 2025-05-16 12:01:10,242 views 556637 131856802137792 Created ShopifyOrder object for shopify_id=6547382796592.
+INFO 2025-05-16 12:16:06,625 views 556637 131856802137792 Shopify webhook signature verified successfully.
+INFO 2025-05-16 12:16:06,627 views 556637 131856802137792 Processing webhook for topic 'orders/fulfilled', resource ID '6546164121904'.
+INFO 2025-05-16 12:16:06,627 views 556637 131856802137792 Order-related topic detected. Fetching latest data for order ID 6546164121904 via API...
+INFO 2025-05-16 12:16:07,256 utils 556637 131856802137792 Util: Successfully fetched Shopify order 6546164121904.
+INFO 2025-05-16 12:16:07,270 views 556637 131856802137792 Updated ShopifyOrder object for shopify_id=6546164121904.
+INFO 2025-05-16 12:16:47,220 views 556637 131856802137792 Shopify webhook signature verified successfully.
+INFO 2025-05-16 12:16:47,221 views 556637 131856802137792 Processing webhook for topic 'orders/fulfilled', resource ID '6545890640176'.
+INFO 2025-05-16 12:16:47,221 views 556637 131856802137792 Order-related topic detected. Fetching latest data for order ID 6545890640176 via API...
+INFO 2025-05-16 12:16:47,854 utils 556637 131856802137792 Util: Successfully fetched Shopify order 6545890640176.
+INFO 2025-05-16 12:16:47,864 views 556637 131856802137792 Updated ShopifyOrder object for shopify_id=6545890640176.
+INFO 2025-05-17 02:57:38,748 views 562024 124394242578112 Shopify webhook signature verified successfully.
+INFO 2025-05-17 02:57:38,748 views 562024 124394242578112 Processing webhook for topic 'orders/create', resource ID '6548364296496'.
+INFO 2025-05-17 02:57:38,748 views 562024 124394242578112 Order-related topic detected. Fetching latest data for order ID 6548364296496 via API...
+INFO 2025-05-17 02:57:39,460 utils 562024 124394242578112 Util: Successfully fetched Shopify order 6548364296496.
+INFO 2025-05-17 02:57:39,482 views 562024 124394242578112 Created ShopifyOrder object for shopify_id=6548364296496.
+INFO 2025-05-17 10:54:25,173 views 573718 132474062341824 Shopify webhook signature verified successfully.
+INFO 2025-05-17 10:54:25,173 views 573718 132474062341824 Processing webhook for topic 'orders/fulfilled', resource ID '6547382796592'.
+INFO 2025-05-17 10:54:25,173 views 573718 132474062341824 Order-related topic detected. Fetching latest data for order ID 6547382796592 via API...
+INFO 2025-05-17 10:54:26,016 utils 573718 132474062341824 Util: Successfully fetched Shopify order 6547382796592.
+INFO 2025-05-17 10:54:26,030 views 573718 132474062341824 Updated ShopifyOrder object for shopify_id=6547382796592.
+INFO 2025-05-17 18:34:35,578 views 578362 135370369492672 Shopify webhook signature verified successfully.
+INFO 2025-05-17 18:34:35,580 views 578362 135370369492672 Processing webhook for topic 'orders/create', resource ID '6549137162544'.
+INFO 2025-05-17 18:34:35,580 views 578362 135370369492672 Order-related topic detected. Fetching latest data for order ID 6549137162544 via API...
+INFO 2025-05-17 18:34:36,513 utils 578362 135370369492672 Util: Successfully fetched Shopify order 6549137162544.
+INFO 2025-05-17 18:34:36,547 views 578362 135370369492672 Created ShopifyOrder object for shopify_id=6549137162544.
+INFO 2025-05-18 11:55:35,768 views 578362 135370369492672 Shopify webhook signature verified successfully.
+INFO 2025-05-18 11:55:35,770 views 578362 135370369492672 Processing webhook for topic 'orders/create', resource ID '6550476718384'.
+INFO 2025-05-18 11:55:35,770 views 578362 135370369492672 Order-related topic detected. Fetching latest data for order ID 6550476718384 via API...
+INFO 2025-05-18 11:55:37,443 utils 578362 135370369492672 Util: Successfully fetched Shopify order 6550476718384.
+INFO 2025-05-18 11:55:37,486 views 578362 135370369492672 Created ShopifyOrder object for shopify_id=6550476718384.
+INFO 2025-05-18 20:43:06,120 views 578362 135370369492672 Shopify webhook signature verified successfully.
+INFO 2025-05-18 20:43:06,121 views 578362 135370369492672 Processing webhook for topic 'orders/create', resource ID '6550882812208'.
+INFO 2025-05-18 20:43:06,121 views 578362 135370369492672 Order-related topic detected. Fetching latest data for order ID 6550882812208 via API...
+INFO 2025-05-18 20:43:06,933 utils 578362 135370369492672 Util: Successfully fetched Shopify order 6550882812208.
+INFO 2025-05-18 20:43:06,953 views 578362 135370369492672 Created ShopifyOrder object for shopify_id=6550882812208.
+INFO 2025-05-19 10:57:31,917 views 578362 135370369492672 Shopify webhook signature verified successfully.
+INFO 2025-05-19 10:57:31,919 views 578362 135370369492672 Processing webhook for topic 'orders/create', resource ID '6551874568496'.
+INFO 2025-05-19 10:57:31,919 views 578362 135370369492672 Order-related topic detected. Fetching latest data for order ID 6551874568496 via API...
+INFO 2025-05-19 10:57:32,846 utils 578362 135370369492672 Util: Successfully fetched Shopify order 6551874568496.
+INFO 2025-05-19 10:57:32,875 views 578362 135370369492672 Created ShopifyOrder object for shopify_id=6551874568496.
+INFO 2025-05-19 11:11:34,329 views 578362 135370369492672 Shopify webhook signature verified successfully.
+INFO 2025-05-19 11:11:34,331 views 578362 135370369492672 Processing webhook for topic 'orders/fulfilled', resource ID '6548967883056'.
+INFO 2025-05-19 11:11:34,332 views 578362 135370369492672 Order-related topic detected. Fetching latest data for order ID 6548967883056 via API...
+INFO 2025-05-19 11:11:35,000 utils 578362 135370369492672 Util: Successfully fetched Shopify order 6548967883056.
+INFO 2025-05-19 11:11:35,052 views 578362 135370369492672 Created ShopifyOrder object for shopify_id=6548967883056.
+INFO 2025-05-19 13:01:32,928 views 606886 126814293419712 Shopify webhook signature verified successfully.
+INFO 2025-05-19 13:01:32,930 views 606886 126814293419712 Processing webhook for topic 'orders/fulfilled', resource ID '6550476718384'.
+INFO 2025-05-19 13:01:32,930 views 606886 126814293419712 Order-related topic detected. Fetching latest data for order ID 6550476718384 via API...
+INFO 2025-05-19 13:01:33,880 utils 606886 126814293419712 Util: Successfully fetched Shopify order 6550476718384.
+INFO 2025-05-19 13:01:33,908 views 606886 126814293419712 Updated ShopifyOrder object for shopify_id=6550476718384.
+INFO 2025-05-19 13:07:45,893 views 606886 126814293419712 Shopify webhook signature verified successfully.
+INFO 2025-05-19 13:07:45,894 views 606886 126814293419712 Processing webhook for topic 'orders/fulfilled', resource ID '6548364296496'.
+INFO 2025-05-19 13:07:45,894 views 606886 126814293419712 Order-related topic detected. Fetching latest data for order ID 6548364296496 via API...
+INFO 2025-05-19 13:07:46,538 utils 606886 126814293419712 Util: Successfully fetched Shopify order 6548364296496.
+INFO 2025-05-19 13:07:46,561 views 606886 126814293419712 Updated ShopifyOrder object for shopify_id=6548364296496.
+INFO 2025-05-19 13:16:52,103 views 606886 126814293419712 Shopify webhook signature verified successfully.
+INFO 2025-05-19 13:16:52,103 views 606886 126814293419712 Processing webhook for topic 'orders/fulfilled', resource ID '6543205695792'.
+INFO 2025-05-19 13:16:52,103 views 606886 126814293419712 Order-related topic detected. Fetching latest data for order ID 6543205695792 via API...
+INFO 2025-05-19 13:16:52,638 utils 606886 126814293419712 Util: Successfully fetched Shopify order 6543205695792.
+INFO 2025-05-19 13:16:52,669 views 606886 126814293419712 Updated ShopifyOrder object for shopify_id=6543205695792.
+INFO 2025-05-19 13:35:26,068 views 607581 126793543005888 Shopify webhook signature verified successfully.
+INFO 2025-05-19 13:35:26,069 views 607581 126793543005888 Processing webhook for topic 'orders/fulfilled', resource ID '6549137162544'.
+INFO 2025-05-19 13:35:26,069 views 607581 126793543005888 Order-related topic detected. Fetching latest data for order ID 6549137162544 via API...
+INFO 2025-05-19 13:35:26,650 utils 607581 126793543005888 Util: Successfully fetched Shopify order 6549137162544.
+INFO 2025-05-19 13:35:26,671 views 607581 126793543005888 Updated ShopifyOrder object for shopify_id=6549137162544.
+INFO 2025-05-19 19:47:15,515 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-19 19:47:15,520 views 608027 126936083637952 Processing webhook for topic 'orders/create', resource ID '6552252875056'.
+INFO 2025-05-19 19:47:15,520 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6552252875056 via API...
+INFO 2025-05-19 19:47:16,761 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6552252875056.
+INFO 2025-05-19 19:47:16,837 views 608027 126936083637952 Created ShopifyOrder object for shopify_id=6552252875056.
+INFO 2025-05-20 12:26:22,353 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-20 12:26:22,355 views 608027 126936083637952 Processing webhook for topic 'orders/edited', resource ID 'None'.
+WARNING 2025-05-20 12:26:22,355 views 608027 126936083637952 Webhook payload for topic 'orders/edited' missing expected resource ID. Acknowledging receipt.
+INFO 2025-05-20 12:35:17,361 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-20 12:35:17,361 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6544423518512'.
+INFO 2025-05-20 12:35:17,361 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6544423518512 via API...
+INFO 2025-05-20 12:35:18,259 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6544423518512.
+INFO 2025-05-20 12:35:18,280 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6544423518512.
+INFO 2025-05-20 12:54:10,133 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-20 12:54:10,133 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6550882812208'.
+INFO 2025-05-20 12:54:10,133 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6550882812208 via API...
+INFO 2025-05-20 12:54:10,702 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6550882812208.
+INFO 2025-05-20 12:54:10,731 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6550882812208.
+INFO 2025-05-20 12:57:12,866 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-20 12:57:12,866 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6551874568496'.
+INFO 2025-05-20 12:57:12,866 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6551874568496 via API...
+INFO 2025-05-20 12:57:13,438 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6551874568496.
+INFO 2025-05-20 12:57:13,463 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6551874568496.
+INFO 2025-05-20 22:18:12,657 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-20 22:18:12,660 views 608027 126936083637952 Processing webhook for topic 'orders/create', resource ID '6553983648048'.
+INFO 2025-05-20 22:18:12,660 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6553983648048 via API...
+INFO 2025-05-20 22:18:13,523 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6553983648048.
+INFO 2025-05-20 22:18:13,565 views 608027 126936083637952 Created ShopifyOrder object for shopify_id=6553983648048.
+INFO 2025-05-21 01:19:43,496 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-21 01:19:43,498 views 608027 126936083637952 Processing webhook for topic 'orders/create', resource ID '6554219413808'.
+INFO 2025-05-21 01:19:43,498 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6554219413808 via API...
+INFO 2025-05-21 01:19:44,326 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6554219413808.
+INFO 2025-05-21 01:19:44,343 views 608027 126936083637952 Created ShopifyOrder object for shopify_id=6554219413808.
+INFO 2025-05-21 13:55:17,159 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-21 13:55:17,161 views 608027 126936083637952 Processing webhook for topic 'orders/create', resource ID '6554938474800'.
+INFO 2025-05-21 13:55:17,161 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6554938474800 via API...
+INFO 2025-05-21 13:55:17,879 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6554938474800.
+INFO 2025-05-21 13:55:17,926 views 608027 126936083637952 Created ShopifyOrder object for shopify_id=6554938474800.
+INFO 2025-05-22 08:22:15,005 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-22 08:22:15,007 views 608027 126936083637952 Processing webhook for topic 'orders/create', resource ID '6556133294384'.
+INFO 2025-05-22 08:22:15,007 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6556133294384 via API...
+INFO 2025-05-22 08:22:15,994 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6556133294384.
+INFO 2025-05-22 08:22:16,025 views 608027 126936083637952 Created ShopifyOrder object for shopify_id=6556133294384.
+INFO 2025-05-22 09:29:41,747 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-22 09:29:41,748 views 608027 126936083637952 Processing webhook for topic 'orders/create', resource ID '6556189524272'.
+INFO 2025-05-22 09:29:41,748 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6556189524272 via API...
+INFO 2025-05-22 09:29:42,614 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6556189524272.
+INFO 2025-05-22 09:29:42,632 views 608027 126936083637952 Created ShopifyOrder object for shopify_id=6556189524272.
+INFO 2025-05-22 10:28:13,128 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-22 10:28:13,132 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6552252875056'.
+INFO 2025-05-22 10:28:13,132 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6552252875056 via API...
+INFO 2025-05-22 10:28:13,850 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6552252875056.
+INFO 2025-05-22 10:28:13,884 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6552252875056.
+INFO 2025-05-22 12:58:41,002 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-22 12:58:41,005 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6554219413808'.
+INFO 2025-05-22 12:58:41,005 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6554219413808 via API...
+INFO 2025-05-22 12:58:41,958 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6554219413808.
+INFO 2025-05-22 12:58:42,008 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6554219413808.
+INFO 2025-05-22 13:00:10,135 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-22 13:00:10,136 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6554938474800'.
+INFO 2025-05-22 13:00:10,136 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6554938474800 via API...
+INFO 2025-05-22 13:00:10,771 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6554938474800.
+INFO 2025-05-22 13:00:10,816 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6554938474800.
+INFO 2025-05-22 13:01:09,384 views 608027 126936083637952 Shopify webhook signature verified successfully.
+INFO 2025-05-22 13:01:09,385 views 608027 126936083637952 Processing webhook for topic 'orders/fulfilled', resource ID '6553983648048'.
+INFO 2025-05-22 13:01:09,385 views 608027 126936083637952 Order-related topic detected. Fetching latest data for order ID 6553983648048 via API...
+INFO 2025-05-22 13:01:10,024 utils 608027 126936083637952 Util: Successfully fetched Shopify order 6553983648048.
+INFO 2025-05-22 13:01:10,064 views 608027 126936083637952 Updated ShopifyOrder object for shopify_id=6553983648048.
+INFO 2025-05-22 18:12:06,847 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-22 18:12:06,849 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6556570517808'.
+INFO 2025-05-22 18:12:06,849 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6556570517808 via API...
+INFO 2025-05-22 18:12:07,675 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6556570517808.
+INFO 2025-05-22 18:12:07,695 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6556570517808.
+INFO 2025-05-23 09:32:33,382 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-23 09:32:33,386 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6557798629680'.
+INFO 2025-05-23 09:32:33,389 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6557798629680 via API...
+INFO 2025-05-23 09:32:34,223 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6557798629680.
+INFO 2025-05-23 09:32:34,280 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6557798629680.
+INFO 2025-05-23 13:07:03,942 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-23 13:07:03,943 views 671186 129577468810944 Processing webhook for topic 'orders/fulfilled', resource ID '6556133294384'.
+INFO 2025-05-23 13:07:03,943 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6556133294384 via API...
+INFO 2025-05-23 13:07:04,840 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6556133294384.
+INFO 2025-05-23 13:07:04,872 views 671186 129577468810944 Updated ShopifyOrder object for shopify_id=6556133294384.
+INFO 2025-05-23 14:26:37,060 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-23 14:26:37,061 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6558030299440'.
+INFO 2025-05-23 14:26:37,061 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6558030299440 via API...
+INFO 2025-05-23 14:26:37,802 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6558030299440.
+INFO 2025-05-23 14:26:37,822 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6558030299440.
+INFO 2025-05-23 15:10:07,475 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-23 15:10:07,476 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6558056546608'.
+INFO 2025-05-23 15:10:07,477 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6558056546608 via API...
+INFO 2025-05-23 15:10:08,093 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6558056546608.
+INFO 2025-05-23 15:10:08,116 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6558056546608.
+INFO 2025-05-24 11:10:09,846 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-24 11:10:09,848 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6559551095088'.
+INFO 2025-05-24 11:10:09,849 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6559551095088 via API...
+INFO 2025-05-24 11:10:10,723 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6559551095088.
+INFO 2025-05-24 11:10:10,773 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6559551095088.
+INFO 2025-05-24 11:44:04,336 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-24 11:44:04,336 views 671186 129577468810944 Processing webhook for topic 'orders/fulfilled', resource ID '6556570517808'.
+INFO 2025-05-24 11:44:04,336 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6556570517808 via API...
+INFO 2025-05-24 11:44:04,933 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6556570517808.
+INFO 2025-05-24 11:44:04,952 views 671186 129577468810944 Updated ShopifyOrder object for shopify_id=6556570517808.
+INFO 2025-05-24 15:45:31,494 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-24 15:45:31,495 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6559726731568'.
+INFO 2025-05-24 15:45:31,496 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6559726731568 via API...
+INFO 2025-05-24 15:45:32,469 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6559726731568.
+INFO 2025-05-24 15:45:32,498 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6559726731568.
+INFO 2025-05-25 12:27:13,826 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-25 12:27:13,828 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6561269088560'.
+INFO 2025-05-25 12:27:13,828 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6561269088560 via API...
+INFO 2025-05-25 12:27:14,835 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6561269088560.
+INFO 2025-05-25 12:27:14,861 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6561269088560.
+INFO 2025-05-25 12:44:19,601 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-25 12:44:19,601 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6561281605936'.
+INFO 2025-05-25 12:44:19,601 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6561281605936 via API...
+INFO 2025-05-25 12:44:20,182 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6561281605936.
+INFO 2025-05-25 12:44:20,204 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6561281605936.
+INFO 2025-05-25 13:28:50,850 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-25 13:28:50,851 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6561310540080'.
+INFO 2025-05-25 13:28:50,851 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6561310540080 via API...
+INFO 2025-05-25 13:28:51,673 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6561310540080.
+INFO 2025-05-25 13:28:51,690 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6561310540080.
+INFO 2025-05-25 14:21:54,690 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-25 14:21:54,690 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6561344028976'.
+INFO 2025-05-25 14:21:54,690 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6561344028976 via API...
+INFO 2025-05-25 14:21:55,443 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6561344028976.
+INFO 2025-05-25 14:21:55,460 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6561344028976.
+INFO 2025-05-25 20:18:02,461 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-25 20:18:02,463 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6561668956464'.
+INFO 2025-05-25 20:18:02,463 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6561668956464 via API...
+INFO 2025-05-25 20:18:03,330 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6561668956464.
+INFO 2025-05-25 20:18:03,348 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6561668956464.
+INFO 2025-05-26 12:08:52,459 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-26 12:08:52,461 views 671186 129577477203648 Processing webhook for topic 'orders/create', resource ID '6562911551792'.
+INFO 2025-05-26 12:08:52,461 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6562911551792 via API...
+INFO 2025-05-26 12:08:53,459 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6562911551792.
+INFO 2025-05-26 12:08:53,494 views 671186 129577477203648 Created ShopifyOrder object for shopify_id=6562911551792.
+INFO 2025-05-26 12:38:37,613 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-26 12:38:37,614 views 671186 129577477203648 Processing webhook for topic 'orders/fulfilled', resource ID '6559726731568'.
+INFO 2025-05-26 12:38:37,614 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6559726731568 via API...
+INFO 2025-05-26 12:38:38,142 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6559726731568.
+INFO 2025-05-26 12:38:38,164 views 671186 129577477203648 Updated ShopifyOrder object for shopify_id=6559726731568.
+INFO 2025-05-26 12:41:04,653 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-26 12:41:04,653 views 671186 129577477203648 Processing webhook for topic 'orders/fulfilled', resource ID '6558056546608'.
+INFO 2025-05-26 12:41:04,653 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6558056546608 via API...
+INFO 2025-05-26 12:41:05,220 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6558056546608.
+INFO 2025-05-26 12:41:05,241 views 671186 129577477203648 Updated ShopifyOrder object for shopify_id=6558056546608.
+INFO 2025-05-26 12:43:30,680 views 671186 129577477203648 Shopify webhook signature verified successfully.
+INFO 2025-05-26 12:43:30,680 views 671186 129577477203648 Processing webhook for topic 'orders/fulfilled', resource ID '6559551095088'.
+INFO 2025-05-26 12:43:30,681 views 671186 129577477203648 Order-related topic detected. Fetching latest data for order ID 6559551095088 via API...
+INFO 2025-05-26 12:43:31,252 utils 671186 129577477203648 Util: Successfully fetched Shopify order 6559551095088.
+INFO 2025-05-26 12:43:31,281 views 671186 129577477203648 Updated ShopifyOrder object for shopify_id=6559551095088.
+INFO 2025-05-27 12:43:41,577 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-27 12:43:41,580 views 671186 129577468810944 Processing webhook for topic 'orders/fulfilled', resource ID '6561668956464'.
+INFO 2025-05-27 12:43:41,580 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6561668956464 via API...
+INFO 2025-05-27 12:43:42,589 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6561668956464.
+INFO 2025-05-27 12:43:42,605 views 671186 129577468810944 Updated ShopifyOrder object for shopify_id=6561668956464.
+INFO 2025-05-27 13:06:30,336 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-27 13:06:30,338 views 671186 129577468810944 Processing webhook for topic 'orders/fulfilled', resource ID '6556189524272'.
+INFO 2025-05-27 13:06:30,338 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6556189524272 via API...
+INFO 2025-05-27 13:06:30,981 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6556189524272.
+INFO 2025-05-27 13:06:30,995 views 671186 129577468810944 Updated ShopifyOrder object for shopify_id=6556189524272.
+INFO 2025-05-27 13:54:40,936 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-27 13:54:40,937 views 671186 129577468810944 Processing webhook for topic 'orders/fulfilled', resource ID '6561281605936'.
+INFO 2025-05-27 13:54:40,937 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6561281605936 via API...
+INFO 2025-05-27 13:54:41,963 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6561281605936.
+INFO 2025-05-27 13:54:41,981 views 671186 129577468810944 Updated ShopifyOrder object for shopify_id=6561281605936.
+INFO 2025-05-27 17:30:49,465 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-27 17:30:49,465 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6564707336496'.
+INFO 2025-05-27 17:30:49,465 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6564707336496 via API...
+INFO 2025-05-27 17:30:50,582 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6564707336496.
+INFO 2025-05-27 17:30:50,616 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6564707336496.
+INFO 2025-05-27 23:42:55,034 views 671186 129577468810944 Shopify webhook signature verified successfully.
+INFO 2025-05-27 23:42:55,035 views 671186 129577468810944 Processing webhook for topic 'orders/create', resource ID '6565193023792'.
+INFO 2025-05-27 23:42:55,035 views 671186 129577468810944 Order-related topic detected. Fetching latest data for order ID 6565193023792 via API...
+INFO 2025-05-27 23:42:55,977 utils 671186 129577468810944 Util: Successfully fetched Shopify order 6565193023792.
+INFO 2025-05-27 23:42:56,000 views 671186 129577468810944 Created ShopifyOrder object for shopify_id=6565193023792.
+INFO 2025-05-28 12:38:19,385 views 765058 126170944509632 Shopify webhook signature verified successfully.
+INFO 2025-05-28 12:38:19,386 views 765058 126170944509632 Processing webhook for topic 'orders/fulfilled', resource ID '6562911551792'.
+INFO 2025-05-28 12:38:19,387 views 765058 126170944509632 Order-related topic detected. Fetching latest data for order ID 6562911551792 via API...
+INFO 2025-05-28 12:38:20,530 utils 765058 126170944509632 Util: Successfully fetched Shopify order 6562911551792.
+INFO 2025-05-28 12:38:20,542 views 765058 126170944509632 Updated ShopifyOrder object for shopify_id=6562911551792.
+INFO 2025-05-28 14:01:02,788 views 765548 135227177273024 Shopify webhook signature verified successfully.
+INFO 2025-05-28 14:01:02,790 views 765548 135227177273024 Processing webhook for topic 'orders/create', resource ID '6566074646832'.
+INFO 2025-05-28 14:01:02,790 views 765548 135227177273024 Order-related topic detected. Fetching latest data for order ID 6566074646832 via API...
+INFO 2025-05-28 14:01:03,937 utils 765548 135227177273024 Util: Successfully fetched Shopify order 6566074646832.
+INFO 2025-05-28 14:01:03,950 views 765548 135227177273024 Created ShopifyOrder object for shopify_id=6566074646832.
+INFO 2025-05-29 11:06:59,068 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-29 11:06:59,070 views 769790 137070140982976 Processing webhook for topic 'orders/create', resource ID '6567459193136'.
+INFO 2025-05-29 11:06:59,070 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6567459193136 via API...
+INFO 2025-05-29 11:07:00,100 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6567459193136.
+INFO 2025-05-29 11:07:00,146 views 769790 137070140982976 Created ShopifyOrder object for shopify_id=6567459193136.
+INFO 2025-05-29 13:21:19,512 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-29 13:21:19,517 views 769790 137070140982976 Processing webhook for topic 'orders/fulfilled', resource ID '6566074646832'.
+INFO 2025-05-29 13:21:19,517 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6566074646832 via API...
+INFO 2025-05-29 13:21:20,469 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6566074646832.
+INFO 2025-05-29 13:21:20,511 views 769790 137070140982976 Updated ShopifyOrder object for shopify_id=6566074646832.
+INFO 2025-05-29 13:22:52,276 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-29 13:22:52,277 views 769790 137070140982976 Processing webhook for topic 'orders/fulfilled', resource ID '6565193023792'.
+INFO 2025-05-29 13:22:52,277 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6565193023792 via API...
+INFO 2025-05-29 13:22:52,827 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6565193023792.
+INFO 2025-05-29 13:22:52,855 views 769790 137070140982976 Updated ShopifyOrder object for shopify_id=6565193023792.
+INFO 2025-05-30 00:22:43,017 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-30 00:22:43,020 views 769790 137070140982976 Processing webhook for topic 'orders/create', resource ID '6568311783728'.
+INFO 2025-05-30 00:22:43,021 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6568311783728 via API...
+INFO 2025-05-30 00:22:44,152 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6568311783728.
+INFO 2025-05-30 00:22:44,198 views 769790 137070140982976 Created ShopifyOrder object for shopify_id=6568311783728.
+INFO 2025-05-30 10:08:27,933 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-30 10:08:27,936 views 769790 137070140982976 Processing webhook for topic 'orders/fulfilled', resource ID '6557798629680'.
+INFO 2025-05-30 10:08:27,936 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6557798629680 via API...
+INFO 2025-05-30 10:08:29,187 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6557798629680.
+INFO 2025-05-30 10:08:29,216 views 769790 137070140982976 Updated ShopifyOrder object for shopify_id=6557798629680.
+INFO 2025-05-30 10:12:22,529 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-30 10:12:22,529 views 769790 137070140982976 Processing webhook for topic 'orders/fulfilled', resource ID '6561344028976'.
+INFO 2025-05-30 10:12:22,529 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6561344028976 via API...
+INFO 2025-05-30 10:12:23,132 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6561344028976.
+INFO 2025-05-30 10:12:23,153 views 769790 137070140982976 Updated ShopifyOrder object for shopify_id=6561344028976.
+INFO 2025-05-30 10:13:22,949 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-30 10:13:22,949 views 769790 137070140982976 Processing webhook for topic 'orders/fulfilled', resource ID '6561310540080'.
+INFO 2025-05-30 10:13:22,949 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6561310540080 via API...
+INFO 2025-05-30 10:13:23,472 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6561310540080.
+INFO 2025-05-30 10:13:23,489 views 769790 137070140982976 Updated ShopifyOrder object for shopify_id=6561310540080.
+INFO 2025-05-30 10:16:20,953 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-30 10:16:20,954 views 769790 137070140982976 Processing webhook for topic 'orders/fulfilled', resource ID '6558030299440'.
+INFO 2025-05-30 10:16:20,954 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6558030299440 via API...
+INFO 2025-05-30 10:16:21,572 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6558030299440.
+INFO 2025-05-30 10:16:21,592 views 769790 137070140982976 Updated ShopifyOrder object for shopify_id=6558030299440.
+INFO 2025-05-30 11:47:15,309 views 769790 137070140982976 Shopify webhook signature verified successfully.
+INFO 2025-05-30 11:47:15,311 views 769790 137070140982976 Processing webhook for topic 'orders/create', resource ID '6569088123184'.
+INFO 2025-05-30 11:47:15,311 views 769790 137070140982976 Order-related topic detected. Fetching latest data for order ID 6569088123184 via API...
+INFO 2025-05-30 11:47:16,446 utils 769790 137070140982976 Util: Successfully fetched Shopify order 6569088123184.
+INFO 2025-05-30 11:47:16,461 views 769790 137070140982976 Created ShopifyOrder object for shopify_id=6569088123184.
+INFO 2025-05-30 11:56:18,988 views 798316 135924763014848 Shopify webhook signature verified successfully.
+INFO 2025-05-30 11:56:18,988 views 798316 135924763014848 Processing webhook for topic 'orders/create', resource ID '6569094480176'.
+INFO 2025-05-30 11:56:18,988 views 798316 135924763014848 Order-related topic detected. Fetching latest data for order ID 6569094480176 via API...
+INFO 2025-05-30 11:56:19,578 utils 798316 135924763014848 Util: Successfully fetched Shopify order 6569094480176.
+INFO 2025-05-30 11:56:19,590 views 798316 135924763014848 Created ShopifyOrder object for shopify_id=6569094480176.
+INFO 2025-05-30 12:05:28,924 views 798361 138659841746624 Shopify webhook signature verified successfully.
+INFO 2025-05-30 12:05:28,926 views 798361 138659841746624 Processing webhook for topic 'orders/create', resource ID '6569101197616'.
+INFO 2025-05-30 12:05:28,926 views 798361 138659841746624 Order-related topic detected. Fetching latest data for order ID 6569101197616 via API...
+INFO 2025-05-30 12:05:29,461 utils 798361 138659841746624 Util: Successfully fetched Shopify order 6569101197616.
+INFO 2025-05-30 12:05:29,469 views 798361 138659841746624 Created ShopifyOrder object for shopify_id=6569101197616.
+INFO 2025-05-30 17:20:59,782 views 802624 125882074552000 Shopify webhook signature verified successfully.
+INFO 2025-05-30 17:20:59,782 views 802624 125882074552000 Processing webhook for topic 'orders/create', resource ID '6569330213168'.
+INFO 2025-05-30 17:20:59,782 views 802624 125882074552000 Order-related topic detected. Fetching latest data for order ID 6569330213168 via API...
+INFO 2025-05-30 17:21:00,788 utils 802624 125882074552000 Util: Successfully fetched Shopify order 6569330213168.
+INFO 2025-05-30 17:21:00,804 views 802624 125882074552000 Created ShopifyOrder object for shopify_id=6569330213168.
+INFO 2025-05-31 09:43:50,169 views 803142 129039082555072 Shopify webhook signature verified successfully.
+INFO 2025-05-31 09:43:50,170 views 803142 129039082555072 Processing webhook for topic 'orders/create', resource ID '6570566451504'.
+INFO 2025-05-31 09:43:50,170 views 803142 129039082555072 Order-related topic detected. Fetching latest data for order ID 6570566451504 via API...
+INFO 2025-05-31 09:43:50,773 utils 803142 129039082555072 Util: Successfully fetched Shopify order 6570566451504.
+INFO 2025-05-31 09:43:50,815 views 803142 129039082555072 Created ShopifyOrder object for shopify_id=6570566451504.
+INFO 2025-05-31 12:30:16,642 views 815737 137169177417408 Shopify webhook signature verified successfully.
+INFO 2025-05-31 12:30:16,642 views 815737 137169177417408 Processing webhook for topic 'orders/create', resource ID '6570695983408'.
+INFO 2025-05-31 12:30:16,642 views 815737 137169177417408 Order-related topic detected. Fetching latest data for order ID 6570695983408 via API...
+INFO 2025-05-31 12:30:17,243 utils 815737 137169177417408 Util: Successfully fetched Shopify order 6570695983408.
+INFO 2025-05-31 12:30:17,255 views 815737 137169177417408 Created ShopifyOrder object for shopify_id=6570695983408.
+INFO 2025-05-31 12:35:23,247 views 815737 137169177417408 Shopify webhook signature verified successfully.
+INFO 2025-05-31 12:35:23,247 views 815737 137169177417408 Processing webhook for topic 'orders/create', resource ID '6570699653424'.
+INFO 2025-05-31 12:35:23,247 views 815737 137169177417408 Order-related topic detected. Fetching latest data for order ID 6570699653424 via API...
+INFO 2025-05-31 12:35:23,830 utils 815737 137169177417408 Util: Successfully fetched Shopify order 6570699653424.
+INFO 2025-05-31 12:35:23,843 views 815737 137169177417408 Created ShopifyOrder object for shopify_id=6570699653424.
+INFO 2025-05-31 12:47:15,743 views 815737 137169177417408 Shopify webhook signature verified successfully.
+INFO 2025-05-31 12:47:15,745 views 815737 137169177417408 Processing webhook for topic 'orders/create', resource ID '6570709319984'.
+INFO 2025-05-31 12:47:15,745 views 815737 137169177417408 Order-related topic detected. Fetching latest data for order ID 6570709319984 via API...
+INFO 2025-05-31 12:47:16,360 utils 815737 137169177417408 Util: Successfully fetched Shopify order 6570709319984.
+INFO 2025-05-31 12:47:16,369 views 815737 137169177417408 Created ShopifyOrder object for shopify_id=6570709319984.
+INFO 2025-05-31 16:19:21,016 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-05-31 16:19:21,016 views 818175 124469215577792 Processing webhook for topic 'orders/create', resource ID '6570847371568'.
+INFO 2025-05-31 16:19:21,016 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6570847371568 via API...
+INFO 2025-05-31 16:19:21,676 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6570847371568.
+INFO 2025-05-31 16:19:21,688 views 818175 124469215577792 Created ShopifyOrder object for shopify_id=6570847371568.
+INFO 2025-06-01 13:28:12,694 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-01 13:28:12,696 views 818175 124469215577792 Processing webhook for topic 'orders/create', resource ID '6572263473456'.
+INFO 2025-06-01 13:28:12,697 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6572263473456 via API...
+INFO 2025-06-01 13:28:13,386 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6572263473456.
+INFO 2025-06-01 13:28:13,431 views 818175 124469215577792 Created ShopifyOrder object for shopify_id=6572263473456.
+INFO 2025-06-02 12:45:08,839 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-02 12:45:08,842 views 818175 124469215577792 Processing webhook for topic 'orders/create', resource ID '6573743767856'.
+INFO 2025-06-02 12:45:08,842 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6573743767856 via API...
+INFO 2025-06-02 12:45:09,436 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6573743767856.
+INFO 2025-06-02 12:45:09,505 views 818175 124469215577792 Created ShopifyOrder object for shopify_id=6573743767856.
+INFO 2025-06-02 12:57:34,477 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-02 12:57:34,477 views 818175 124469215577792 Processing webhook for topic 'orders/create', resource ID '6573750288688'.
+INFO 2025-06-02 12:57:34,477 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6573750288688 via API...
+INFO 2025-06-02 12:57:35,059 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6573750288688.
+INFO 2025-06-02 12:57:35,078 views 818175 124469215577792 Created ShopifyOrder object for shopify_id=6573750288688.
+INFO 2025-06-02 13:06:52,530 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-02 13:06:52,531 views 818175 124469215577792 Processing webhook for topic 'orders/fulfilled', resource ID '6568311783728'.
+INFO 2025-06-02 13:06:52,531 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6568311783728 via API...
+INFO 2025-06-02 13:06:53,054 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6568311783728.
+INFO 2025-06-02 13:06:53,083 views 818175 124469215577792 Updated ShopifyOrder object for shopify_id=6568311783728.
+INFO 2025-06-02 13:14:11,750 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-02 13:14:11,753 views 818175 124469215577792 Processing webhook for topic 'orders/fulfilled', resource ID '6567459193136'.
+INFO 2025-06-02 13:14:11,753 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6567459193136 via API...
+INFO 2025-06-02 13:14:12,291 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6567459193136.
+INFO 2025-06-02 13:14:12,322 views 818175 124469215577792 Updated ShopifyOrder object for shopify_id=6567459193136.
+INFO 2025-06-02 16:19:14,749 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-02 16:19:14,750 views 818175 124469215577792 Processing webhook for topic 'orders/create', resource ID '6573877264688'.
+INFO 2025-06-02 16:19:14,751 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6573877264688 via API...
+INFO 2025-06-02 16:19:15,324 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6573877264688.
+INFO 2025-06-02 16:19:15,342 views 818175 124469215577792 Created ShopifyOrder object for shopify_id=6573877264688.
+INFO 2025-06-02 19:18:04,437 views 818175 124469215577792 Shopify webhook signature verified successfully.
+INFO 2025-06-02 19:18:04,438 views 818175 124469215577792 Processing webhook for topic 'orders/create', resource ID '6574030356784'.
+INFO 2025-06-02 19:18:04,438 views 818175 124469215577792 Order-related topic detected. Fetching latest data for order ID 6574030356784 via API...
+INFO 2025-06-02 19:18:05,501 utils 818175 124469215577792 Util: Successfully fetched Shopify order 6574030356784.
+INFO 2025-06-02 19:18:05,528 views 818175 124469215577792 Created ShopifyOrder object for shopify_id=6574030356784.
+INFO 2025-06-03 12:34:08,887 views 864683 138711024031424 Shopify webhook signature verified successfully.
+INFO 2025-06-03 12:34:08,888 views 864683 138711024031424 Processing webhook for topic 'orders/create', resource ID '6575211774256'.
+INFO 2025-06-03 12:34:08,888 views 864683 138711024031424 Order-related topic detected. Fetching latest data for order ID 6575211774256 via API...
+INFO 2025-06-03 12:34:09,734 utils 864683 138711024031424 Util: Successfully fetched Shopify order 6575211774256.
+INFO 2025-06-03 12:34:09,749 views 864683 138711024031424 Created ShopifyOrder object for shopify_id=6575211774256.
+INFO 2025-06-03 13:05:02,631 views 865082 131363139897024 Shopify webhook signature verified successfully.
+INFO 2025-06-03 13:05:02,632 views 865082 131363139897024 Processing webhook for topic 'orders/fulfilled', resource ID '6570847371568'.
+INFO 2025-06-03 13:05:02,632 views 865082 131363139897024 Order-related topic detected. Fetching latest data for order ID 6570847371568 via API...
+INFO 2025-06-03 13:05:03,343 utils 865082 131363139897024 Util: Successfully fetched Shopify order 6570847371568.
+INFO 2025-06-03 13:05:03,356 views 865082 131363139897024 Updated ShopifyOrder object for shopify_id=6570847371568.
+INFO 2025-06-03 13:39:14,867 views 865082 131363139897024 Shopify webhook signature verified successfully.
+INFO 2025-06-03 13:39:14,868 views 865082 131363139897024 Processing webhook for topic 'orders/create', resource ID '6575252570416'.
+INFO 2025-06-03 13:39:14,869 views 865082 131363139897024 Order-related topic detected. Fetching latest data for order ID 6575252570416 via API...
+INFO 2025-06-03 13:39:15,506 utils 865082 131363139897024 Util: Successfully fetched Shopify order 6575252570416.
+INFO 2025-06-03 13:39:15,519 views 865082 131363139897024 Created ShopifyOrder object for shopify_id=6575252570416.
+INFO 2025-06-03 19:40:50,301 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-03 19:40:50,303 views 867454 127262232774336 Processing webhook for topic 'orders/create', resource ID '6575538897200'.
+INFO 2025-06-03 19:40:50,303 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6575538897200 via API...
+INFO 2025-06-03 19:40:51,173 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6575538897200.
+INFO 2025-06-03 19:40:51,211 views 867454 127262232774336 Created ShopifyOrder object for shopify_id=6575538897200.
+INFO 2025-06-04 01:08:35,726 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-04 01:08:35,727 views 867454 127262232774336 Processing webhook for topic 'orders/create', resource ID '6575986278704'.
+INFO 2025-06-04 01:08:35,727 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6575986278704 via API...
+INFO 2025-06-04 01:08:36,644 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6575986278704.
+INFO 2025-06-04 01:08:36,675 views 867454 127262232774336 Created ShopifyOrder object for shopify_id=6575986278704.
+INFO 2025-06-04 10:49:33,996 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-04 10:49:34,000 views 867454 127262232774336 Processing webhook for topic 'orders/fulfilled', resource ID '6574030356784'.
+INFO 2025-06-04 10:49:34,000 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6574030356784 via API...
+INFO 2025-06-04 10:49:34,968 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6574030356784.
+INFO 2025-06-04 10:49:34,995 views 867454 127262232774336 Updated ShopifyOrder object for shopify_id=6574030356784.
+INFO 2025-06-04 10:50:51,020 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-04 10:50:51,021 views 867454 127262232774336 Processing webhook for topic 'orders/fulfilled', resource ID '6573743767856'.
+INFO 2025-06-04 10:50:51,022 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6573743767856 via API...
+INFO 2025-06-04 10:50:51,630 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6573743767856.
+INFO 2025-06-04 10:50:51,659 views 867454 127262232774336 Updated ShopifyOrder object for shopify_id=6573743767856.
+INFO 2025-06-04 10:51:42,298 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-04 10:51:42,298 views 867454 127262232774336 Processing webhook for topic 'orders/fulfilled', resource ID '6569330213168'.
+INFO 2025-06-04 10:51:42,298 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6569330213168 via API...
+INFO 2025-06-04 10:51:42,943 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6569330213168.
+INFO 2025-06-04 10:51:42,967 views 867454 127262232774336 Updated ShopifyOrder object for shopify_id=6569330213168.
+INFO 2025-06-04 10:52:26,694 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-04 10:52:26,694 views 867454 127262232774336 Processing webhook for topic 'orders/fulfilled', resource ID '6561269088560'.
+INFO 2025-06-04 10:52:26,695 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6561269088560 via API...
+INFO 2025-06-04 10:52:27,301 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6561269088560.
+INFO 2025-06-04 10:52:27,318 views 867454 127262232774336 Updated ShopifyOrder object for shopify_id=6561269088560.
+INFO 2025-06-04 14:24:19,677 views 867454 127262232774336 Shopify webhook signature verified successfully.
+INFO 2025-06-04 14:24:19,680 views 867454 127262232774336 Processing webhook for topic 'orders/create', resource ID '6576755409200'.
+INFO 2025-06-04 14:24:19,680 views 867454 127262232774336 Order-related topic detected. Fetching latest data for order ID 6576755409200 via API...
+INFO 2025-06-04 14:24:20,700 utils 867454 127262232774336 Util: Successfully fetched Shopify order 6576755409200.
+INFO 2025-06-04 14:24:20,760 views 867454 127262232774336 Created ShopifyOrder object for shopify_id=6576755409200.
+INFO 2025-06-04 15:41:40,014 views 883159 133764685969088 Shopify webhook signature verified successfully.
+INFO 2025-06-04 15:41:40,014 views 883159 133764685969088 Processing webhook for topic 'orders/fulfilled', resource ID '6573750288688'.
+INFO 2025-06-04 15:41:40,014 views 883159 133764685969088 Order-related topic detected. Fetching latest data for order ID 6573750288688 via API...
+INFO 2025-06-04 15:41:41,019 utils 883159 133764685969088 Util: Successfully fetched Shopify order 6573750288688.
+INFO 2025-06-04 15:41:41,051 views 883159 133764685969088 Updated ShopifyOrder object for shopify_id=6573750288688.
+INFO 2025-06-04 16:01:52,480 views 883159 133764685969088 Shopify webhook signature verified successfully.
+INFO 2025-06-04 16:01:52,481 views 883159 133764685969088 Processing webhook for topic 'orders/fulfilled', resource ID '6575252570416'.
+INFO 2025-06-04 16:01:52,482 views 883159 133764685969088 Order-related topic detected. Fetching latest data for order ID 6575252570416 via API...
+INFO 2025-06-04 16:01:53,070 utils 883159 133764685969088 Util: Successfully fetched Shopify order 6575252570416.
+INFO 2025-06-04 16:01:53,102 views 883159 133764685969088 Updated ShopifyOrder object for shopify_id=6575252570416.
+INFO 2025-06-05 10:50:01,001 views 883159 133764685969088 Shopify webhook signature verified successfully.
+INFO 2025-06-05 10:50:01,004 views 883159 133764685969088 Processing webhook for topic 'orders/create', resource ID '6578140873008'.
+INFO 2025-06-05 10:50:01,004 views 883159 133764685969088 Order-related topic detected. Fetching latest data for order ID 6578140873008 via API...
+INFO 2025-06-05 10:50:01,919 utils 883159 133764685969088 Util: Successfully fetched Shopify order 6578140873008.
+INFO 2025-06-05 10:50:01,953 views 883159 133764685969088 Created ShopifyOrder object for shopify_id=6578140873008.
+INFO 2025-06-05 14:32:53,407 views 897040 130230275749568 Shopify webhook signature verified successfully.
+INFO 2025-06-05 14:32:53,408 views 897040 130230275749568 Processing webhook for topic 'orders/fulfilled', resource ID '6575538897200'.
+INFO 2025-06-05 14:32:53,408 views 897040 130230275749568 Order-related topic detected. Fetching latest data for order ID 6575538897200 via API...
+INFO 2025-06-05 14:32:54,465 utils 897040 130230275749568 Util: Successfully fetched Shopify order 6575538897200.
+INFO 2025-06-05 14:32:54,478 views 897040 130230275749568 Updated ShopifyOrder object for shopify_id=6575538897200.
+INFO 2025-06-05 14:33:45,788 views 897040 130230275749568 Shopify webhook signature verified successfully.
+INFO 2025-06-05 14:33:45,791 views 897040 130230275749568 Processing webhook for topic 'orders/fulfilled', resource ID '6573877264688'.
+INFO 2025-06-05 14:33:45,791 views 897040 130230275749568 Order-related topic detected. Fetching latest data for order ID 6573877264688 via API...
+INFO 2025-06-05 14:33:46,376 utils 897040 130230275749568 Util: Successfully fetched Shopify order 6573877264688.
+INFO 2025-06-05 14:33:46,391 views 897040 130230275749568 Updated ShopifyOrder object for shopify_id=6573877264688.
+INFO 2025-06-05 14:35:53,924 views 897040 130230275749568 Shopify webhook signature verified successfully.
+INFO 2025-06-05 14:35:53,924 views 897040 130230275749568 Processing webhook for topic 'orders/fulfilled', resource ID '6570709319984'.
+INFO 2025-06-05 14:35:53,924 views 897040 130230275749568 Order-related topic detected. Fetching latest data for order ID 6570709319984 via API...
+INFO 2025-06-05 14:35:54,455 utils 897040 130230275749568 Util: Successfully fetched Shopify order 6570709319984.
+INFO 2025-06-05 14:35:54,465 views 897040 130230275749568 Updated ShopifyOrder object for shopify_id=6570709319984.
+ERROR 2025-06-05 16:11:52,402 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6578140873008: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,407 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6576755409200: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,412 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575986278704: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,416 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575538897200: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,420 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575252570416: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,422 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575211774256: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,425 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6574030356784: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,428 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573877264688: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,430 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573750288688: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,433 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573743767856: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,436 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6572263473456: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,439 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570847371568: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,441 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570709319984: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,444 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570699653424: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:11:52,447 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570695983408: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,618 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6578140873008: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,621 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6576755409200: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,625 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575986278704: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,628 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575538897200: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,630 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575252570416: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,633 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575211774256: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,636 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6574030356784: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,638 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573877264688: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,641 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573750288688: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,644 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573743767856: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,648 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6572263473456: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,650 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570847371568: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,653 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570709319984: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,657 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570699653424: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:14,659 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570695983408: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:16,987 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570566451504: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:16,990 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6569330213168: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:16,993 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6569101197616: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:16,996 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6569094480176: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:16,999 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6569088123184: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,003 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6568311783728: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,005 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6567459193136: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,008 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6566074646832: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,012 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6565193023792: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,017 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6562911551792: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,021 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6561668956464: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,024 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6561344028976: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,027 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6561310540080: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,031 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6561281605936: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:17,034 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6561269088560: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,281 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6578140873008: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,284 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6576755409200: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,288 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575986278704: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,290 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575538897200: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,294 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575252570416: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,296 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6575211774256: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,299 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6574030356784: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,302 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573877264688: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,305 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573750288688: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,308 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6573743767856: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,311 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6572263473456: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,314 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570847371568: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,317 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570709319984: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,321 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570699653424: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+ERROR 2025-06-05 16:12:21,326 views 900730 124437968701120 Error calculating highlight for Shopify Order ID 6570695983408: 'ShopifyOrder' object has no attribute 'shipemnt_status'
+Traceback (most recent call last):
+  File "/home/nurserynisarga-admin/htdocs/admin.nurserynisarga.in/shopify_app/views.py", line 262, in shopify_order_list_view
+    if hasattr(order, 'fulfillment_status') and hasattr(order, 'created_at_shopify') and order.shipemnt_status in ['processing','partially-shppied','cancelled']  and order.created_at_shopify:
+                                                                                         ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShopifyOrder' object has no attribute 'shipemnt_status'. Did you mean: 'shipment_status'?
+INFO 2025-06-05 18:50:47,761 views 902077 124088782952128 Shopify webhook signature verified successfully.
+INFO 2025-06-05 18:50:47,762 views 902077 124088782952128 Processing webhook for topic 'orders/create', resource ID '6578508431664'.
+INFO 2025-06-05 18:50:47,762 views 902077 124088782952128 Order-related topic detected. Fetching latest data for order ID 6578508431664 via API...
+INFO 2025-06-05 18:50:48,560 utils 902077 124088782952128 Util: Successfully fetched Shopify order 6578508431664.
+INFO 2025-06-05 18:50:48,574 views 902077 124088782952128 Created ShopifyOrder object for shopify_id=6578508431664.
+INFO 2025-06-06 10:15:46,184 views 902077 124088782952128 Shopify webhook signature verified successfully.
+INFO 2025-06-06 10:15:46,186 views 902077 124088782952128 Processing webhook for topic 'orders/create', resource ID '6579714818352'.
+INFO 2025-06-06 10:15:46,186 views 902077 124088782952128 Order-related topic detected. Fetching latest data for order ID 6579714818352 via API...
+INFO 2025-06-06 10:15:47,075 utils 902077 124088782952128 Util: Successfully fetched Shopify order 6579714818352.
+INFO 2025-06-06 10:15:47,135 views 902077 124088782952128 Created ShopifyOrder object for shopify_id=6579714818352.
+INFO 2025-06-06 13:40:10,880 views 916078 132850724144832 Shopify webhook signature verified successfully.
+INFO 2025-06-06 13:40:10,881 views 916078 132850724144832 Processing webhook for topic 'orders/fulfilled', resource ID '6575211774256'.
+INFO 2025-06-06 13:40:10,882 views 916078 132850724144832 Order-related topic detected. Fetching latest data for order ID 6575211774256 via API...
+INFO 2025-06-06 13:40:11,876 utils 916078 132850724144832 Util: Successfully fetched Shopify order 6575211774256.
+INFO 2025-06-06 13:40:11,890 views 916078 132850724144832 Updated ShopifyOrder object for shopify_id=6575211774256.
+INFO 2025-06-06 17:43:56,490 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-06 17:43:56,491 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6580042400048'.
+INFO 2025-06-06 17:43:56,492 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6580042400048 via API...
+INFO 2025-06-06 17:43:57,459 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6580042400048.
+INFO 2025-06-06 17:43:57,476 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6580042400048.
+INFO 2025-06-06 18:36:29,670 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-06 18:36:29,672 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6580098629936'.
+INFO 2025-06-06 18:36:29,672 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6580098629936 via API...
+INFO 2025-06-06 18:36:30,487 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6580098629936.
+INFO 2025-06-06 18:36:30,503 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6580098629936.
+INFO 2025-06-06 22:44:11,213 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-06 22:44:11,214 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6580468416816'.
+INFO 2025-06-06 22:44:11,214 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6580468416816 via API...
+INFO 2025-06-06 22:44:12,087 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6580468416816.
+INFO 2025-06-06 22:44:12,116 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6580468416816.
+INFO 2025-06-07 12:28:52,947 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-07 12:28:52,950 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6581414428976'.
+INFO 2025-06-07 12:28:52,950 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6581414428976 via API...
+INFO 2025-06-07 12:28:53,776 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6581414428976.
+INFO 2025-06-07 12:28:53,799 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6581414428976.
+INFO 2025-06-07 12:31:06,445 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-07 12:31:06,445 views 916825 135784827344576 Processing webhook for topic 'orders/fulfilled', resource ID '6578508431664'.
+INFO 2025-06-07 12:31:06,445 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6578508431664 via API...
+INFO 2025-06-07 12:31:07,076 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6578508431664.
+INFO 2025-06-07 12:31:07,098 views 916825 135784827344576 Updated ShopifyOrder object for shopify_id=6578508431664.
+INFO 2025-06-07 12:36:13,082 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-07 12:36:13,082 views 916825 135784827344576 Processing webhook for topic 'orders/fulfilled', resource ID '6579714818352'.
+INFO 2025-06-07 12:36:13,082 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6579714818352 via API...
+INFO 2025-06-07 12:36:13,631 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6579714818352.
+INFO 2025-06-07 12:36:13,644 views 916825 135784827344576 Updated ShopifyOrder object for shopify_id=6579714818352.
+INFO 2025-06-07 12:44:02,289 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-07 12:44:02,289 views 916825 135784827344576 Processing webhook for topic 'orders/fulfilled', resource ID '6572263473456'.
+INFO 2025-06-07 12:44:02,289 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6572263473456 via API...
+INFO 2025-06-07 12:44:02,858 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6572263473456.
+INFO 2025-06-07 12:44:02,873 views 916825 135784827344576 Updated ShopifyOrder object for shopify_id=6572263473456.
+INFO 2025-06-07 19:51:52,187 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-07 19:51:52,189 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6581770289456'.
+INFO 2025-06-07 19:51:52,190 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6581770289456 via API...
+INFO 2025-06-07 19:51:52,870 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6581770289456.
+INFO 2025-06-07 19:51:52,908 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6581770289456.
+INFO 2025-06-08 17:11:25,366 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-08 17:11:25,368 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6580098629936'.
+INFO 2025-06-08 17:11:25,368 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6580098629936 via API...
+INFO 2025-06-08 17:11:26,610 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6580098629936.
+INFO 2025-06-08 17:11:26,659 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6580098629936.
+INFO 2025-06-08 20:54:28,186 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-08 20:54:28,188 views 916825 135784719972032 Processing webhook for topic 'orders/create', resource ID '6583511056688'.
+INFO 2025-06-08 20:54:28,188 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6583511056688 via API...
+INFO 2025-06-08 20:54:29,107 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6583511056688.
+INFO 2025-06-08 20:54:29,135 views 916825 135784719972032 Created ShopifyOrder object for shopify_id=6583511056688.
+INFO 2025-06-08 21:38:01,126 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-08 21:38:01,127 views 916825 135784719972032 Processing webhook for topic 'orders/create', resource ID '6583569776944'.
+INFO 2025-06-08 21:38:01,127 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6583569776944 via API...
+INFO 2025-06-08 21:38:02,490 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6583569776944.
+INFO 2025-06-08 21:38:02,522 views 916825 135784719972032 Created ShopifyOrder object for shopify_id=6583569776944.
+INFO 2025-06-08 23:43:36,525 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-08 23:43:36,529 views 916825 135784719972032 Processing webhook for topic 'orders/create', resource ID '6583751508272'.
+INFO 2025-06-08 23:43:36,529 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6583751508272 via API...
+INFO 2025-06-08 23:43:37,496 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6583751508272.
+INFO 2025-06-08 23:43:37,519 views 916825 135784719972032 Created ShopifyOrder object for shopify_id=6583751508272.
+INFO 2025-06-09 06:25:35,355 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-09 06:25:35,367 views 916825 135784719972032 Processing webhook for topic 'orders/create', resource ID '6584260690224'.
+INFO 2025-06-09 06:25:35,367 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6584260690224 via API...
+INFO 2025-06-09 06:25:36,301 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6584260690224.
+INFO 2025-06-09 06:25:36,337 views 916825 135784719972032 Created ShopifyOrder object for shopify_id=6584260690224.
+INFO 2025-06-09 12:40:19,650 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-09 12:40:19,652 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6576755409200'.
+INFO 2025-06-09 12:40:19,652 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6576755409200 via API...
+INFO 2025-06-09 12:40:20,542 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6576755409200.
+INFO 2025-06-09 12:40:20,571 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6576755409200.
+INFO 2025-06-09 13:00:33,763 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-09 13:00:33,763 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6578140873008'.
+INFO 2025-06-09 13:00:33,764 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6578140873008 via API...
+INFO 2025-06-09 13:00:34,415 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6578140873008.
+INFO 2025-06-09 13:00:34,430 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6578140873008.
+INFO 2025-06-10 09:02:51,851 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 09:02:51,856 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6581770289456'.
+INFO 2025-06-10 09:02:51,856 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6581770289456 via API...
+INFO 2025-06-10 09:02:53,037 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6581770289456.
+INFO 2025-06-10 09:02:53,083 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6581770289456.
+INFO 2025-06-10 09:07:09,844 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 09:07:09,844 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6583751508272'.
+INFO 2025-06-10 09:07:09,844 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6583751508272 via API...
+INFO 2025-06-10 09:07:10,417 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6583751508272.
+INFO 2025-06-10 09:07:10,456 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6583751508272.
+INFO 2025-06-10 09:10:19,473 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 09:10:19,474 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6583511056688'.
+INFO 2025-06-10 09:10:19,474 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6583511056688 via API...
+INFO 2025-06-10 09:10:20,034 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6583511056688.
+INFO 2025-06-10 09:10:20,055 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6583511056688.
+INFO 2025-06-10 09:26:01,071 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 09:26:01,072 views 916825 135784719972032 Processing webhook for topic 'orders/create', resource ID '6585881788720'.
+INFO 2025-06-10 09:26:01,073 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6585881788720 via API...
+INFO 2025-06-10 09:26:01,696 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6585881788720.
+INFO 2025-06-10 09:26:01,741 views 916825 135784719972032 Created ShopifyOrder object for shopify_id=6585881788720.
+INFO 2025-06-10 13:12:20,350 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-10 13:12:20,353 views 916825 135784827344576 Processing webhook for topic 'orders/fulfilled', resource ID '6583569776944'.
+INFO 2025-06-10 13:12:20,353 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6583569776944 via API...
+INFO 2025-06-10 13:12:21,162 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6583569776944.
+INFO 2025-06-10 13:12:21,233 views 916825 135784827344576 Updated ShopifyOrder object for shopify_id=6583569776944.
+INFO 2025-06-10 13:16:30,586 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 13:16:30,587 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6584260690224'.
+INFO 2025-06-10 13:16:30,587 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6584260690224 via API...
+INFO 2025-06-10 13:16:31,201 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6584260690224.
+INFO 2025-06-10 13:16:31,222 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6584260690224.
+INFO 2025-06-10 13:18:09,932 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 13:18:09,934 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6581414428976'.
+INFO 2025-06-10 13:18:09,935 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6581414428976 via API...
+INFO 2025-06-10 13:18:10,569 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6581414428976.
+INFO 2025-06-10 13:18:10,600 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6581414428976.
+INFO 2025-06-10 13:30:26,707 views 916825 135784719972032 Shopify webhook signature verified successfully.
+INFO 2025-06-10 13:30:26,708 views 916825 135784719972032 Processing webhook for topic 'orders/fulfilled', resource ID '6580468416816'.
+INFO 2025-06-10 13:30:26,708 views 916825 135784719972032 Order-related topic detected. Fetching latest data for order ID 6580468416816 via API...
+INFO 2025-06-10 13:30:27,260 utils 916825 135784719972032 Util: Successfully fetched Shopify order 6580468416816.
+INFO 2025-06-10 13:30:27,300 views 916825 135784719972032 Updated ShopifyOrder object for shopify_id=6580468416816.
+INFO 2025-06-10 16:26:46,131 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-10 16:26:46,135 views 916825 135784827344576 Processing webhook for topic 'orders/fulfilled', resource ID '6585881788720'.
+INFO 2025-06-10 16:26:46,135 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6585881788720 via API...
+INFO 2025-06-10 16:26:47,240 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6585881788720.
+INFO 2025-06-10 16:26:47,263 views 916825 135784827344576 Updated ShopifyOrder object for shopify_id=6585881788720.
+INFO 2025-06-10 19:17:28,556 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-10 19:17:28,558 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6586329596208'.
+INFO 2025-06-10 19:17:28,558 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6586329596208 via API...
+INFO 2025-06-10 19:17:29,494 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6586329596208.
+INFO 2025-06-10 19:17:29,520 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6586329596208.
+INFO 2025-06-11 07:50:12,449 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-11 07:50:12,452 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6587278229808'.
+INFO 2025-06-11 07:50:12,452 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6587278229808 via API...
+INFO 2025-06-11 07:50:13,253 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6587278229808.
+INFO 2025-06-11 07:50:13,293 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6587278229808.
+INFO 2025-06-11 08:00:48,459 views 916825 135784827344576 Shopify webhook signature verified successfully.
+INFO 2025-06-11 08:00:48,460 views 916825 135784827344576 Processing webhook for topic 'orders/create', resource ID '6587289338160'.
+INFO 2025-06-11 08:00:48,461 views 916825 135784827344576 Order-related topic detected. Fetching latest data for order ID 6587289338160 via API...
+INFO 2025-06-11 08:00:49,037 utils 916825 135784827344576 Util: Successfully fetched Shopify order 6587289338160.
+INFO 2025-06-11 08:00:49,060 views 916825 135784827344576 Created ShopifyOrder object for shopify_id=6587289338160.
+INFO 2025-06-12 11:28:50,798 views 999876 137026805790400 Shopify webhook signature verified successfully.
+INFO 2025-06-12 11:28:50,800 views 999876 137026805790400 Processing webhook for topic 'orders/create', resource ID '6589241360688'.
+INFO 2025-06-12 11:28:50,801 views 999876 137026805790400 Order-related topic detected. Fetching latest data for order ID 6589241360688 via API...
+INFO 2025-06-12 11:28:51,807 utils 999876 137026805790400 Util: Successfully fetched Shopify order 6589241360688.
+INFO 2025-06-12 11:28:51,871 views 999876 137026805790400 Created ShopifyOrder object for shopify_id=6589241360688.
+INFO 2025-06-12 12:50:07,087 views 999876 137026805790400 Shopify webhook signature verified successfully.
+INFO 2025-06-12 12:50:07,088 views 999876 137026805790400 Processing webhook for topic 'orders/fulfilled', resource ID '6586329596208'.
+INFO 2025-06-12 12:50:07,088 views 999876 137026805790400 Order-related topic detected. Fetching latest data for order ID 6586329596208 via API...
+INFO 2025-06-12 12:50:07,971 utils 999876 137026805790400 Util: Successfully fetched Shopify order 6586329596208.
+INFO 2025-06-12 12:50:08,039 views 999876 137026805790400 Updated ShopifyOrder object for shopify_id=6586329596208.
+INFO 2025-06-12 13:09:43,729 views 999876 137026805790400 Shopify webhook signature verified successfully.
+INFO 2025-06-12 13:09:43,729 views 999876 137026805790400 Processing webhook for topic 'orders/fulfilled', resource ID '6575986278704'.
+INFO 2025-06-12 13:09:43,729 views 999876 137026805790400 Order-related topic detected. Fetching latest data for order ID 6575986278704 via API...
+INFO 2025-06-12 13:09:44,307 utils 999876 137026805790400 Util: Successfully fetched Shopify order 6575986278704.
+INFO 2025-06-12 13:09:44,352 views 999876 137026805790400 Updated ShopifyOrder object for shopify_id=6575986278704.
+INFO 2025-06-13 09:00:19,981 views 999876 137026670405312 Shopify webhook signature verified successfully.
+INFO 2025-06-13 09:00:19,983 views 999876 137026670405312 Processing webhook for topic 'orders/create', resource ID '6590707269936'.
+INFO 2025-06-13 09:00:19,983 views 999876 137026670405312 Order-related topic detected. Fetching latest data for order ID 6590707269936 via API...
+INFO 2025-06-13 09:00:20,824 utils 999876 137026670405312 Util: Successfully fetched Shopify order 6590707269936.
+INFO 2025-06-13 09:00:20,872 views 999876 137026670405312 Created ShopifyOrder object for shopify_id=6590707269936.
+INFO 2025-06-13 10:55:22,120 views 999876 137026670405312 Shopify webhook signature verified successfully.
+INFO 2025-06-13 10:55:22,120 views 999876 137026670405312 Processing webhook for topic 'orders/fulfilled', resource ID '6589241360688'.
+INFO 2025-06-13 10:55:22,120 views 999876 137026670405312 Order-related topic detected. Fetching latest data for order ID 6589241360688 via API...
+INFO 2025-06-13 10:55:23,141 utils 999876 137026670405312 Util: Successfully fetched Shopify order 6589241360688.
+INFO 2025-06-13 10:55:23,164 views 999876 137026670405312 Updated ShopifyOrder object for shopify_id=6589241360688.
+INFO 2025-06-13 15:34:18,194 views 1029872 134351262041792 Shopify webhook signature verified successfully.
+INFO 2025-06-13 15:34:18,196 views 1029872 134351262041792 Processing webhook for topic 'orders/create', resource ID '6591028298032'.
+INFO 2025-06-13 15:34:18,196 views 1029872 134351262041792 Order-related topic detected. Fetching latest data for order ID 6591028298032 via API...
+INFO 2025-06-13 15:34:19,076 utils 1029872 134351262041792 Util: Successfully fetched Shopify order 6591028298032.
+INFO 2025-06-13 15:34:19,140 views 1029872 134351262041792 Created ShopifyOrder object for shopify_id=6591028298032.
+INFO 2025-06-14 02:06:31,251 views 1029872 134351262041792 Shopify webhook signature verified successfully.
+INFO 2025-06-14 02:06:31,253 views 1029872 134351262041792 Processing webhook for topic 'orders/create', resource ID '6591830065456'.
+INFO 2025-06-14 02:06:31,253 views 1029872 134351262041792 Order-related topic detected. Fetching latest data for order ID 6591830065456 via API...
+INFO 2025-06-14 02:06:32,008 utils 1029872 134351262041792 Util: Successfully fetched Shopify order 6591830065456.
+INFO 2025-06-14 02:06:32,032 views 1029872 134351262041792 Created ShopifyOrder object for shopify_id=6591830065456.
+INFO 2025-06-14 11:03:32,467 views 1029872 134351262041792 Shopify webhook signature verified successfully.
+INFO 2025-06-14 11:03:32,469 views 1029872 134351262041792 Processing webhook for topic 'orders/fulfilled', resource ID '6591830065456'.
+INFO 2025-06-14 11:03:32,470 views 1029872 134351262041792 Order-related topic detected. Fetching latest data for order ID 6591830065456 via API...
+INFO 2025-06-14 11:03:33,453 utils 1029872 134351262041792 Util: Successfully fetched Shopify order 6591830065456.
+INFO 2025-06-14 11:03:33,478 views 1029872 134351262041792 Updated ShopifyOrder object for shopify_id=6591830065456.

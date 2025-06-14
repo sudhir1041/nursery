@@ -4,5 +4,5 @@ from . import views
 app_name = 'invoice_app'
 
 urlpatterns = [
-    path('invoice/<int:invoice_id>/download/', views.download_invoice_pdf, name='download_invoice_pdf'),
+    path('create_invoice/<int:id>/', views.create_invoice, name='create_invoice'),
 ]
