@@ -3,6 +3,8 @@ from django.urls import path, include
 admin.site.site_header = "Nursery Nisarga"
 admin.site.site_title = "Admin"
 admin.site.index_title = "Welcome Admin"
+from django.conf import settings
+from django.conf.urls.static import static
 from . import views  
 
 urlpatterns = [
@@ -19,3 +21,6 @@ urlpatterns = [
     path('shipment/',include('shipment_app.urls')),
     path('invoice/', include('invoice_app.urls', namespace='invoice_app')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

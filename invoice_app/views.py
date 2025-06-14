@@ -1,61 +1,42 @@
-import decimal
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from django.template.loader import render_to_string
+from django.shortcuts import render,redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from woocommerce_app.models import WooCommerceOrder
+from shopify_app.models import ShopifyOrder
+from facebook_app.models import Facebook_orders
+from .models import Order,Invoice,Company_name
+import logging
 
-# You will need to install weasyprint: pip install WeasyPrint
-from weasyprint import HTML
+logger = logging.getLogger(__name__)
 
-# Make sure to import your actual models
-# from .models import Invoice, InvoiceItem
-
-def download_invoice_pdf(request, invoice_id):
-    """
-    Generates a PDF from a Tailwind CSS HTML template for a given invoice
-    and returns it as a downloadable file.
-    """
-    # 1. Fetch the required invoice object.
-    # get_object_or_404 is a shortcut that raises a 404 error if the object is not found.
-    invoice = get_object_or_404(Invoice, pk=invoice_id)
+def create_invoice(request,id):
+    woo_order = WooCommerceOrder.get_object_or_404(WooCommerceOrder, id=id)
+    logger.info(f"WooCommerce order retrieved: {woo_order}")
     
-    # Assumes your InvoiceItem model has a ForeignKey to Invoice with related_name='items'
-    items = invoice.items.all() 
-
-    # 2. Calculate totals directly in the view.
-    # This keeps your template clean and focused on presentation.
-    subtotal = sum(item.quantity * item.unit_price for item in items)
+    shopify_order = ShopifyOrder.get_object_or_404(ShopifyOrder, id=id)
+    logger.info(f"Shopify order retrieved: {shopify_order}")
     
-    # Safely get 'shipping_cost' from your Invoice model.
-    # Defaults to 0.00 if the field doesn't exist for some reason.
-    shipping_cost = getattr(invoice, 'shipping_cost', decimal.Decimal('0.00'))
-    total = subtotal + shipping_cost
+    facebook_order = Facebook_orders.get_object_or_404(Facebook_orders, id=id)
+    logger.info(f"Facebook order retrieved: {facebook_order}")
 
-    # 3. Prepare the full context dictionary to pass to the template.
-    # This contains all the dynamic data your HTML template needs.
-    context = {
-        'invoice': invoice,
-        'items': items,
-        'subtotal': subtotal,
-        'shipping_cost': shipping_cost,
-        'total': total,
-        # Safely get 'payment_method'. Defaults to 'Not Specified'.
-        'payment_method': getattr(invoice, 'payment_method', 'Not Specified'), 
-    }
+    # Create Order instance
+    order = Order.objects.create(
+        customer_name=f"{woo_order.billing_first_name} {woo_order.billing_last_name}",
+        customer_address=f"{woo_order.billing_address_1}, {woo_order.billing_address_2}, {woo_order.billing_city}, {woo_order.billing_state}, {woo_order.billing_postcode}, {woo_order.billing_country}",
+        customer_email=woo_order.billing_email,
+        customer_phone=woo_order.billing_phone,
+        order_total=woo_order.total_amount,
+        order_status=woo_order.status,
+        order_items=woo_order.line_items_json,
+        order_shipment_status=woo_order.shipment_status,
+        order_notes=woo_order.customer_note,
+        payment_method=woo_order.raw_data.get('payment_method', ''),
+        shipping_charge=woo_order.raw_data.get('shipping_charge', 0)
+    )
 
-    # 4. Render the HTML template to a string.
-    # Replace 'your_invoice_app' with the actual name of your Django app.
-    # The template file should be located at:
-    # your_invoice_app/templates/your_invoice_app/tailwind_invoice_template.html
-    html_string = render_to_string('your_invoice_app/tailwind_invoice_template.html', context)
+    # Create Invoice instance
+    invoice = Invoice.objects.create(
+        order=order
+    )
 
-    # 5. Generate the PDF file in memory using WeasyPrint.
-    # The base_url helps WeasyPrint locate external files like images or fonts.
-    pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+    logger.info(f"Invoice created with number: {invoice.invoice_number}")
 
-    # 6. Create the final HTTP response with the correct headers.
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    
-    # The Content-Disposition header tells the browser to prompt a download.
-    response['Content-Disposition'] = f'attachment; filename="invoice-{invoice.invoice_number}.pdf"'
-    
-    return response
