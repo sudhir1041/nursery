@@ -9,17 +9,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_invoice(request, woo_id):
+def create_invoice(request, id):
     try:
         # Check if invoice already exists for this order
-        existing_invoice = Invoice.objects.filter(order_id=woo_id).first()
+        existing_invoice = Invoice.objects.filter(order_id=id).first()
         if existing_invoice:
             logger.info(f"Invoice already exists with number: {existing_invoice.invoice_number}")
             return HttpResponse(f"Invoice already exists with number: {existing_invoice.invoice_number}")
 
         # Try to get order from different sources
         try:
-            order_source = get_object_or_404(WooCommerceOrder, woo_id=woo_id)
+            order_source = get_object_or_404(WooCommerceOrder, woo_id=id)
             order_data = {
                 'order_id': order_source.woo_id,
                 'customer_name': f"{order_source.billing_first_name} {order_source.billing_last_name}",
@@ -36,19 +36,19 @@ def create_invoice(request, woo_id):
             }
         except:
             try:
-                order_source = get_object_or_404(ShopifyOrder, woo_id=woo_id)
+                order_source = get_object_or_404(ShopifyOrder, woo_id=id)
                 # Add Shopify order data mapping here
                 order_data = {}
             except:
                 try:
-                    order_source = get_object_or_404(Facebook_orders, woo_id=woo_id)
+                    order_source = get_object_or_404(Facebook_orders, woo_id=id)
                     # Add Facebook order data mapping here
                     order_data = {}
                 except:
                     raise Exception("Order not found in any source")
 
         # Check if order already exists
-        existing_order = Order.objects.filter(order_id=woo_id).first()
+        existing_order = Order.objects.filter(order_id=id).first()
         if existing_order:
             order = existing_order
         else:
