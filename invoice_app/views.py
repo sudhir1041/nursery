@@ -9,14 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def create_invoice(request,id):
-    woo_order = WooCommerceOrder.get_object_or_404(WooCommerceOrder, id=id)
-    logger.info(f"WooCommerce order retrieved: {woo_order}")
-    
-    shopify_order = ShopifyOrder.get_object_or_404(ShopifyOrder, id=id)
-    logger.info(f"Shopify order retrieved: {shopify_order}")
-    
-    facebook_order = Facebook_orders.get_object_or_404(Facebook_orders, id=id)
-    logger.info(f"Facebook order retrieved: {facebook_order}")
+    woo_order = WooCommerceOrder.objects.filter(WooCommerceOrder, id=id)
 
     # Create Order instance
     order = Order.objects.create(
