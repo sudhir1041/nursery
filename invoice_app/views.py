@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def create_invoice(request,id):
-    woo_order = WooCommerceOrder.objects.filter(WooCommerceOrder, id=id)
+    woo_order = get_object_or_404(WooCommerceOrder, id=id)
 
     # Create Order instance
     order = Order.objects.create(
