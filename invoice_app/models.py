@@ -11,15 +11,15 @@ class Order(models.Model):
     customer_email = models.EmailField()
     customer_phone = models.CharField(max_length=15)
     order_total = models.DecimalField(max_digits=10, decimal_places=2)
-    order_status = models.CharField(max_length=50)
-    order_items = models.JSONField()
-    order_shipment_status = models.CharField(max_length=50)
+    order_status = models.CharField(max_length=50, default='pending')
+    order_items = models.JSONField(default=dict)
+    order_shipment_status = models.CharField(max_length=50, default='pending')
     order_notes = models.TextField(blank=True, null=True)
-    payment_method = models.CharField(max_length=100)
-    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=100, default='cash')
+    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f"Order {self.order_id}"
+        return f"Order {self.invoice_id}"
 
     class Meta:
         ordering = ['-order_date']
