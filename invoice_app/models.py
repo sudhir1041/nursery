@@ -5,6 +5,7 @@ class Order(models.Model):
     def generate_invoice_id():
         return str(random.randint(100000, 999999))
     invoice_id = models.CharField(max_length=6, default=generate_invoice_id, editable=False, unique=True)
+    order_id = models.CharField(max_length=100, unique=True)
     order_date = models.DateTimeField(auto_now_add=True)
     customer_name = models.CharField(max_length=200)
     customer_address = models.TextField()

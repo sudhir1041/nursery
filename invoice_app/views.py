@@ -9,18 +9,19 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def create_invoice(request,id):
+def create_invoice(request, woo_id):
     try:
         # Check if invoice already exists for this order
-        existing_invoice = Invoice.objects.filter(order__id=id).first()
+        existing_invoice = Invoice.objects.filter(order_id=woo_id).first()
         if existing_invoice:
             logger.info(f"Invoice already exists with number: {existing_invoice.invoice_number}")
             return HttpResponse(f"Invoice already exists with number: {existing_invoice.invoice_number}")
 
         # Try to get order from different sources
         try:
-            order_source = get_object_or_404(WooCommerceOrder, id=id)
+            order_source = get_object_or_404(WooCommerceOrder, woo_id=woo_id)
             order_data = {
+                'order_id': order_source.woo_id,
                 'customer_name': f"{order_source.billing_first_name} {order_source.billing_last_name}",
                 'customer_address': f"{order_source.billing_address_1}, {order_source.billing_address_2}, {order_source.billing_city}, {order_source.billing_state}, {order_source.billing_postcode}, {order_source.billing_country}",
                 'customer_email': order_source.billing_email,
@@ -35,19 +36,19 @@ def create_invoice(request,id):
             }
         except:
             try:
-                order_source = get_object_or_404(ShopifyOrder, id=id)
+                order_source = get_object_or_404(ShopifyOrder, id=woo_id)
                 # Add Shopify order data mapping here
                 order_data = {}
             except:
                 try:
-                    order_source = get_object_or_404(Facebook_orders, id=id)
+                    order_source = get_object_or_404(Facebook_orders, id=woo_id)
                     # Add Facebook order data mapping here
                     order_data = {}
                 except:
                     raise Exception("Order not found in any source")
 
         # Check if order already exists
-        existing_order = Order.objects.filter(id=id).first()
+        existing_order = Order.objects.filter(order_id=woo_id).first()
         if existing_order:
             order = existing_order
         else:
