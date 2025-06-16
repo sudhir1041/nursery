@@ -133,17 +133,21 @@ def invoice_pdf(request, id):
         order = invoice.order
         order_data = _get_order_data(id)
 
-        # Always ensure items is a list
+        # --- START: Corrected items block ---
         items = order.order_items or []
+
         if isinstance(items, str):
             try:
                 items = json.loads(items)
             except Exception:
                 items = []
+
         if isinstance(items, dict):
-            items = list(items.values())
-        if not isinstance(items, list):
+            items = [v for v in items.values() if isinstance(v, dict)]
+
+        if not (isinstance(items, list) and all(isinstance(i, dict) for i in items)):
             items = []
+        # --- END: Corrected items block ---
 
         subtotal = sum(
             (float(item.get('price', 0)) * float(item.get('quantity', 1)))
@@ -157,8 +161,8 @@ def invoice_pdf(request, id):
         context = {
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
-            'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),      # <- invoice date from Invoice model
-            'order_date': order.order_date.strftime('%Y-%m-%d'),          # <- order date from Order model
+            'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
+            'order_date': order.order_date.strftime('%Y-%m-%d'),
             'order_data': order_data,
             'items': items,
             'subtotal': subtotal,
@@ -176,7 +180,7 @@ def invoice_pdf(request, id):
         html_string = render_to_string('invoice/pdf_template.html', context)
 
         base_url = request.build_absolute_uri('/')
-        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()  # Correct usage
+        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
 
         # Save PDF file
         invoice.pdf_file.save(
