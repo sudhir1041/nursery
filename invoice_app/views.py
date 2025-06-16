@@ -157,10 +157,10 @@ def invoice_pdf(request, id):
         context = {
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
-            'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
-            'order_date': order.order_date.strftime('%Y-%m-%d'),
+            'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),      # <- invoice date from Invoice model
+            'order_date': order.order_date.strftime('%Y-%m-%d'),          # <- order date from Order model
             'order_data': order_data,
-            'items': items,  # Pass items as a list
+            'items': items,
             'subtotal': subtotal,
             'shipping_cost': shipping_cost,
             'payment_method': order.payment_method,
@@ -176,7 +176,7 @@ def invoice_pdf(request, id):
         html_string = render_to_string('invoice/pdf_template.html', context)
 
         base_url = request.build_absolute_uri('/')
-        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
+        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()  # Correct usage
 
         # Save PDF file
         invoice.pdf_file.save(
