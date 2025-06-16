@@ -100,6 +100,8 @@ def create_invoice(request, id):
     """Create an invoice for a given order ID across all platforms."""
     try:
         invoice = _get_or_create_invoice(id)
+        # Generate PDF after creating invoice
+        invoice_pdf(request, id)
         logger.info(f"Invoice ready with number: {invoice.invoice_number}")
         return HttpResponse(
             f"Invoice created successfully with number: {invoice.invoice_number}"
