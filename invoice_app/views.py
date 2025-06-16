@@ -118,6 +118,14 @@ def invoice_pdf(request, id):
     """Return a PDF invoice for the given order ID."""
     try:
         invoice = _get_or_create_invoice(id)
+        
+        # Check if PDF already exists and return it
+        if invoice.pdf_file:
+            response = HttpResponse(invoice.pdf_file.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
+            return response
+            
+        # If PDF doesn't exist, generate it
         order = invoice.order
         order_data = _get_order_data(id)
 
@@ -157,12 +165,12 @@ def invoice_pdf(request, id):
         base_url = request.build_absolute_uri('/')
         pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
 
-        if not invoice.pdf_file:
-            invoice.pdf_file.save(
-                f"invoice_{invoice.invoice_number}.pdf",
-                ContentFile(pdf_bytes),
-                save=True,
-            )
+        # Save PDF file
+        invoice.pdf_file.save(
+            f"invoice_{invoice.invoice_number}.pdf",
+            ContentFile(pdf_bytes),
+            save=True,
+        )
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response[
