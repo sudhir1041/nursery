@@ -5,7 +5,8 @@ admin.site.site_title = "Admin"
 admin.site.index_title = "Welcome Admin"
 from django.conf import settings
 from django.conf.urls.static import static
-from . import views  
+from . import views
+from . import api_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,6 +21,13 @@ urlpatterns = [
     path('whatsapp/', include('whatsapp_app.urls', namespace='whatsapp_app')),
     path('shipment/',include('shipment_app.urls')),
     path('invoice/', include('invoice_app.urls', namespace='invoice_app')),
+
+    # API endpoints
+    path('api/dashboard/', api_views.dashboard_api, name='api_dashboard'),
+    path('api/orders/', api_views.orders_api, name='api_orders'),
+    path('api/orders/<str:order_id>/', api_views.order_detail_api, name='api_order_detail'),
+    path('api/orders/<str:order_id>/update/', api_views.order_update_api, name='api_order_update'),
+    path('api/settings/', api_views.settings_api, name='api_settings'),
 ]
 
 if settings.DEBUG:

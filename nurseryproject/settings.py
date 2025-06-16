@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'django_celery_beat',
+    'nurseryproject.apps.NurseryprojectConfig',
     'invoice_app',
     'woocommerce_app',
     'shopify_app',
