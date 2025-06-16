@@ -119,6 +119,7 @@ def invoice_pdf(request, id):
     try:
         invoice = _get_or_create_invoice(id)
         order = invoice.order
+        order_data = _get_order_data(id)
 
         items = order.order_items or []
         if isinstance(items, str):
@@ -134,19 +135,25 @@ def invoice_pdf(request, id):
         shipping_cost = float(order.shipping_charge or 0)
         total = subtotal + shipping_cost
 
-        html_string = render_to_string(
-            'invoice/pdf_template.html',
-            {
-                'invoice': invoice,
-                'items': items,
-                'subtotal': subtotal,
-                'shipping_cost': shipping_cost,
-                'payment_method': order.payment_method,
-                'total': total,
-            },
-        )
+        context = {
+            'invoice': invoice,
+            'invoice_number': invoice.invoice_number,
+            'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
+            'order_date': order.created_at.strftime('%Y-%m-%d'),
+            'order_data': order_data,
+            'items': items,
+            'subtotal': subtotal,
+            'shipping_cost': shipping_cost,
+            'payment_method': order.payment_method,
+            'total': total,
+            'company_name': 'Your Company Name',
+            'company_address': 'Your Company Address\nCity, State, ZIP\nCountry',
+            'company_contact': 'Phone: +1234567890\nEmail: contact@company.com',
+            'logo_url': request.build_absolute_uri('/static/images/logo.png'),
+        }
 
-        # Use the site root as base URL so static assets resolve correctly
+        html_string = render_to_string('invoice/pdf_template.html', context)
+
         base_url = request.build_absolute_uri('/')
         pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
 
