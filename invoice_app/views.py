@@ -158,7 +158,7 @@ def invoice_pdf(request, id):
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
             'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
-            'order_date': order.created_at.strftime('%Y-%m-%d'),
+            'order_date': order.order_date.strftime('%Y-%m-%d'),
             'order_data': order_data,
             'items': items,  # Pass items as a list
             'subtotal': subtotal,
