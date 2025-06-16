@@ -64,6 +64,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Invoice</th>
                         <th>Order ID</th>
                         <th>Date Created</th>
                         <th>Status</th>
@@ -77,7 +78,8 @@
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                    <tr {% if order.is_overdue_highlight %} style="background-color:rgb(223, 124, 124);color:white;" {% endif %}>                                               
+                    <tr {% if order.is_overdue_highlight %} style="background-color:rgb(223, 124, 124);color:white;" {% endif %}>          
+                        <td><a class="order-details-view" href="{% url 'invoice_app:invoice_pdf' order.id %}">Download<a/></td>                                     
                         <td><a class="order-details-view" href="{% url 'facebook_order_detail' order.order_id %}"><i class="fas fa-eye"></i>#{{ order.order_id }}<a/></td>
                         <td>{{ order.date_created|date:"Y-m-d H:i" }}</td>
                         <td>
