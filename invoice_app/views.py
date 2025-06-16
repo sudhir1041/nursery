@@ -9,12 +9,7 @@ from django.core.files.base import ContentFile
 import json
 import logging
 
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from io import BytesIO
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from weasyprint import HTML
 
 logger = logging.getLogger(__name__)
 
@@ -139,56 +134,21 @@ def invoice_pdf(request, id):
         shipping_cost = float(order.shipping_charge or 0)
         total = subtotal + shipping_cost
 
-        # Create PDF directly without HTML template
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        elements = []
+        html_string = render_to_string(
+            'invoice/pdf_template.html',
+            {
+                'invoice': invoice,
+                'items': items,
+                'subtotal': subtotal,
+                'shipping_cost': shipping_cost,
+                'payment_method': order.payment_method,
+                'total': total,
+            },
+        )
 
-        # Header
-        elements.append(Paragraph(f"Invoice #{invoice.invoice_number}", styles['Heading1']))
-        elements.append(Spacer(1, 20))
-
-        # Customer Info
-        elements.append(Paragraph(f"Customer: {order.customer_name}", styles['Normal']))
-        elements.append(Paragraph(f"Address: {order.customer_address}", styles['Normal']))
-        elements.append(Paragraph(f"Email: {order.customer_email}", styles['Normal']))
-        elements.append(Paragraph(f"Phone: {order.customer_phone}", styles['Normal']))
-        elements.append(Spacer(1, 20))
-
-        # Order Items Table
-        table_data = [['Item', 'Quantity', 'Price', 'Total']]
-        for item in items:
-            quantity = float(item.get('quantity', 1))
-            price = float(item.get('price', 0))
-            table_data.append([
-                item.get('name', ''),
-                str(quantity),
-                f"${price:.2f}",
-                f"${quantity * price:.2f}"
-            ])
-
-        table = Table(table_data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 14),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        elements.append(table)
-        elements.append(Spacer(1, 20))
-
-        # Totals
-        elements.append(Paragraph(f"Subtotal: ${subtotal:.2f}", styles['Normal']))
-        elements.append(Paragraph(f"Shipping: ${shipping_cost:.2f}", styles['Normal']))
-        elements.append(Paragraph(f"Total: ${total:.2f}", styles['Normal']))
-
-        doc.build(elements)
-        pdf_bytes = buffer.getvalue()
-        buffer.close()
+        # Use the site root as base URL so static assets resolve correctly
+        base_url = request.build_absolute_uri('/')
+        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
 
         if not invoice.pdf_file:
             invoice.pdf_file.save(
