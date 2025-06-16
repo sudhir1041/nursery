@@ -77,13 +77,15 @@
     <!-- Header Section -->
     <table class="header-table" style="margin-bottom: 40px;">
         <tr>
-            <td style="width: 60%;">
-                <img src="{{ logo_url }}" style="height: 50pt;">
+            <td style="width: 50%;">
+                <img src="{{ logo_url }}" style="height: 80pt; max-width: 300px; object-fit: contain;">
             </td>
-            <td class="text-right" style="font-size: 11px; width: 40%;">
-                <span class="font-bold">{{ company_name }}</span><br/>
-                {{ company_address|linebreaksbr }}<br/>
-                {{ company_contact }}
+            <td class="text-right" style="width: 50%;">
+                <span style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 8px;">{{ company_name }}</span>
+                <span style="font-size: 12px; display: block; line-height: 1.5;">
+                    {{ company_address|linebreaksbr }}<br/>
+                    {{ company_contact }}
+                </span>
             </td>
         </tr>
     </table>
