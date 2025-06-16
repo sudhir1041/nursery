@@ -145,7 +145,9 @@ def invoice_pdf(request, id):
             },
         )
 
-        pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
+        # Use the site root as base URL so static assets resolve correctly
+        base_url = request.build_absolute_uri('/')
+        pdf_file = HTML(string=html_string, base_url=base_url).write_pdf()
         response = HttpResponse(pdf_file, content_type='application/pdf')
         response[
             'Content-Disposition'
