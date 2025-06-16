@@ -9,7 +9,9 @@ from django.core.files.base import ContentFile
 import json
 import logging
 
-from weasyprint import HTML
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from io import BytesIO
 
 logger = logging.getLogger(__name__)
 
@@ -134,22 +136,29 @@ def invoice_pdf(request, id):
         shipping_cost = float(order.shipping_charge or 0)
         total = subtotal + shipping_cost
 
-        html_string = render_to_string(
-            'invoice/pdf_template.html',
-            {
-                'invoice': invoice,
-                'items': items,
-                'subtotal': subtotal,
-                'shipping_cost': shipping_cost,
-                'payment_method': order.payment_method,
-                'total': total,
-            },
-        )
-
-        # Use the site root as base URL so static assets resolve correctly
-        base_url = request.build_absolute_uri('/')
-        html = HTML(string=html_string, base_url=base_url)
-        pdf_bytes = html.write_pdf()
+        # Create PDF using ReportLab
+        buffer = BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        
+        # Add content to PDF
+        p.drawString(100, 750, f"Invoice #{invoice.invoice_number}")
+        p.drawString(100, 700, f"Customer: {order.customer_name}")
+        p.drawString(100, 680, f"Address: {order.customer_address}")
+        
+        y = 600
+        for item in items:
+            p.drawString(100, y, f"{item.get('name', '')} - Qty: {item.get('quantity', 1)} - Price: ${item.get('price', 0)}")
+            y -= 20
+            
+        p.drawString(100, y-40, f"Subtotal: ${subtotal}")
+        p.drawString(100, y-60, f"Shipping: ${shipping_cost}")
+        p.drawString(100, y-80, f"Total: ${total}")
+        
+        p.showPage()
+        p.save()
+        
+        pdf_bytes = buffer.getvalue()
+        buffer.close()
 
         if not invoice.pdf_file:
             invoice.pdf_file.save(
