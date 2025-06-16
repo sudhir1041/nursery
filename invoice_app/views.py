@@ -5,6 +5,7 @@ from facebook_app.models import Facebook_orders
 from .models import Order, Invoice
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.core.files.base import ContentFile
 import json
 import logging
 
@@ -147,8 +148,16 @@ def invoice_pdf(request, id):
 
         # Use the site root as base URL so static assets resolve correctly
         base_url = request.build_absolute_uri('/')
-        pdf_file = HTML(string=html_string, base_url=base_url).write_pdf()
-        response = HttpResponse(pdf_file, content_type='application/pdf')
+        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
+
+        if not invoice.pdf_file:
+            invoice.pdf_file.save(
+                f"invoice_{invoice.invoice_number}.pdf",
+                ContentFile(pdf_bytes),
+                save=True,
+            )
+
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
         response[
             'Content-Disposition'
         ] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
