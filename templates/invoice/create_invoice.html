@@ -47,19 +47,19 @@
                 <h2 class="text-2xl font-semibold text-gray-800 mb-4">INVOICE</h2>
                 <h3 class="font-semibold text-gray-700">Billed To</h3>
                 <address class="text-gray-600 not-italic mt-2">
-                    {{ invoice.customer.name }}<br>
-                    {{ invoice.customer.address|linebreaksbr }}<br>
-                    {{ invoice.customer.email }}<br>
-                    {{ invoice.customer.phone }}
+                    {{ invoice.order.customer_name }}<br>
+                    {{ invoice.order.customer_address|linebreaksbr }}<br>
+                    {{ invoice.order.customer_email }}<br>
+                    {{ invoice.order.customer_phone }}
                 </address>
             </div>
             <div class="w-full sm:w-auto sm:text-right">
                 <table class="text-sm w-full sm:w-auto">
                     <tbody>
                         <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Invoice Number:</td><td class="text-gray-600 py-1">{{ invoice.invoice_number }}</td></tr>
-                        <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Invoice Date:</td><td class="text-gray-600 py-1">{{ invoice.issue_date|date:"F j, Y" }}</td></tr>
-                        <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Order Number:</td><td class="text-gray-600 py-1">{{ invoice.id }}</td></tr>
-                        <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Order Date:</td><td class="text-gray-600 py-1">{{ invoice.created_at|date:"F j, Y" }}</td></tr>
+                        <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Invoice Date:</td><td class="text-gray-600 py-1">{{ invoice.invoice_date|date:"F j, Y" }}</td></tr>
+                        <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Order Number:</td><td class="text-gray-600 py-1">{{ invoice.order.order_id }}</td></tr>
+                        <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Order Date:</td><td class="text-gray-600 py-1">{{ invoice.order.order_date|date:"F j, Y" }}</td></tr>
                         <tr class="flex justify-between sm:table-row"><td class="font-semibold text-gray-700 pr-4 py-1">Payment Method:</td><td class="text-gray-600 py-1">{{ payment_method }}</td></tr>
                     </tbody>
                 </table>
@@ -77,11 +77,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for item in invoice.items.all %}
+                        {% for item in items %}
                         <tr class="border-b border-gray-200">
                             <td class="p-3 text-gray-700">{{ item.description }}</td>
                             <td class="p-3 text-gray-700 text-center">{{ item.quantity }}</td>
-                            <td class="p-3 text-gray-700 text-right">₹{{ item.unit_price|floatformat:2 }}</td>
+                            <td class="p-3 text-gray-700 text-right">₹{{ item.price|floatformat:2 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

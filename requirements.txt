@@ -64,3 +64,5 @@ wcwidth==0.2.13
 whitenoise==6.9.0
 WooCommerce==3.0.0
 zope.interface==7.2
+WeasyPrint==61.2
+
