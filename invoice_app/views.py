@@ -148,7 +148,8 @@ def invoice_pdf(request, id):
 
         # Use the site root as base URL so static assets resolve correctly
         base_url = request.build_absolute_uri('/')
-        pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
+        html = HTML(string=html_string, base_url=base_url)
+        pdf_bytes = html.write_pdf()
 
         if not invoice.pdf_file:
             invoice.pdf_file.save(
