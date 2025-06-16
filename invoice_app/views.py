@@ -136,24 +136,20 @@ def invoice_pdf(request, id):
         shipping_cost = float(order.shipping_charge or 0)
         total = subtotal + shipping_cost
 
-        # Create PDF using ReportLab
+        # Render HTML template
+        html_content = render_to_string('pdf_template.html', {
+            'invoice': invoice,
+            'order': order,
+            'items': items,
+            'subtotal': subtotal,
+            'shipping_cost': shipping_cost,
+            'total': total
+        })
+
+        # Create PDF from HTML
         buffer = BytesIO()
         p = canvas.Canvas(buffer, pagesize=letter)
-        
-        # Add content to PDF
-        p.drawString(100, 750, f"Invoice #{invoice.invoice_number}")
-        p.drawString(100, 700, f"Customer: {order.customer_name}")
-        p.drawString(100, 680, f"Address: {order.customer_address}")
-        
-        y = 600
-        for item in items:
-            p.drawString(100, y, f"{item.get('name', '')} - Qty: {item.get('quantity', 1)} - Price: ${item.get('price', 0)}")
-            y -= 20
-            
-        p.drawString(100, y-40, f"Subtotal: ${subtotal}")
-        p.drawString(100, y-60, f"Shipping: ${shipping_cost}")
-        p.drawString(100, y-80, f"Total: ${total}")
-        
+        p.drawString(100, 750, html_content)
         p.showPage()
         p.save()
         
