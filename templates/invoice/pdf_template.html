@@ -140,7 +140,7 @@
         <tbody>
             {% for item in items %}
             <tr>
-                <td>{{ item.name|default:item.product_name }}</td>
+                <td>{{ item.name|default:item.parent_name }}</td>
                 <td style="text-align: center;">{{ item.quantity }}</td>
                 <td class="text-right">₹{{ item.price|default:item.total }}</td>
             </tr>
