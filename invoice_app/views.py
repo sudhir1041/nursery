@@ -120,23 +120,30 @@ def invoice_pdf(request, id):
     """Return a PDF invoice for the given order ID."""
     try:
         invoice = _get_or_create_invoice(id)
-        
+
         # Check if PDF already exists and return it
         if invoice.pdf_file:
-            response = HttpResponse(invoice.pdf_file.read(), content_type='application/pdf')
+            with invoice.pdf_file.open('rb') as f:
+                pdf_content = f.read()
+            response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
             return response
-            
+
         # If PDF doesn't exist, generate it
         order = invoice.order
         order_data = _get_order_data(id)
 
+        # Always ensure items is a list
         items = order.order_items or []
         if isinstance(items, str):
             try:
                 items = json.loads(items)
             except Exception:
                 items = []
+        if isinstance(items, dict):
+            items = list(items.values())
+        if not isinstance(items, list):
+            items = []
 
         subtotal = sum(
             (float(item.get('price', 0)) * float(item.get('quantity', 1)))
@@ -145,21 +152,25 @@ def invoice_pdf(request, id):
         shipping_cost = float(order.shipping_charge or 0)
         total = subtotal + shipping_cost
 
+        # Get company info
+        company = Company_name.objects.first()
         context = {
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
             'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
             'order_date': order.created_at.strftime('%Y-%m-%d'),
             'order_data': order_data,
-            'items': items,
+            'items': items,  # Pass items as a list
             'subtotal': subtotal,
             'shipping_cost': shipping_cost,
             'payment_method': order.payment_method,
             'total': total,
-            'company_name': 'Your Company Name',
-            'company_address': 'Your Company Address\nCity, State, ZIP\nCountry',
-            'company_contact': 'Phone: +1234567890\nEmail: contact@company.com',
-            'logo_url': request.build_absolute_uri('/static/images/logo.png'),
+            'company_name': company.company_name if company else 'Your Company Name',
+            'company_address': company.company_address if company else '',
+            'company_contact': f"Phone: {company.company_phone}\nEmail: {company.company_email}" if company else '',
+            'company_email': company.company_email if company else '',
+            'social_media': company.company_website if company else '',
+            'logo_url': request.build_absolute_uri(company.company_logo.url) if company and company.company_logo else request.build_absolute_uri('/static/images/logo.png'),
         }
 
         html_string = render_to_string('invoice/pdf_template.html', context)
@@ -175,9 +186,7 @@ def invoice_pdf(request, id):
         )
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
-        response[
-            'Content-Disposition'
-        ] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
+        response['Content-Disposition'] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
         return response
 
     except Exception as e:

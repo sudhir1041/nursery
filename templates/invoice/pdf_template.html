@@ -138,11 +138,15 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in order_data.order_items %}
+            {% for item in items %}
             <tr>
                 <td>{{ item.description }}</td>
                 <td style="text-align: center;">{{ item.quantity }}</td>
                 <td class="text-right">₹{{ item.price }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No items found</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -152,15 +156,15 @@
     <table class="totals-table">
         <tr>
             <td class="font-bold">Subtotal</td>
-            <td class="text-right">₹{{ order_data.order_total }}</td>
+            <td class="text-right">₹{{ subtotal }}</td>
         </tr>
         <tr>
             <td class="font-bold" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Shipping</td>
-            <td class="text-right" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">{{ order_data.shipping_charge }}</td>
+            <td class="text-right" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">₹{{ shipping_cost }}</td>
         </tr>
         <tr class="total-row">
             <td class="font-bold text-lg">Total</td>
-            <td class="font-bold text-lg text-right">₹{{ order_data.order_total }}</td>
+            <td class="font-bold text-lg text-right">₹{{ total }}</td>
         </tr>
     </table>
     
