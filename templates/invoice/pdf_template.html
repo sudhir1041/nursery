@@ -6,7 +6,7 @@
     <style>
         @page {
             size: a4 portrait;
-            margin: 1cm; /* Standard A4 margin */
+            margin: 1cm;
         }
         body {
             font-family: "Helvetica", "sans-serif";
@@ -29,14 +29,14 @@
             margin-top: 30px;
         }
         .items-table thead th {
-            background-color: #2d3748; /* dark gray */
+            background-color: #2d3748;
             color: #ffffff;
             padding: 10px;
             font-size: 11px;
             text-transform: uppercase;
         }
         .items-table tbody td {
-            border-bottom: 1px solid #e2e8f0; /* light gray */
+            border-bottom: 1px solid #e2e8f0;
             padding: 10px;
         }
         .totals-table {
@@ -57,7 +57,7 @@
             font-size: 1.1em;
         }
         .total-row {
-             background-color: #f7fafc; /* very light gray */
+             background-color: #f7fafc;
         }
         .address-block {
             line-height: 1.5;
@@ -78,13 +78,12 @@
     <table class="header-table" style="margin-bottom: 40px;">
         <tr>
             <td style="width: 60%;">
-                <img src="https://nurserynisarga.in/wp-content/uploads/2021/11/cropped-Nursery_Nisarga_Logo_with_R_150x150-px.webp" style="height: 50pt;">
+                <img src="{{ logo_url }}" style="height: 50pt;">
             </td>
             <td class="text-right" style="font-size: 11px; width: 40%;">
-                <span class="font-bold">Nursery Nisarga</span><br/>
-                Opposite MGM School, BDA Road<br/>
-                Bhopal, Madhyapradesh 462022, Contact<br/>
-                8435472529
+                <span class="font-bold">{{ company_name }}</span><br/>
+                {{ company_address|linebreaksbr }}<br/>
+                {{ company_contact }}
             </td>
         </tr>
     </table>
@@ -96,29 +95,29 @@
                 <h2 style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0;">INVOICE</h2>
                 <div class="font-bold" style="margin-bottom: 5px;">Billed To</div>
                 <div class="address-block">
-                    {{ invoice.order.customer_name }}<br>
-                    {{ invoice.order.customer_address|linebreaksbr }}<br>
-                    {{ invoice.order.customer_email }}<br>
-                    {{ invoice.order.customer_phone }}
+                    {{ customer_name }}<br>
+                    {{ customer_address|linebreaksbr }}<br>
+                    {{ customer_email }}<br>
+                    {{ customer_phone }}
                 </div>
             </td>
             <td style="width: 50%; vertical-align: middle;">
                 <table class="invoice-details-table" style="float: right;">
                     <tr>
                         <td class="font-bold">Invoice Number:</td>
-                        <td class="text-right">{{ invoice.invoice_number }}</td>
+                        <td class="text-right">{{ invoice_number }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Invoice Date:</td>
-                        <td class="text-right">{{ invoice.invoice_date|date:"F j, Y" }}</td>
+                        <td class="text-right">{{ invoice_date }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Order Number:</td>
-                        <td class="text-right">{{ invoice.order.order_id }}</td>
+                        <td class="text-right">{{ order_id }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Order Date:</td>
-                        <td class="text-right">{{ invoice.order.order_date|date:"F j, Y" }}</td>
+                        <td class="text-right">{{ order_date }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Payment Method:</td>
@@ -143,7 +142,7 @@
             <tr>
                 <td>{{ item.description }}</td>
                 <td style="text-align: center;">{{ item.quantity }}</td>
-                <td class="text-right">₹{{ item.price|floatformat:2 }}</td>
+                <td class="text-right">₹{{ item.price }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -153,7 +152,7 @@
     <table class="totals-table">
         <tr>
             <td class="font-bold">Subtotal</td>
-            <td class="text-right">₹{{ subtotal|floatformat:2 }}</td>
+            <td class="text-right">₹{{ subtotal }}</td>
         </tr>
         <tr>
             <td class="font-bold" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Shipping</td>
@@ -161,15 +160,15 @@
         </tr>
         <tr class="total-row">
             <td class="font-bold text-lg">Total</td>
-            <td class="font-bold text-lg text-right">₹{{ total|floatformat:2 }}</td>
+            <td class="font-bold text-lg text-right">₹{{ total }}</td>
         </tr>
     </table>
     
     <!-- Footer Section -->
     <div style="position: fixed; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 10px;">
         <hr>
-        <p>or mail us order@nurserynisarga.in</p>
-        <p>Follow Us, Insta, Fb - Nurserynisargaonline</p>
+        <p>{{ company_email }}</p>
+        <p>{{ social_media }}</p>
     </div>
 
 </body>
