@@ -96,10 +96,10 @@
                 <h2 style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0;">INVOICE</h2>
                 <div class="font-bold" style="margin-bottom: 5px;">Billed To</div>
                 <div class="address-block">
-                    {{ invoice.customer.name }}<br>
-                    {{ invoice.customer.address|linebreaksbr }}<br>
-                    {{ invoice.customer.email }}<br>
-                    {{ invoice.customer.phone }}
+                    {{ invoice.order.customer_name }}<br>
+                    {{ invoice.order.customer_address|linebreaksbr }}<br>
+                    {{ invoice.order.customer_email }}<br>
+                    {{ invoice.order.customer_phone }}
                 </div>
             </td>
             <td style="width: 50%; vertical-align: middle;">
@@ -110,15 +110,15 @@
                     </tr>
                     <tr>
                         <td class="font-bold">Invoice Date:</td>
-                        <td class="text-right">{{ invoice.issue_date|date:"F j, Y" }}</td>
+                        <td class="text-right">{{ invoice.invoice_date|date:"F j, Y" }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Order Number:</td>
-                        <td class="text-right">{{ invoice.id }}</td>
+                        <td class="text-right">{{ invoice.order.order_id }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Order Date:</td>
-                        <td class="text-right">{{ invoice.created_at|date:"F j, Y" }}</td>
+                        <td class="text-right">{{ invoice.order.order_date|date:"F j, Y" }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Payment Method:</td>
@@ -139,11 +139,11 @@
             </tr>
         </thead>
         <tbody>
-            {% for item in invoice.items.all %}
+            {% for item in items %}
             <tr>
                 <td>{{ item.description }}</td>
                 <td style="text-align: center;">{{ item.quantity }}</td>
-                <td class="text-right">₹{{ item.unit_price|floatformat:2 }}</td>
+                <td class="text-right">₹{{ item.price|floatformat:2 }}</td>
             </tr>
             {% endfor %}
         </tbody>
