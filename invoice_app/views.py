@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from woocommerce_app.models import WooCommerceOrder
 from shopify_app.models import ShopifyOrder
 from facebook_app.models import Facebook_orders
-from .models import Order, Invoice
+from .models import Order, Invoice,Company_name
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
