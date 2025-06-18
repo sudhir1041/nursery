@@ -149,20 +149,26 @@
                     {{ item.title }}
                 {% elif item.product_name %}
                     {{ item.product_name }}
-                {% elif item.name|default:item.parent_name %}
-                    {{ item.name|default:item.parent_name }}
+                {% elif item.parent_name %}
+                    {{ item.parent_name }}
                 {% else %}
                     -
                 {% endif %}
                 {% if item.variant_title %}
                     <br><small>{{ item.variant_title }}</small>
+                {% elif item.pot_size %}
+                    <br><small>{{ item.pot_size }}</small>
                 {% endif %}
             </td>
             <td style="text-align: center;">
-                {% if item.quantity %}{{ item.quantity }}{% elif item.qty %}{{ item.qty }}{% else %}1{% endif %}
+                {% if item.quantity %}{{ item.quantity }}
+                {% elif item.qty %}{{ item.qty }}
+                {% else %}1{% endif %}
             </td>
             <td class="text-right">
-                ₹{% if item.price %}{{ item.price }}{% elif item.total %}{{ item.total }}{% else %}0{% endif %}
+                ₹{% if item.price is not None %}{{ item.price }}
+                {% elif item.total %}{{ item.total }}
+                {% else %}0{% endif %}
             </td>
         </tr>
         {% empty %}
