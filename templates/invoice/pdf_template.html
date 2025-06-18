@@ -147,8 +147,8 @@
                     {{ item.name }}
                 {% elif item.title %}
                     {{ item.title }}
-                {% elif item.parent_name %}
-                    {{ item.parent_name }}
+                {% elif item.name|default:item.parent_name %}
+                    {{ item.name|default:item.parent_name }}
                 {% else %}
                     -
                 {% endif %}
