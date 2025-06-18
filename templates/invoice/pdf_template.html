@@ -131,28 +131,46 @@
     </table>
 
     <!-- Invoice Items Table -->
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th style="text-align: center;">Quantity</th>
-                <th class="text-right">Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.name|default:item.parent_name }}</td>
-                <td style="text-align: center;">{{ item.quantity }}</td>
-                <td class="text-right">₹{{ item.price|default:item.total }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No items found</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<table class="items-table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th style="text-align: center;">Quantity</th>
+            <th class="text-right">Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>
+                {% if item.name %}
+                    {{ item.name }}
+                {% elif item.title %}
+                    {{ item.title }}
+                {% elif item.parent_name %}
+                    {{ item.parent_name }}
+                {% else %}
+                    -
+                {% endif %}
+                {% if item.variant_title %}
+                    <br><small>{{ item.variant_title }}</small>
+                {% endif %}
+            </td>
+            <td style="text-align: center;">
+                {% if item.quantity %}{{ item.quantity }}{% elif item.qty %}{{ item.qty }}{% else %}1{% endif %}
+            </td>
+            <td class="text-right">
+                ₹{% if item.price %}{{ item.price }}{% elif item.total %}{{ item.total }}{% else %}0{% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No items found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 
     <!-- Totals Section -->
     <table class="totals-table">
