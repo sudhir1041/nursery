@@ -59,3 +59,36 @@ The project writes log files to the `logs/` folder. Log configuration resides in
 ## License
 
 No license file is provided.
+
+## Ecommerce Management API
+
+A streamlined API-only Django project located in `ecommerce_management/`. It excludes Celery, Channels and WhatsApp integrations. Credentials are stored through the `settings_app` API rather than environment files. A minimal React frontend is provided in `ecommerce_management/frontend/` to demonstrate integration with the API.
+
+Available API endpoints include:
+
+- `/api/settings/` - manage credentials
+- `/api/whatsapp/` - WhatsApp contacts
+- `/api/facebook/` - Facebook orders
+- `/api/shopify/` - Shopify orders
+- `/api/woocommerce/` - WooCommerce orders
+- `/api/invoice/` - invoice orders
+
+### Email reports
+
+Configure SMTP credentials using the `/api/settings/` endpoint with keys like `EMAIL_HOST`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and `REPORT_RECIPIENT_EMAIL`.
+Run the management command below daily (e.g. via cron at 8pm) to send order summaries:
+```bash
+python ecommerce_management/manage.py send_eod_report
+```
+Invoices created through the `/api/invoice/` endpoint are automatically emailed to the customer address if provided.
+
+To install dependencies for the new project:
+```bash
+pip install -r ecommerce_management/requirements.txt
+```
+
+Run migrations and start the development server:
+```bash
+python ecommerce_management/manage.py migrate
+python ecommerce_management/manage.py runserver
+```
