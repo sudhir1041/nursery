@@ -36,6 +36,7 @@ def _get_order_data(order_id):
             'order_id': str(order_source.shopify_id),
             'customer_name': shipping.get('name', '').strip(),
             'customer_address': address,
+            'order_date' : order_source.created_at_shopify,
             'customer_email': order_source.email,
             'customer_phone': shipping.get('phone'),
             'order_total': order_source.total_price or 0,
@@ -60,6 +61,7 @@ def _get_order_data(order_id):
         return {
             'order_id': order_source.order_id,
             'customer_name': f"{order_source.first_name} {order_source.last_name}".strip(),
+            'order_date' : order_source.date_created,
             'customer_address': address,
             'customer_email': order_source.email,
             'customer_phone': order_source.phone,
@@ -81,6 +83,7 @@ def _get_order_data(order_id):
             'customer_name': f"{order_source.billing_first_name} {order_source.billing_last_name}".strip(),
             'customer_address': f"{order_source.billing_address_1}, {order_source.billing_address_2}, {order_source.billing_city}, {order_source.billing_state}, {order_source.billing_postcode}, {order_source.billing_country}",
             'customer_email': order_source.billing_email,
+            'order_date' : order_source.date_created_woo,
             'customer_phone': order_source.billing_phone,
             'order_total': order_source.total_amount or 0,
             'order_status': order_source.status,
@@ -104,6 +107,7 @@ def _get_order_data(order_id):
         return {
             'order_id': order_source.order_id,
             'customer_name': f"{order_source.first_name} {order_source.last_name}".strip(),
+            'order_date' : order_source.date_created,
             'customer_address': address,
             'customer_email': order_source.email,
             'customer_phone': order_source.phone,
