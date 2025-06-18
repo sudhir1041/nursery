@@ -11,7 +11,7 @@ class Order(models.Model):
     order_date = models.DateTimeField(default=timezone.now)
     customer_name = models.CharField(max_length=200)
     customer_address = models.TextField()
-    customer_email = models.EmailField()
+    customer_email = models.EmailField(null=True, blank=True)
     customer_phone = models.CharField(max_length=15)
     order_total = models.DecimalField(max_digits=10, decimal_places=2)
     order_status = models.CharField(max_length=50, default='pending')
