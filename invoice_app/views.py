@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from woocommerce_app.models import WooCommerceOrder
 from shopify_app.models import ShopifyOrder
 from facebook_app.models import Facebook_orders
-from .models import Order, Invoice,Company_name
+from .models import Order, Invoice, Company_name
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
@@ -15,9 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 def _get_order_data(order_id):
-    """Return normalized order data for the given ID from any platform."""
-    if WooCommerceOrder.objects.filter(pk=order_id).exists():
-        order_source = WooCommerceOrder.objects.get(pk=order_id)
+    """Return normalized order data for the given ID from any platform.
+    Ensures that order_id is treated as a string for consistent lookups.
+    """
+    # Convert order_id to string for consistent primary key lookups
+    order_id_str = str(order_id)
+
+    if WooCommerceOrder.objects.filter(pk=order_id_str).exists():
+        order_source = WooCommerceOrder.objects.get(pk=order_id_str)
         raw = order_source.raw_data or {}
         return {
             'order_id': str(order_source.woo_id),
@@ -33,8 +38,8 @@ def _get_order_data(order_id):
             'payment_method': raw.get('payment_method', ''),
             'shipping_charge': raw.get('shipping_charge', 0),
         }
-    if ShopifyOrder.objects.filter(pk=str(order_id)).exists():
-        order_source = ShopifyOrder.objects.get(pk=str(order_id))        
+    if ShopifyOrder.objects.filter(pk=order_id_str).exists():
+        order_source = ShopifyOrder.objects.get(pk=order_id_str)        
         shipping = order_source.shipping_address_json or {}
         raw = order_source.raw_data or {}
         address = ", ".join(filter(None, [
@@ -59,8 +64,8 @@ def _get_order_data(order_id):
             'payment_method': raw.get('payment_method', ''),
             'shipping_charge': raw.get('shipping_charge', 0),
         }
-    if Facebook_orders.objects.filter(pk=str(order_id)).exists():
-        order_source = Facebook_orders.objects.get(pk=str(order_id))        
+    if Facebook_orders.objects.filter(pk=order_id_str).exists():
+        order_source = Facebook_orders.objects.get(pk=order_id_str)        
         address = ", ".join(filter(None, [
             order_source.address,
             order_source.city,
@@ -86,7 +91,11 @@ def _get_order_data(order_id):
 
 
 def _get_or_create_invoice(order_id):
-    order_data = _get_order_data(order_id)
+    """
+    Retrieves or creates an invoice for a given order ID.
+    Ensures order_id is passed as a string to _get_order_data.
+    """
+    order_data = _get_order_data(str(order_id))  # Ensure order_id is string
     invoice = Invoice.objects.filter(order__order_id=order_data['order_id']).first()
     if invoice:
         return invoice
@@ -99,9 +108,10 @@ def _get_or_create_invoice(order_id):
 def create_invoice(request, id):
     """Create an invoice for a given order ID across all platforms."""
     try:
-        invoice = _get_or_create_invoice(id)
+        # Ensure id is passed as a string to _get_or_create_invoice
+        invoice = _get_or_create_invoice(str(id)) 
         # Generate PDF after creating invoice
-        invoice_pdf(request, id)
+        invoice_pdf(request, str(id))  # Ensure id is string here as well
         logger.info(f"Invoice ready with number: {invoice.invoice_number}")
         return HttpResponse(
             f"Invoice created successfully with number: {invoice.invoice_number}"
@@ -119,7 +129,8 @@ def create_company(request):
 def invoice_pdf(request, id):
     """Return a PDF invoice for the given order ID."""
     try:
-        invoice = _get_or_create_invoice(id)
+        # Ensure id is passed as a string to _get_or_create_invoice
+        invoice = _get_or_create_invoice(str(id))
 
         # Check if PDF already exists and return it
         if invoice.pdf_file:
@@ -131,7 +142,8 @@ def invoice_pdf(request, id):
 
         # If PDF doesn't exist, generate it
         order = invoice.order
-        order_data = _get_order_data(id)
+        # Ensure id is passed as a string to _get_order_data
+        order_data = _get_order_data(str(id))
 
         # --- START: Corrected items block ---
         items = order.order_items or []
@@ -142,7 +154,10 @@ def invoice_pdf(request, id):
             except Exception:
                 items = []
 
+        # Handle cases where order_items might be a dict (e.g., from WooCommerce/Shopify raw_data)
+        # and convert it to a list of item dictionaries.
         if isinstance(items, dict):
+            # Assuming the dict values are the actual item dictionaries
             items = [v for v in items.values() if isinstance(v, dict)]
 
         if not (isinstance(items, list) and all(isinstance(i, dict) for i in items)):
@@ -162,7 +177,7 @@ def invoice_pdf(request, id):
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
             'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
-            'order_date': order.order_date.strftime('%Y-%m-%d'),
+            'order_date': order.order_date.strftime('%Y-%m-%d') if order.order_date else '', # Added check for order.order_date
             'order_data': order_data,
             'items': items,
             'subtotal': subtotal,
