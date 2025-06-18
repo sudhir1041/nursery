@@ -143,10 +143,10 @@
         {% for item in items %}
         <tr>
             <td>
-                {% if item.name %}
-                    {{ item.name }}
-                {% elif item.product_name %}
-                    {{ item.product_name }}
+                {% if item.name | default:item.product_name %}
+                    {{ item.item.product_name }}
+                {% elif item.title %}
+                    {{ item.title }}
                 {% elif item.name|default:item.parent_name %}
                     {{ item.name|default:item.parent_name }}
                 {% else %}
