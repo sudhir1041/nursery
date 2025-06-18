@@ -283,10 +283,17 @@ CHANNEL_LAYERS = {
 }
 
 # Celery Configuration (Example)
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0' 
-CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1' 
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Kolkata'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# When running the development server we often don't have Celery workers
+# running. Execute tasks locally in that case so the project can run
+# without Redis or a Celery worker.
+if DEBUG:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
