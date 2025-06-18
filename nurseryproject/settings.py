@@ -40,20 +40,16 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
-    'django_celery_beat',
     'invoice_app',
     'woocommerce_app',
     'shopify_app',
     'facebook_app',
-    'whatsapp_app',
     'shipment_app',
     'rest_framework',
 ]
@@ -195,10 +191,6 @@ LOGGING = {
             'format': '{levelname} {asctime} {module}: {message}',
             'style': '{',
         },
-        'celery_format': {
-            'format': '{levelname} {asctime} {task_name} {task_id} {module}: {message}',
-            'style': '{',
-        }
     },
     'handlers': {
         'console': {
@@ -222,14 +214,6 @@ LOGGING = {
             'backupCount': 3,
             'formatter': 'verbose',
         },
-        'celery_task_file': { 
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'celery_tasks.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 5,
-            'formatter': 'celery_format',
-        },
     },
     'root': {
         'handlers': ['console', 'app_file'], 
@@ -251,16 +235,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'celery': { 
-            'handlers': ['console', 'celery_task_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'celery.task': { 
-            'handlers': ['console', 'celery_task_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
         # Example for handling database query logs (can be verbose)
         # 'django.db.backends': {
         #     'handlers': ['console'],
@@ -272,21 +246,3 @@ LOGGING = {
 
 REDIS_HOST = "127.0.0.1"
 REDIS_PORT = "6379"
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(REDIS_HOST, REDIS_PORT)],
-        },
-    },
-}
-
-# Celery Configuration (Example)
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0' 
-CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1' 
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Kolkata'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
