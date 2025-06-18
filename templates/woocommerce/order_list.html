@@ -104,7 +104,7 @@
                     <tbody>
                         {% for order in orders %}
                         <tr {% if order.is_overdue_highlight %} style="background-color:yellow; color:blue;" {% endif %}>
-                            <td><a class="order-details-view" href="{% url 'invoice_app:invoice_pdf' order.id %}">Download</a></td>
+                            <td><a class="order-details-view" href="{% url 'invoice_app:invoice_pdf' order.id %}"><i class="fas fa-file-invoice"></i></a></td>
                             <td><a class="order-details-view" href="{% url 'order_detail' order.woo_id %}"><i class="fas fa-eye"></i> #{{ order.woo_id }}</a></td>                            
                             <td>{{ order.date_created_woo|date:"d-m-Y H:i"|default:"N/A" }}</td> {# Use woo date #}
                             <td>
