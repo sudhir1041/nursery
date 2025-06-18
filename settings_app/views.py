@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from .models import Credential
+from .serializers import CredentialSerializer
 
-# Create your views here.
+
+class CredentialViewSet(viewsets.ModelViewSet):
+    queryset = Credential.objects.all()
+    serializer_class = CredentialSerializer
