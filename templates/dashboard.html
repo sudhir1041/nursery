@@ -117,7 +117,7 @@
         const ordersCtx = document.getElementById('ordersChart');
         if (ordersCtx) {
             new Chart(ordersCtx.getContext('2d'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: ['Total Orders', 'Total Pending', 'Total Shipped','Total Not Shipped'],
                     datasets: [{
@@ -141,7 +141,7 @@
         const wooCtx = document.getElementById('wooChart');
         if (wooCtx) {
             new Chart(wooCtx.getContext('2d'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
                     datasets: [{
@@ -165,7 +165,7 @@
         const shopifyCtx = document.getElementById('shopifyChart');
         if (shopifyCtx) {
             new Chart(shopifyCtx.getContext('2d'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
                     datasets: [{
@@ -189,7 +189,7 @@
         const fbCtx = document.getElementById('fbChart');
         if (fbCtx) {
             new Chart(fbCtx.getContext('2d'), {
-                type: 'pie',
+                type: 'bar',
                 data: {
                     labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
                     datasets: [{
