@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'facebook_app',
     'whatsapp_app',
     'shipment_app',
+    'settings_app',
     'rest_framework',
 ]
 

@@ -35,7 +35,7 @@ logs/                  Application logs
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Provide a `.env` file in the project root containing values referenced in `nurseryproject/settings.py`. Common variables include database credentials (`DB_NAME`, `DB_USER`, etc.), API keys (`SHOPIFY_API_KEY`, `WOOCOMMERCE_CONSUMER_KEY`, `WHATSAPP_ACCESS_TOKEN`) and the Django secret key.
+2. Create the database and run migrations. Configuration values like API keys can be entered through the **Settings** page once the server is running, removing the need for a local `.env` file.
 3. Apply migrations and create a superuser:
    ```bash
    python manage.py migrate
