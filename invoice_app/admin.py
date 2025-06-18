@@ -1,6 +1,6 @@
 
 from django.contrib import admin
-from .models import Order, Company_name, Invoice
+from .models import Order, Invoice
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -10,10 +10,6 @@ class OrderAdmin(admin.ModelAdmin):
     readonly_fields = ('invoice_id',)
     ordering = ('-order_date',)
 
-@admin.register(Company_name) 
-class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'company_email', 'company_phone', 'company_website')
-    search_fields = ('company_name', 'company_email')
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):

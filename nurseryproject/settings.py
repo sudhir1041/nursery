@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'shopify_app',
     'facebook_app',
     'shipment_app',
+    'settings_app',
     'rest_framework',
 ]
 
@@ -84,26 +85,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nurseryproject.wsgi.application'
-
-# --- WooCommerce Settings ---
-WOOCOMMERCE_STORE_URL = os.getenv('WOOCOMMERCE_STORE_URL')
-WOOCOMMERCE_CONSUMER_KEY = os.getenv('WOOCOMMERCE_CONSUMER_KEY')
-WOOCOMMERCE_CONSUMER_SECRET = os.getenv('WOOCOMMERCE_CONSUMER_SECRET')
-WOOCOMMERCE_WEBHOOK_SECRET = os.getenv('WOOCOMMERCE_WEBHOOK_SECRET', 'a-very-strong-random-secret')
-
-# --- Shopify Settings ---
-SHOPIFY_STORE_DOMAIN = os.getenv('SHOPIFY_STORE_DOMAIN')
-SHOPIFY_API_VERSION = os.getenv('SHOPIFY_API_VERSION', '2024-04')
-SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv('SHOPIFY_ADMIN_ACCESS_TOKEN')
-SHOPIFY_API_KEY = os.getenv('SHOPIFY_API_KEY')
-SHOPIFY_API_SECRET_KEY = os.getenv('SHOPIFY_API_SECRET_KEY')
-SHOPIFY_WEBHOOK_SECRET = os.getenv('SHOPIFY_WEBHOOK_SECRET', 'SHOPIFY_API_SECRET_KEY')
-
-# --- whatsapp Settings ---
-WHATSAPP_ACCESS_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN')
-WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID')
-WHATSAPP_VERIFY_TOKEN = os.getenv('WHATSAPP_VERIFY_TOKEN')
-WHATSAPP_APP_SECRET = os.getenv('WHATSAPP_APP_SECRET')
 
 
 

@@ -5,27 +5,30 @@ import hmac # For webhook verification
 import hashlib # For webhook verification
 import base64 # For webhook verification
 from django.conf import settings
+from settings_app.models import get_site_settings
 from urllib.parse import urljoin
 
 # Use the logger configured for 'shopify_app' in settings.py
 logger = logging.getLogger(__name__)
 
 def get_shopify_api_base_url():
-    """Constructs the base URL for Shopify API requests."""
-    domain = getattr(settings, 'SHOPIFY_STORE_DOMAIN', None)
-    api_version = getattr(settings, 'SHOPIFY_API_VERSION', None)
+    """Constructs the base URL for Shopify API requests using SiteSettings."""
+    site_settings = get_site_settings()
+    domain = getattr(site_settings, 'shopify_store_domain', None) if site_settings else None
+    api_version = getattr(site_settings, 'shopify_api_version', None) if site_settings else None
     if not domain or not api_version:
-        logger.error("Shopify domain or API version not configured in settings.")
+        logger.error("Shopify domain or API version not configured in Site Settings.")
         raise ValueError("Shopify domain and API version must be set.")
     # Ensure domain doesn't have https:// prefix already
     domain = domain.replace('https://', '').replace('http://', '')
     return f"https://{domain}/admin/api/{api_version}/"
 
 def get_shopify_api_headers():
-    """Returns the necessary headers for Shopify API requests."""
-    token = getattr(settings, 'SHOPIFY_ADMIN_ACCESS_TOKEN', None)
+    """Returns the necessary headers for Shopify API requests using SiteSettings."""
+    site_settings = get_site_settings()
+    token = getattr(site_settings, 'shopify_admin_access_token', None) if site_settings else None
     if not token:
-        logger.error("Shopify Admin Access Token not configured in settings.")
+        logger.error("Shopify Admin Access Token not configured in Site Settings.")
         raise ValueError("Shopify Admin Access Token must be set.")
     return {
         "Content-Type": "application/json",
@@ -176,12 +179,13 @@ def fetch_shopify_orders(params=None):
 def verify_shopify_webhook(request):
     """
     Verifies the HMAC-SHA256 signature of an incoming Shopify webhook request
-    using the SHOPIFY_WEBHOOK_SECRET from Django settings.
+    using the webhook secret stored in :class:`SiteSettings`.
     """
     # Get the secret key (should be the Shopify App's API Secret Key)
-    secret = getattr(settings, 'SHOPIFY_WEBHOOK_SECRET', None)
+    site_settings = get_site_settings()
+    secret = getattr(site_settings, 'shopify_webhook_secret', None) if site_settings else None
     if not secret:
-        logger.error("SHOPIFY_WEBHOOK_SECRET not set in settings. Cannot verify webhook.")
+        logger.error("SHOPIFY_WEBHOOK_SECRET not configured in Site Settings. Cannot verify webhook.")
         return False
 
     # Get the HMAC header sent by Shopify

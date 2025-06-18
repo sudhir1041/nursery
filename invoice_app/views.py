@@ -2,7 +2,8 @@ from django.shortcuts import get_object_or_404
 from woocommerce_app.models import WooCommerceOrder
 from shopify_app.models import ShopifyOrder
 from facebook_app.models import Facebook_orders
-from .models import Order, Invoice,Company_name
+from .models import Order, Invoice
+from settings_app.models import get_site_settings
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.core.files.base import ContentFile
@@ -204,8 +205,8 @@ def invoice_pdf(request, id):
         shipping_cost = float(order.shipping_charge or 0)
         total = subtotal + shipping_cost
 
-        # Get company info
-        company = Company_name.objects.first()
+        # Get company info from settings
+        site_settings = get_site_settings()
         context = {
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
@@ -217,12 +218,12 @@ def invoice_pdf(request, id):
             'shipping_cost': shipping_cost,
             'payment_method': order.payment_method,
             'total': total,
-            'company_name': company.company_name if company else 'Your Company Name',
-            'company_address': company.company_address if company else '',
-            'company_contact': f"Phone: {company.company_phone}\nEmail: {company.company_email}" if company else '',
-            'company_email': company.company_email if company else '',
-            'social_media': company.company_website if company else '',
-            'logo_url': request.build_absolute_uri(company.company_logo.url) if company and company.company_logo else request.build_absolute_uri('/static/images/logo.png'),
+            'company_name': getattr(site_settings, 'company_name', 'Your Company Name') if site_settings else 'Your Company Name',
+            'company_address': getattr(site_settings, 'company_address', '') if site_settings else '',
+            'company_contact': f"Phone: {site_settings.company_phone}\nEmail: {site_settings.company_email}" if site_settings else '',
+            'company_email': getattr(site_settings, 'company_email', '') if site_settings else '',
+            'social_media': getattr(site_settings, 'company_website', '') if site_settings else '',
+            'logo_url': request.build_absolute_uri(site_settings.company_logo.url) if site_settings and site_settings.company_logo else request.build_absolute_uri('/static/images/logo.png'),
         }
 
         html_string = render_to_string('invoice/pdf_template.html', context)

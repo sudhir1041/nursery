@@ -32,16 +32,18 @@ logs/                  Application logs
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Provide a `.env` file in the project root containing values referenced in `nurseryproject/settings.py`. Common variables include database credentials (`DB_NAME`, `DB_USER`, etc.), API keys (`SHOPIFY_API_KEY`, `WOOCOMMERCE_CONSUMER_KEY`) and the Django secret key.
-3. Apply migrations and create a superuser:
+2. Apply migrations and create a superuser:
    ```bash
    python manage.py migrate
    python manage.py createsuperuser
    ```
-4. Run the development server:
+3. Run the development server:
    ```bash
    python manage.py runserver
    ```
+
+After logging into the Django admin site you can manage WooCommerce and Shopify
+API credentials, logos and invoicing company details under **Site Settings**.
 
 
 ## Logging

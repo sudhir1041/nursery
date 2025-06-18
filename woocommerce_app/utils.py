@@ -1,25 +1,26 @@
 from woocommerce import API
 from django.conf import settings
+from settings_app.models import get_site_settings
 import logging
 
 logger = logging.getLogger(__name__) # Use the logger configured in settings.py
 
 def get_woocommerce_api_client():
-    """Initializes and returns a WooCommerce API client instance."""
-    required_settings = [
-        settings.WOOCOMMERCE_STORE_URL,
-        settings.WOOCOMMERCE_CONSUMER_KEY,
-        settings.WOOCOMMERCE_CONSUMER_SECRET
-    ]
-    if not all(required_settings):
-        logger.error("WooCommerce API settings (URL, Key, Secret) are not fully configured in Django settings.")
-        raise ValueError("WooCommerce API settings missing in Django settings.")
+    """Initializes and returns a WooCommerce API client instance using SiteSettings."""
+    site_settings = get_site_settings()
+    if not site_settings or not all([
+        site_settings.woocommerce_store_url,
+        site_settings.woocommerce_consumer_key,
+        site_settings.woocommerce_consumer_secret,
+    ]):
+        logger.error("WooCommerce API credentials are not configured in Site Settings.")
+        raise ValueError("WooCommerce API settings missing.")
 
     try:
         wcapi = API(
-            url=settings.WOOCOMMERCE_STORE_URL,
-            consumer_key=settings.WOOCOMMERCE_CONSUMER_KEY,
-            consumer_secret=settings.WOOCOMMERCE_CONSUMER_SECRET,
+            url=site_settings.woocommerce_store_url,
+            consumer_key=site_settings.woocommerce_consumer_key,
+            consumer_secret=site_settings.woocommerce_consumer_secret,
             wp_api=True, # Usually required
             version="wc/v3", # Check WooCommerce REST API docs for the latest stable version
             timeout=20 # Increase timeout if needed
