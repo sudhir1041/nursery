@@ -16,25 +16,12 @@ logger = logging.getLogger(__name__)
 
 def _get_order_data(order_id):
     """Return normalized order data for the given ID from any platform."""
-    if WooCommerceOrder.objects.filter(pk=order_id).exists():
-        order_source = WooCommerceOrder.objects.get(pk=order_id)
-        raw = order_source.raw_data or {}
-        return {
-            'order_id': str(order_source.woo_id),
-            'customer_name': f"{order_source.billing_first_name} {order_source.billing_last_name}".strip(),
-            'customer_address': f"{order_source.billing_address_1}, {order_source.billing_address_2}, {order_source.billing_city}, {order_source.billing_state}, {order_source.billing_postcode}, {order_source.billing_country}",
-            'customer_email': order_source.billing_email,
-            'customer_phone': order_source.billing_phone,
-            'order_total': order_source.total_amount or 0,
-            'order_status': order_source.status,
-            'order_items': order_source.line_items_json or {},
-            'order_shipment_status': order_source.shipment_status,
-            'order_notes': order_source.customer_note,
-            'payment_method': raw.get('payment_method', ''),
-            'shipping_charge': raw.get('shipping_charge', 0),
-        }
-    if ShopifyOrder.objects.filter(name=order_id).exists():
-        order_source = ShopifyOrder.objects.get(name=order_id)
+
+    order_id_str = str(order_id)
+
+    # Shopify: IDs start with # or @# (e.g. #1234, @#LE1234)
+    if order_id_str.startswith('#') or order_id_str.startswith('@#'):
+        order_source = get_object_or_404(ShopifyOrder, name=order_id_str)
         shipping = order_source.shipping_address_json or {}
         raw = order_source.raw_data or {}
         address = ", ".join(filter(None, [
@@ -59,7 +46,53 @@ def _get_order_data(order_id):
             'payment_method': raw.get('payment_method', ''),
             'shipping_charge': raw.get('shipping_charge', 0),
         }
-    if Facebook_orders.objects.filter(pk=order_id).exists():
+
+    # Facebook: IDs start with NS (e.g. NS202398)
+    elif order_id_str.startswith('NS'):
+        order_source = get_object_or_404(Facebook_orders, order_id=order_id_str)
+        address = ", ".join(filter(None, [
+            order_source.address,
+            order_source.city,
+            order_source.state,
+            order_source.postcode,
+            order_source.country,
+        ]))
+        return {
+            'order_id': order_source.order_id,
+            'customer_name': f"{order_source.first_name} {order_source.last_name}".strip(),
+            'customer_address': address,
+            'customer_email': order_source.email,
+            'customer_phone': order_source.phone,
+            'order_total': order_source.total_amount or 0,
+            'order_status': order_source.status,
+            'order_items': order_source.products_json or {},
+            'order_shipment_status': order_source.shipment_status,
+            'order_notes': order_source.customer_note,
+            'payment_method': order_source.mode_of_payment or '',
+            'shipping_charge': order_source.shipment_amount or 0,
+        }
+
+    # WooCommerce: Integer or UUID as PK
+    elif WooCommerceOrder.objects.filter(pk=order_id).exists():
+        order_source = WooCommerceOrder.objects.get(pk=order_id)
+        raw = order_source.raw_data or {}
+        return {
+            'order_id': str(order_source.woo_id),
+            'customer_name': f"{order_source.billing_first_name} {order_source.billing_last_name}".strip(),
+            'customer_address': f"{order_source.billing_address_1}, {order_source.billing_address_2}, {order_source.billing_city}, {order_source.billing_state}, {order_source.billing_postcode}, {order_source.billing_country}",
+            'customer_email': order_source.billing_email,
+            'customer_phone': order_source.billing_phone,
+            'order_total': order_source.total_amount or 0,
+            'order_status': order_source.status,
+            'order_items': order_source.line_items_json or {},
+            'order_shipment_status': order_source.shipment_status,
+            'order_notes': order_source.customer_note,
+            'payment_method': raw.get('payment_method', ''),
+            'shipping_charge': raw.get('shipping_charge', 0),
+        }
+
+    # Optional: Facebook fallback if PK matches (not recommended unless you use integer PKs for Facebook orders)
+    elif Facebook_orders.objects.filter(pk=order_id).exists():
         order_source = Facebook_orders.objects.get(pk=order_id)
         address = ", ".join(filter(None, [
             order_source.address,
@@ -82,7 +115,9 @@ def _get_order_data(order_id):
             'payment_method': order_source.mode_of_payment or '',
             'shipping_charge': order_source.shipment_amount or 0,
         }
+
     raise Exception("Order not found in any source")
+
 
 
 def _get_or_create_invoice(order_id):
