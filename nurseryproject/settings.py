@@ -13,6 +13,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- Load Environment Variables ---
 load_dotenv(BASE_DIR / '.env')
 
+# --- Encryption Key for Settings App ---
+from cryptography.fernet import Fernet
+FIELD_ENCRYPTION_KEY = os.getenv('FIELD_ENCRYPTION_KEY')
+if not FIELD_ENCRYPTION_KEY:
+    FIELD_ENCRYPTION_KEY = Fernet.generate_key().decode()
+
+# --- Base URL for constructing webhook endpoints ---
+BASE_WEBHOOK_URL = os.getenv('BASE_WEBHOOK_URL', '')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -55,6 +64,7 @@ INSTALLED_APPS = [
     'facebook_app',
     'whatsapp_app',
     'shipment_app',
+    'settings_app',
     'rest_framework',
 ]
 
@@ -108,6 +118,20 @@ WHATSAPP_ACCESS_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN')
 WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID')
 WHATSAPP_VERIFY_TOKEN = os.getenv('WHATSAPP_VERIFY_TOKEN')
 WHATSAPP_APP_SECRET = os.getenv('WHATSAPP_APP_SECRET')
+
+# --- Construct full webhook URLs for reference ---
+WHATSAPP_WEBHOOK_ENDPOINT = '/whatsapp/webhook/'
+SHOPIFY_WEBHOOK_ENDPOINT = '/shopify/webhooks/receive-shopify-e5d4f3c2b1/'
+WOOCOMMERCE_WEBHOOK_ENDPOINT = '/woocommerce/webhooks/orders/receive-9a8b7c6d5e/'
+
+if BASE_WEBHOOK_URL:
+    WHATSAPP_WEBHOOK_URL = f"{BASE_WEBHOOK_URL.rstrip('/')}{WHATSAPP_WEBHOOK_ENDPOINT}"
+    SHOPIFY_WEBHOOK_URL = f"{BASE_WEBHOOK_URL.rstrip('/')}{SHOPIFY_WEBHOOK_ENDPOINT}"
+    WOOCOMMERCE_WEBHOOK_URL = f"{BASE_WEBHOOK_URL.rstrip('/')}{WOOCOMMERCE_WEBHOOK_ENDPOINT}"
+else:
+    WHATSAPP_WEBHOOK_URL = WHATSAPP_WEBHOOK_ENDPOINT
+    SHOPIFY_WEBHOOK_URL = SHOPIFY_WEBHOOK_ENDPOINT
+    WOOCOMMERCE_WEBHOOK_URL = WOOCOMMERCE_WEBHOOK_ENDPOINT
 
 
 
