@@ -126,8 +126,7 @@ def _get_order_data(order_id):
 
 def _get_or_create_invoice(order_id):
     order_data = _get_order_data(order_id)
-    logger.info(f"Order data to be used for save/update: {order_data}")
-
+    
     # Get or create the Order object
     order_obj, created = Order.objects.get_or_create(
         order_id=order_data['order_id'], defaults=order_data
@@ -135,29 +134,13 @@ def _get_or_create_invoice(order_id):
 
     # If not created, update all relevant fields (including order_date)
     if not created:
-        updated = False
         for field, value in order_data.items():
             if hasattr(order_obj, field):
-                if getattr(order_obj, field) != value:
-                    setattr(order_obj, field, value)
-                    updated = True
-        if updated:
-            order_obj.save()
-            logger.info(f"Order {order_obj.order_id} updated with new data, including order_date: {order_obj.order_date}")
-        else:
-            logger.info(f"Order {order_obj.order_id} already up to date.")
-
-    else:
-        logger.info(f"New order created with order_date: {order_obj.order_date}")
+                setattr(order_obj, field, value)
+        order_obj.save()
 
     # Now get or create the invoice for this order
-    invoice, inv_created = Invoice.objects.get_or_create(order=order_obj)
-
-    if inv_created:
-        logger.info(f"New invoice created for order {order_obj.order_id}, invoice number: {invoice.invoice_number}")
-    else:
-        logger.info(f"Invoice already exists for order {order_obj.order_id}, invoice number: {invoice.invoice_number}")
-
+    invoice, _ = Invoice.objects.get_or_create(order=order_obj)
     return invoice
 
 
