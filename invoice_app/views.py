@@ -33,8 +33,8 @@ def _get_order_data(order_id):
             'payment_method': raw.get('payment_method', ''),
             'shipping_charge': raw.get('shipping_charge', 0),
         }
-    if ShopifyOrder.objects.filter(pk=order_id).exists():
-        order_source = ShopifyOrder.objects.get(pk=order_id)
+    if ShopifyOrder.objects.filter(name=order_id).exists():
+        order_source = ShopifyOrder.objects.get(name=order_id)
         shipping = order_source.shipping_address_json or {}
         raw = order_source.raw_data or {}
         address = ", ".join(filter(None, [
