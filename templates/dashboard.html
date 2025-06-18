@@ -96,10 +96,10 @@
     }
 
     canvas {
-        width: 100%;
-        max-height: 200px;
-        margin-top: 15px;
-    }
+    width: 100% !important;
+    height: 220px !important;
+    max-height: 300px;
+}
 
     .widget-header {
         display: flex;
@@ -113,15 +113,16 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Orders Chart
+        // Orders Bar Chart
         const ordersCtx = document.getElementById('ordersChart');
         if (ordersCtx) {
             new Chart(ordersCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: ['Total Orders', 'Total Pending', 'Total Shipped','Total Not Shipped'],
+                    labels: ['Total Orders', 'Total Pending', 'Total Shipped', 'Total Not Shipped'],
                     datasets: [{
-                        data: [{{ total_orders }}, {{ total_pending_orders }}, {{ total_shipment_status_orders }},{{ total_not_shipped }}],
+                        label: 'Orders',
+                        data: [{{ total_orders }}, {{ total_pending_orders }}, {{ total_shipment_status_orders }}, {{ total_not_shipped }}],
                         backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
                     }]
                 },
@@ -129,23 +130,32 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right'
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#333',
+                            font: { weight: 'bold' }
                         }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
 
-        // WooCommerce Chart
+        // WooCommerce Bar Chart
         const wooCtx = document.getElementById('wooChart');
         if (wooCtx) {
             new Chart(wooCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
+                    labels: ['Total Orders', 'Pending', 'Shipped', 'Not Shipped'],
                     datasets: [{
-                        data: [{{ woo_orders }}, {{ woo_pending_orders }}, {{ woo_shipped_orders }},{{ woo_not_shipped }}],
+                        label: 'WooCommerce Orders',
+                        data: [{{ woo_orders }}, {{ woo_pending_orders }}, {{ woo_shipped_orders }}, {{ woo_not_shipped }}],
                         backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
                     }]
                 },
@@ -153,23 +163,32 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right'
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#333',
+                            font: { weight: 'bold' }
                         }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
 
-        // Shopify Chart
+        // Shopify Bar Chart
         const shopifyCtx = document.getElementById('shopifyChart');
         if (shopifyCtx) {
             new Chart(shopifyCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
+                    labels: ['Total Orders', 'Pending', 'Shipped', 'Not Shipped'],
                     datasets: [{
-                        data: [{{ shopify_orders }}, {{ shopify_pending_orders }}, {{ shopify_shipped_orders }},{{ shopify_not_shipped_orders }}],
+                        label: 'Shopify Orders',
+                        data: [{{ shopify_orders }}, {{ shopify_pending_orders }}, {{ shopify_shipped_orders }}, {{ shopify_not_shipped_orders }}],
                         backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
                     }]
                 },
@@ -177,23 +196,32 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right'
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#333',
+                            font: { weight: 'bold' }
                         }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
 
-        // Facebook Shop Chart
+        // Facebook Shop Bar Chart
         const fbCtx = document.getElementById('fbChart');
         if (fbCtx) {
             new Chart(fbCtx.getContext('2d'), {
                 type: 'bar',
                 data: {
-                    labels: ['Total Orders', 'Pending', 'Shipped','Not Shipped'],
+                    labels: ['Total Orders', 'Pending', 'Shipped', 'Not Shipped'],
                     datasets: [{
-                        data: [{{ fb_orders }}, {{ fb_pending_orders }}, {{ fb_shipped_orders }},{{ fb_not_shipped }}],
+                        label: 'Facebook Shop Orders',
+                        data: [{{ fb_orders }}, {{ fb_pending_orders }}, {{ fb_shipped_orders }}, {{ fb_not_shipped }}],
                         backgroundColor: ['#36a2eb', '#ff6384', '#28a745', '#ffcd56']
                     }]
                 },
@@ -201,13 +229,22 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right'
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#333',
+                            font: { weight: 'bold' }
                         }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
     });
 </script>
+
 {% endblock %}
