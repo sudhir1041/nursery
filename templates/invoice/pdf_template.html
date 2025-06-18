@@ -9,7 +9,7 @@
             margin: 1cm;
         }
         body {
-            font-family: "Helvetica", "sans-serif";
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-size: 12px;
             color: #333;
         }
@@ -18,83 +18,111 @@
             border-collapse: collapse;
         }
         th, td {
-            padding: 5px;
+            padding: 6px 5px;
             text-align: left;
             vertical-align: top;
         }
         .header-table td {
             padding: 0;
         }
+        .logo {
+            height: 80px;
+            max-width: 220px;
+            object-fit: contain;
+        }
+        .company-details {
+            text-align: right;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .invoice-title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            margin: 30px 0 15px 0;
+            letter-spacing: 1px;
+        }
+        .address-block {
+            line-height: 1.5;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .details-table {
+            font-size: 12px;
+            float: right;
+        }
+        .details-table td {
+            padding: 3px 7px;
+        }
         .items-table {
-            margin-top: 30px;
+            margin-top: 20px;
+            font-size: 13px;
         }
-        .items-table thead th {
+        .items-table th {
             background-color: #2d3748;
-            color: #ffffff;
-            padding: 10px;
-            font-size: 11px;
-            text-transform: uppercase;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
         }
-        .items-table tbody td {
+        .items-table td {
             border-bottom: 1px solid #e2e8f0;
-            padding: 10px;
+        }
+        .product-details {
+            font-size: 11px;
+            color: #555;
         }
         .totals-table {
-            width: 45%;
+            width: 40%;
             float: right;
             margin-top: 20px;
+            font-size: 13px;
         }
         .totals-table td {
-            padding: 8px;
-        }
-        .text-right {
-            text-align: right;
+            padding: 6px 7px;
         }
         .font-bold {
             font-weight: bold;
         }
-        .text-lg {
-            font-size: 1.1em;
-        }
         .total-row {
-             background-color: #f7fafc;
+            background-color: #f7fafc;
         }
-        .address-block {
-            line-height: 1.5;
+        .notes-section {
+            font-size: 12px;
+            margin-top: 12px;
+            color: #444;
         }
-        .invoice-details-table td {
-            padding: 2px 5px;
-        }
-        hr {
-            border: 0;
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #444;
+            margin-top: 45px;
             border-top: 1px solid #e2e8f0;
-            margin: 20px 0;
+            padding-top: 12px;
         }
     </style>
 </head>
 <body>
 
     <!-- Header Section -->
-    <table class="header-table" style="margin-bottom: 40px;">
+    <table class="header-table" style="margin-bottom: 10px;">
         <tr>
-            <td style="width: 50%;">
-                <img src="{{ logo_url }}" style="height: 80pt; max-width: 300px; object-fit: contain;">
+            <td style="width: 60%;">
+                <img src="{{ logo_url }}" class="logo">
             </td>
-            <td class="text-right" style="width: 50%;">
-                <span style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 8px;">{{ company_name }}</span>
-                <span style="font-size: 12px; display: block; line-height: 1.5;">
-                    {{ company_address|linebreaksbr }}<br/>
-                    {{ company_contact }}
-                </span>
+            <td class="company-details" style="width: 40%;">
+                <strong>{{ company_name }}</strong><br>
+                {{ company_address|linebreaksbr }}<br>
+                {{ company_contact }}
             </td>
         </tr>
     </table>
 
-    <!-- Invoice Title and Details Section -->
-    <table style="margin-bottom: 40px;">
+    <div class="invoice-title">INVOICE</div>
+
+    <!-- Invoice Details Section -->
+    <table style="margin-bottom: 18px;">
         <tr>
-            <td style="width: 50%;">
-                <h2 style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0;">INVOICE</h2>
+            <td style="width: 55%; vertical-align: top;">
                 <div class="font-bold" style="margin-bottom: 5px;">Billed To</div>
                 <div class="address-block">
                     {{ order_data.customer_name }}<br>
@@ -103,27 +131,27 @@
                     {{ order_data.customer_phone }}
                 </div>
             </td>
-            <td style="width: 50%; vertical-align: middle;">
-                <table class="invoice-details-table" style="float: right;">
+            <td style="width: 45%; vertical-align: top;">
+                <table class="details-table">
                     <tr>
                         <td class="font-bold">Invoice Number:</td>
-                        <td class="text-right">{{ invoice_number }}</td>
+                        <td>{{ invoice_number }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Invoice Date:</td>
-                        <td class="text-right">{{ invoice_date }}</td>
+                        <td>{{ invoice_date }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Order Number:</td>
-                        <td class="text-right">{{ order_data.order_id }}</td>
+                        <td>{{ order_data.order_id }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Order Date:</td>
-                        <td class="text-right">{{ order_date }}</td>
+                        <td>{{ order_date }}</td>
                     </tr>
                     <tr>
                         <td class="font-bold">Payment Method:</td>
-                        <td class="text-right">{{ order_data.payment_method }}</td>
+                        <td>{{ order_data.payment_method }}</td>
                     </tr>
                 </table>
             </td>
@@ -131,54 +159,71 @@
     </table>
 
     <!-- Invoice Items Table -->
-<table class="items-table">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th style="text-align: center;">Quantity</th>
-            <th class="text-right">Price</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in items %}
-        <tr>
-            <td>
-                {% if item.name %}
-                    {{ item.name }}
-                {% elif item.title %}
-                    {{ item.title }}
-                {% elif item.product_name %}
-                    {{ item.product_name }}
-                {% elif item.parent_name %}
-                    {{ item.parent_name }}
-                {% else %}
-                    -
-                {% endif %}
-                {% if item.variant_title %}
-                    <br><small>{{ item.variant_title }}</small>
-                {% elif item.pot_size %}
-                    <br><small>{{ item.pot_size }}</small>
-                {% endif %}
-            </td>
-            <td style="text-align: center;">
-                {% if item.quantity %}{{ item.quantity }}
-                {% elif item.qty %}{{ item.qty }}
-                {% else %}1{% endif %}
-            </td>
-            <td class="text-right">
-                ₹{% if item.price is not None %}{{ item.price }}
-                {% elif item.total %}{{ item.total }}
-                {% else %}0{% endif %}
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3">No items found</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 60%;">Product</th>
+                <th style="width: 15%; text-align: center;">Quantity</th>
+                <th style="width: 25%;" class="text-right">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    {% if item.name %}
+                        {{ item.name }}
+                    {% elif item.title %}
+                        {{ item.title }}
+                    {% elif item.product_name %}
+                        {{ item.product_name }}
+                    {% elif item.parent_name %}
+                        {{ item.parent_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                    <div class="product-details">
+                        {% if item.sku %}
+                            SKU: {{ item.sku }}
+                        {% endif %}
+                        {% if item.weight or item.grams %}
+                            {% if item.sku %} | {% endif %}
+                            Weight: 
+                            {% if item.weight %}{{ item.weight }}kg
+                            {% elif item.grams %}{{ item.grams|floatformat:2 }}g{% endif %}
+                        {% endif %}
+                        {% if item.variant_title %}
+                            <br>{{ item.variant_title }}
+                        {% elif item.pot_size %}
+                            <br>{{ item.pot_size }}
+                        {% endif %}
+                    </div>
+                </td>
+                <td style="text-align: center;">
+                    {% if item.quantity %}{{ item.quantity }}
+                    {% elif item.qty %}{{ item.qty }}
+                    {% else %}1{% endif %}
+                </td>
+                <td class="text-right">
+                    ₹{% if item.price is not None %}{{ item.price }}
+                    {% elif item.total %}{{ item.total }}
+                    {% else %}0{% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No items found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <!-- Notes Section -->
+    {% if order_data.order_notes %}
+    <div class="notes-section">
+        <strong>Notes:</strong> {{ order_data.order_notes }}
+    </div>
+    {% endif %}
 
     <!-- Totals Section -->
     <table class="totals-table">
@@ -187,18 +232,17 @@
             <td class="text-right">₹{{ subtotal }}</td>
         </tr>
         <tr>
-            <td class="font-bold" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Shipping</td>
-            <td class="text-right" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">₹{{ shipping_cost }}</td>
+            <td class="font-bold" style="border-bottom: 1px solid #e2e8f0;">Shipping</td>
+            <td class="text-right" style="border-bottom: 1px solid #e2e8f0;">{% if shipping_cost == 0 %}free{% else %}₹{{ shipping_cost }}{% endif %}</td>
         </tr>
         <tr class="total-row">
-            <td class="font-bold text-lg">Total</td>
-            <td class="font-bold text-lg text-right">₹{{ total }}</td>
+            <td class="font-bold">Total</td>
+            <td class="font-bold text-right">₹{{ total }}</td>
         </tr>
     </table>
     
     <!-- Footer Section -->
-    <div style="position: fixed; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 15px;">
-        <hr>
+    <div class="footer">
         <p>{{ company_email }}</p>
         <p>{{ social_media }}</p>
     </div>
