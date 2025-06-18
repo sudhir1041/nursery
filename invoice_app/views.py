@@ -14,10 +14,12 @@ from weasyprint import HTML
 logger = logging.getLogger(__name__)
 
 
+# --- MODIFIED FUNCTION ---
 def _get_order_data(order_id):
     """Return normalized order data for the given ID from any platform."""
-    if WooCommerceOrder.objects.filter(pk=order_id).exists():
-        order_source = WooCommerceOrder.objects.get(pk=order_id)
+
+    # Try to find the order in WooCommerce using the 'woo_id' field
+    if (order_source := WooCommerceOrder.objects.filter(woo_id=order_id).first()):
         raw = order_source.raw_data or {}
         return {
             'order_id': str(order_source.woo_id),
@@ -33,8 +35,9 @@ def _get_order_data(order_id):
             'payment_method': raw.get('payment_method', ''),
             'shipping_charge': raw.get('shipping_charge', 0),
         }
-    if ShopifyOrder.objects.filter(pk=order_id).exists():
-        order_source = ShopifyOrder.objects.get(pk=order_id)
+
+    # Try to find the order in Shopify using the 'shopify_id' field
+    if (order_source := ShopifyOrder.objects.filter(shopify_id=order_id).first()):
         shipping = order_source.shipping_address_json or {}
         raw = order_source.raw_data or {}
         address = ", ".join(filter(None, [
@@ -59,8 +62,9 @@ def _get_order_data(order_id):
             'payment_method': raw.get('payment_method', ''),
             'shipping_charge': raw.get('shipping_charge', 0),
         }
-    if Facebook_orders.objects.filter(pk=order_id).exists():
-        order_source = Facebook_orders.objects.get(pk=order_id)
+
+    # Try to find the order in Facebook using the 'order_id' field
+    if (order_source := Facebook_orders.objects.filter(order_id=order_id).first()):
         address = ", ".join(filter(None, [
             order_source.address,
             order_source.city,
@@ -82,16 +86,28 @@ def _get_order_data(order_id):
             'payment_method': order_source.mode_of_payment or '',
             'shipping_charge': order_source.shipment_amount or 0,
         }
+
     raise Exception("Order not found in any source")
 
 
 def _get_or_create_invoice(order_id):
     order_data = _get_order_data(order_id)
+    # Check if an invoice already exists for the central Order object
     invoice = Invoice.objects.filter(order__order_id=order_data['order_id']).first()
     if invoice:
         return invoice
 
-    order_obj, _ = Order.objects.get_or_create(order_id=order_data['order_id'], defaults=order_data)
+    # If no invoice exists, get or create the central Order object first
+    order_obj, created = Order.objects.get_or_create(
+        order_id=order_data['order_id'], 
+        defaults=order_data
+    )
+    # If the order was not created, it means it already existed, so we should update it
+    if not created:
+        for key, value in order_data.items():
+            setattr(order_obj, key, value)
+        order_obj.save()
+        
     invoice = Invoice.objects.create(order=order_obj)
     return invoice
 
@@ -99,8 +115,9 @@ def _get_or_create_invoice(order_id):
 def create_invoice(request, id):
     """Create an invoice for a given order ID across all platforms."""
     try:
+        # The 'id' from the URL is the platform-specific order ID
         invoice = _get_or_create_invoice(id)
-        # Generate PDF after creating invoice
+        # Generate PDF after creating invoice, passing the same ID
         invoice_pdf(request, id)
         logger.info(f"Invoice ready with number: {invoice.invoice_number}")
         return HttpResponse(
@@ -119,6 +136,7 @@ def create_company(request):
 def invoice_pdf(request, id):
     """Return a PDF invoice for the given order ID."""
     try:
+        # The 'id' from the URL is the platform-specific order ID
         invoice = _get_or_create_invoice(id)
 
         # Check if PDF already exists and return it
@@ -131,9 +149,8 @@ def invoice_pdf(request, id):
 
         # If PDF doesn't exist, generate it
         order = invoice.order
-        order_data = _get_order_data(id)
-
-        # --- START: Corrected items block ---
+        
+        # --- This block is to handle various ways line items might be stored ---
         items = order.order_items or []
 
         if isinstance(items, str):
@@ -147,7 +164,7 @@ def invoice_pdf(request, id):
 
         if not (isinstance(items, list) and all(isinstance(i, dict) for i in items)):
             items = []
-        # --- END: Corrected items block ---
+        # --- End of items block ---
 
         subtotal = sum(
             (float(item.get('price', 0)) * float(item.get('quantity', 1)))
@@ -162,8 +179,8 @@ def invoice_pdf(request, id):
             'invoice': invoice,
             'invoice_number': invoice.invoice_number,
             'invoice_date': invoice.created_at.strftime('%Y-%m-%d'),
-            'order_date': order.order_date.strftime('%Y-%m-%d'),
-            'order_data': order_data,
+            'order_date': order.created_at.strftime('%Y-%m-%d'), # Use created_at from your central Order model
+            'order_data': order, # Pass the entire central order object
             'items': items,
             'subtotal': subtotal,
             'shipping_cost': shipping_cost,
@@ -178,7 +195,6 @@ def invoice_pdf(request, id):
         }
 
         html_string = render_to_string('invoice/pdf_template.html', context)
-
         base_url = request.build_absolute_uri('/')
         pdf_bytes = HTML(string=html_string, base_url=base_url).write_pdf()
 
