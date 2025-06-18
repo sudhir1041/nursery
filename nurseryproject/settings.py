@@ -40,21 +40,18 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Application definition
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'channels',
-    'django_celery_beat',
     'invoice_app',
     'woocommerce_app',
     'shopify_app',
     'facebook_app',
-    'whatsapp_app',
     'shipment_app',
+    'settings_app',
     'rest_framework',
 ]
 
@@ -88,26 +85,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nurseryproject.wsgi.application'
-
-# --- WooCommerce Settings ---
-WOOCOMMERCE_STORE_URL = os.getenv('WOOCOMMERCE_STORE_URL')
-WOOCOMMERCE_CONSUMER_KEY = os.getenv('WOOCOMMERCE_CONSUMER_KEY')
-WOOCOMMERCE_CONSUMER_SECRET = os.getenv('WOOCOMMERCE_CONSUMER_SECRET')
-WOOCOMMERCE_WEBHOOK_SECRET = os.getenv('WOOCOMMERCE_WEBHOOK_SECRET', 'a-very-strong-random-secret')
-
-# --- Shopify Settings ---
-SHOPIFY_STORE_DOMAIN = os.getenv('SHOPIFY_STORE_DOMAIN')
-SHOPIFY_API_VERSION = os.getenv('SHOPIFY_API_VERSION', '2024-04')
-SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv('SHOPIFY_ADMIN_ACCESS_TOKEN')
-SHOPIFY_API_KEY = os.getenv('SHOPIFY_API_KEY')
-SHOPIFY_API_SECRET_KEY = os.getenv('SHOPIFY_API_SECRET_KEY')
-SHOPIFY_WEBHOOK_SECRET = os.getenv('SHOPIFY_WEBHOOK_SECRET', 'SHOPIFY_API_SECRET_KEY')
-
-# --- whatsapp Settings ---
-WHATSAPP_ACCESS_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN')
-WHATSAPP_PHONE_NUMBER_ID = os.getenv('WHATSAPP_PHONE_NUMBER_ID')
-WHATSAPP_VERIFY_TOKEN = os.getenv('WHATSAPP_VERIFY_TOKEN')
-WHATSAPP_APP_SECRET = os.getenv('WHATSAPP_APP_SECRET')
 
 
 
@@ -195,10 +172,6 @@ LOGGING = {
             'format': '{levelname} {asctime} {module}: {message}',
             'style': '{',
         },
-        'celery_format': {
-            'format': '{levelname} {asctime} {task_name} {task_id} {module}: {message}',
-            'style': '{',
-        }
     },
     'handlers': {
         'console': {
@@ -222,14 +195,6 @@ LOGGING = {
             'backupCount': 3,
             'formatter': 'verbose',
         },
-        'celery_task_file': { 
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'celery_tasks.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 5,
-            'formatter': 'celery_format',
-        },
     },
     'root': {
         'handlers': ['console', 'app_file'], 
@@ -251,16 +216,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'celery': { 
-            'handlers': ['console', 'celery_task_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'celery.task': { 
-            'handlers': ['console', 'celery_task_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
         # Example for handling database query logs (can be verbose)
         # 'django.db.backends': {
         #     'handlers': ['console'],
@@ -272,21 +227,3 @@ LOGGING = {
 
 REDIS_HOST = "127.0.0.1"
 REDIS_PORT = "6379"
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(REDIS_HOST, REDIS_PORT)],
-        },
-    },
-}
-
-# Celery Configuration (Example)
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0' 
-CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/1' 
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Kolkata'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

@@ -35,18 +35,6 @@ class Order(models.Model):
     class Meta:
         ordering = ['-order_date']
 
-class Company_name(models.Model):
-    company_name = models.CharField(max_length=100)
-    company_address = models.TextField()
-    company_phone = models.CharField(max_length=15)
-    company_email = models.EmailField()
-    company_website = models.URLField()
-    company_logo = models.ImageField(upload_to='company_logo/', blank=True, null=True)
-
-    def __str__(self):
-        return self.company_name
-    class Meta:
-        verbose_name_plural = 'Company Details'
 
 class Invoice(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)

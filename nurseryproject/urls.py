@@ -17,7 +17,6 @@ urlpatterns = [
     path('woocommerce/', include('woocommerce_app.urls')),
     path('shopify/', include('shopify_app.urls')),
     path('facebook/', include('facebook_app.urls')),
-    path('whatsapp/', include('whatsapp_app.urls', namespace='whatsapp_app')),
     path('shipment/',include('shipment_app.urls')),
     path('invoice/', include('invoice_app.urls', namespace='invoice_app')),
 ]

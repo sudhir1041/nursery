@@ -8,8 +8,12 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 """
 
 import os
-from dotenv import load_dotenv 
-load_dotenv()                 
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
 from django.core.wsgi import get_wsgi_application
 
