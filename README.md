@@ -46,6 +46,10 @@ logs/                  Application logs
    python manage.py runserver
    ```
 
+When `DEBUG` is set to `True` (the default in development), Celery tasks
+execute immediately in the same process. This allows the site to run locally
+without needing Redis or any Celery workers.
+
 For background tasks you also need Redis running and Celery workers:
 ```bash
 celery -A nurseryproject worker -l info
